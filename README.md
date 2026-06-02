@@ -31,5 +31,5 @@ Infraestructura: Despliegue mediante contenedores Docker, garantizando un entorn
 
 IA e Integración: Google Gemini, Sistemas Vectoriales, RAG para la precisión del conocimiento, y arquitectura de procesamiento en tiempo real.
 
-Frontend: React Native.
+Frontend: Next.js y React Native.
 
