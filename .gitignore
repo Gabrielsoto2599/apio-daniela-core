@@ -1,0 +1,20 @@
+node_modules/
+.expo/
+dist/
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# Carpetas nativas (IMPORTANTE: deben estar aquí para evitar conflictos con el prebuild)
+android/
+ios/
+
+# Configuración de entorno
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# TypeScript
+expo-env.d.ts

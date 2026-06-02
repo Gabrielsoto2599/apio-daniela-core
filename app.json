@@ -1,0 +1,63 @@
+{
+  "expo": {
+    "name": "Apio IA",
+    "slug": "apio-ia-v2",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./apio-app/assets/images/icon.png",
+    "scheme": "apioapp",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "Necesitamos acceso al micrófono para que hables con Daniela."
+      }
+    },
+    "android": {
+      "package": "com.sotosystem.apioia",
+      "versionCode": 1,
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.INTERNET"
+      ],
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./apio-app/assets/images/android-icon-foreground.png",
+        "backgroundImage": "./apio-app/assets/images/android-icon-background.png",
+        "monochromeImage": "./apio-app/assets/images/android-icon-monochrome.png"
+      }
+    },
+    "web": {
+      "output": "static",
+      "favicon": "./apio-app/assets/images/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-splash-screen",
+        {
+          "image": "./apio-app/assets/images/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff"
+        }
+      ],
+      [
+        "expo-av",
+        {
+          "microphonePermission": "Daniela necesita escucharte para poder responderte, chamo."
+        }
+      ],
+      "expo-router"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "d2808447-c901-4cc7-bf32-49b782086403"
+      }
+    },
+    "owner": "ednydarleny1402"
+  }
+}
