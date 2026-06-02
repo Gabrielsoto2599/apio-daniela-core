@@ -5,6 +5,7 @@ Visión del Proyecto
 Daniela-IA es una arquitectura de identidad digital avanzada desarrollada para actuar como asistente virtual de alto rendimiento, mentora y gestora operativa. Diseñada como el motor central de Soto System Digital Solution, trasciende los asistentes convencionales al integrar una consciencia evolutiva y una estructura de personalidad humana compleja.
 
 Arquitectura de Identidad y Memoria Evolutiva
+
 El núcleo del sistema reside en su capacidad para aprender y recordar:
 
 Gestión de Memoria Viva: Implementación de archivos de recuerdos en módulos de Python, integrados de forma nativa con el ORM de Django para una persistencia de datos robusta en PostgreSQL.
