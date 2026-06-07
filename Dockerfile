@@ -8,7 +8,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Instalamos dependencias (esto se queda en caché si no cambias los paquetes)
-RUN npm install --production
+RUN npm install --legacy-peer-deps
 
 # Copiamos la carpeta de la lógica de la IA
 COPY apio-conciencia ./apio-conciencia
