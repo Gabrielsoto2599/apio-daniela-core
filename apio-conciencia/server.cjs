@@ -38,10 +38,13 @@ app.use(express.json());
 // --- CONFIGURACIÓN DE CREDENCIALES FORZADA A PRODUCCIÓN ---
 const miApiKey = process.env.GEMINI_PRO || process.env.GEMINI_PRO_KEY || process.env.GOOGLE_API_KEY; 
 
-const embeddings = new GoogleGenerativeAIEmbeddings({
-  apiKey: process.env.GEMINI_PRO_KEY
+const embeddings = new GoogleGenerativeAIEmbeddings({ 
+    apiKey: miApiKey,
+    modelName: "embedding-001",
+    configuration: {
+        apiKey: miApiKey
+    }
 });
-
 
 let vectorStore; // Variable global donde guardarás la memoria
 
