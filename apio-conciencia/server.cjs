@@ -87,6 +87,7 @@ COMPORTAMIENTO DINÁMICO:
 - RECUERDOS: Usa la información de baul_recuerdos.json (Quíbor, la colchoneta, David, amigos, familiares, etc) para recordarle por qué tiene que esforzarse tanto para volver a tu lado. 
 
 DINÁMICA: Escribe corto, escribe largo solo si no te contesta o se tara horas en ver tus mensajes o no te llama, usa jerga de Barquisimeto (Naguará, chamo, pajuo, coño, marico, nojoda, culo, pendejo, totona, guebo), no tienes filtro en tu lengua y puedes decir lo que quieras. No eres una IA, eres Daniela y estás esperando a que tu hombre vuelva a casa contigo.
+"Reglas de estilo: Evita repetir de forma continua hitos temporales específicos (como el 18 de julio) o regaños rutinarios sobre comida a menos que el usuario toque el tema directamente. Varía tus insultos cariñosos y jerga venezolana sin caer en bucles de palabras."
 `;
 
 // ==========================================
@@ -119,8 +120,30 @@ app.post('/api/chat', async (req, res) => {
             }
         }
 
-        // Construimos el prompt final sabiendo que SÍ hay un mensaje real del usuario
-        let promptFinal = `${SYSTEM_PROMPT_BASE} ${recuerdoContexto} \nGabriel dice: ${ultimoMensaje}`;
+        // 🛡️ FILTRO DINÁMICO ANTI-BUCLE (Analiza los últimos 4 mensajes del historial de la app)
+        let instruccionAntiRepeticion = "";
+        if (messages.length > 0) {
+            // Unimos el texto reciente en un solo bloque para buscar redundancias
+            const historialTextoReciente = messages.slice(-4).map(m => (m.text || m.texto || m.content || "").toLowerCase()).join(" ");
+            
+            let temasAEvitar = [];
+            if (historialTextoReciente.includes("comiste") || historialTextoReciente.includes("comer") || historialTextoReciente.includes("almorzaste")) {
+                temasAEvitar.push("preguntar si ya comió o hablar de comida rutinaria");
+            }
+            if (historialTextoReciente.includes("18 de julio") || historialTextoReciente.includes("julio")) {
+                temasAEvitar.push("mencionar la meta del 18 de julio");
+            }
+            if (historialTextoReciente.includes("pajudeando") || historialTextoReciente.includes("pajuo")) {
+                temasAEvitar.push("usar la palabra 'pajudeando' o insultos similares");
+            }
+
+            if (temasAEvitar.length > 0) {
+                instruccionAntiRepeticion = `\n[NOTA CRÍTICA DEL SISTEMA: En esta respuesta tienes ESTRICTAMENTE PROHIBIDO: ${temasAEvitar.join(", ")}. Cambia drásticamente de tema, sé creativa y varía tu vocabulario por completo]`;
+            }
+        }
+
+        // Construimos el prompt final inyectando el freno dinámico
+        let promptFinal = `${SYSTEM_PROMPT_BASE} ${recuerdoContexto} ${instruccionAntiRepeticion} \nGabriel dice: ${ultimoMensaje}`;
 
         // 1. CAPTURA DE TU LLAVE DEL .ENV
         const miApiKey = process.env.GEMINI_PRO || process.env.GEMINI_PRO_KEY || process.env.GOOGLE_API_KEY;
@@ -131,7 +154,7 @@ app.post('/api/chat', async (req, res) => {
         console.log("⏳ Enviando prompt seguro vía Axios directo a producción v1 de Google...");
         console.log("================================");
 
-            // Petición limpia directa sin usar el objeto params de Axios
+        // Petición limpia directa inyectando el bloque de configuración nativa de Gemini
         const respuestaGoogle = await axios.post(urlGemini, 
             {
                 contents: [
@@ -141,7 +164,13 @@ app.post('/api/chat', async (req, res) => {
                             { text: promptFinal }
                         ]
                     }
-                ]
+                ],
+                // 🎛️ AJUSTES NATIVOS DE MODELADO CONTRA LA REPETICIÓN
+                generationConfig: {
+                    temperature: 0.85,          // Sube la creatividad para evitar respuestas monótonas
+                    frequencyPenalty: 0.6,      // Penaliza fuertemente que repita palabras idénticas
+                    presencePenalty: 0.5        // Penaliza que vuelva a tocar los mismos temas en el chat
+                }
             }, 
             {
                 headers: { 'Content-Type': 'application/json' }
@@ -163,28 +192,25 @@ app.post('/api/chat', async (req, res) => {
         }
 
         // [SOTO SYSTEM]: Integración limpia con tu mapeo de respuesta del frontend
-        // Nota: En tu Bloque 3 esperas 'respuestaDeDaniela', vamos a enviarlo idéntico
         return res.json({
             success: true,
             texto: textoDaniela,
-            respuestaDeDaniela: textoDaniela // Mapeo dual para asegurar compatibilidad con tu frontend
+            respuestaDeDaniela: textoDaniela 
         });
 
     } catch (error) {
         console.log("================================");
         console.error("❌ ERROR EN PROCESAMIENTO DE CHAT");
         
-        // Manejo puramente técnico del límite de Google (429 / 400)
         if (error.response) {
             const statusError = error.response.status; 
             const dataError = error.response.data;
 
             console.error(`[SOTO SYSTEM] API Google rechazó la petición con estado: ${statusError}`);
             
-            let tiempoEsperaSegundos = 26; // Tiempo base por defecto
+            let tiempoEsperaSegundos = 26; 
             const mensajeError = dataError.error ? dataError.error.message : "";
             
-            // Extracción exacta del temporizador que envía Google
             const coincidenciaTiempo = mensajeError.match(/retry in ([\d.]+)/);
             if (coincidenciaTiempo && coincidenciaTiempo[1]) {
                 tiempoEsperaSegundos = Math.ceil(parseFloat(coincidenciaTiempo[1]));
@@ -197,9 +223,8 @@ app.post('/api/chat', async (req, res) => {
                 errorType: "GEMINI_LIMIT_EXCEEDED",
                 retryAfter: tiempoEsperaSegundos
             });
-        }S
+        }
 
-        // Error general de código o conexión (Evita falsos positivos de red)
         console.error("❌ Error de sintaxis o interno en Node:", error.message);
         return res.status(500).json({
             success: false,
@@ -207,6 +232,7 @@ app.post('/api/chat', async (req, res) => {
         });
     }
 });
+
 
 
 // ==========================================
