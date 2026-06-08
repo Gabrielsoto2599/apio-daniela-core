@@ -1,5 +1,3 @@
-import { Platform } from 'react-native';
-
 // --- CONFIGURACIÓN DE PRODUCCIÓN (ACTIVA) ---
 export const BASE_URL ='https://daniela-ia-production-5356.up.railway.app';
 
