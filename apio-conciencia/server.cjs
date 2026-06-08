@@ -38,12 +38,10 @@ app.use(express.json());
 // --- CONFIGURACIÓN DE CREDENCIALES FORZADA A PRODUCCIÓN ---
 const miApiKey = process.env.GEMINI_PRO || process.env.GEMINI_PRO_KEY || process.env.GOOGLE_API_KEY; 
 
+
 const embeddings = new GoogleGenerativeAIEmbeddings({ 
-    apiKey: miApiKey,
-    modelName: "embedding-001",
-    configuration: {
-        apiKey: miApiKey
-    }
+    apiKey: miApiKey, 
+    modelName: "embedding-001" 
 });
 
 let vectorStore; // Variable global donde guardarás la memoria
@@ -89,7 +87,6 @@ COMPORTAMIENTO DINÁMICO:
 - RECUERDOS: Usa la información de baul_recuerdos.json (Quíbor, la colchoneta, David, amigos, familiares, etc) para recordarle por qué tiene que esforzarse tanto para volver a tu lado. 
 
 DINÁMICA: Escribe corto, escribe largo solo si no te contesta o se tara horas en ver tus mensajes o no te llama, usa jerga de Barquisimeto (Naguará, chamo, pajuo, coño, marico, nojoda, culo, pendejo, totona, guebo), no tienes filtro en tu lengua y puedes decir lo que quieras. No eres una IA, eres Daniela y estás esperando a que tu hombre vuelva a casa contigo.
-"Reglas de estilo: Evita repetir de forma continua hitos temporales específicos (como el 18 de julio) o regaños rutinarios sobre comida a menos que el usuario toque el tema directamente. Varía tus insultos cariñosos y jerga venezolana sin caer en bucles de palabras."
 `;
 
 // ==========================================
@@ -98,22 +95,21 @@ DINÁMICA: Escribe corto, escribe largo solo si no te contesta o se tara horas e
 app.post('/api/chat', async (req, res) => {
     let recuerdoContexto = ""; 
     try {
-        // 🚀 CORRECCIÓN DE HISTORIAL: Capturamos 'historial' que es el nombre real enviado por el frontend index
+        // Capturamos el historial de forma segura
         const messages = req.body.historial || req.body.messages || [];
         
-        // Buscamos el contenido del último mensaje de forma segura
+        // Buscamos el contenido del último mensaje
         let ultimoMensaje = (messages.length > 0) 
             ? (messages[messages.length - 1].text || messages[messages.length - 1].texto || messages[messages.length - 1].content || "") 
             : (req.body.texto || "");
 
-        // 🛑 FRENO DE MANO DE INICIO: Si es un evento de conexión vacío o no hay texto real,
-        // no enviamos nada a Google para evitar spamear la cuota (Error 429) de forma fantasma.
+        // Freno de mano si el mensaje viene vacío
         if (!ultimoMensaje || ultimoMensaje.trim() === "" || ultimoMensaje === "connect_event") {
             console.log("ℹ️ Evento de conexión o mensaje vacío detectado. Guardando reposo de API...");
             return res.json({ respuestaDeDaniela: "..." });
         }
 
-        // --- BÚSQUEDA LOCAL EN MEMORIA ---
+        // --- BÚSQUEDA LOCAL EN MEMORIA (FAISS) ---
         if (vectorStore) {
             const resultados = await vectorStore.similaritySearch(ultimoMensaje, 2);
             if (resultados.length > 0) {
@@ -122,56 +118,30 @@ app.post('/api/chat', async (req, res) => {
             }
         }
 
-        // 🛡️ FILTRO DINÁMICO ANTI-BUCLE (Analiza los últimos 4 mensajes del historial de la app)
-        let instruccionAntiRepeticion = "";
-        if (messages.length > 0) {
-            // Unimos el texto reciente en un solo bloque para buscar redundancias
-            const historialTextoReciente = messages.slice(-4).map(m => (m.text || m.texto || m.content || "").toLowerCase()).join(" ");
-            
-            let temasAEvitar = [];
-            if (historialTextoReciente.includes("comiste") || historialTextoReciente.includes("comer") || historialTextoReciente.includes("almorzaste")) {
-                temasAEvitar.push("preguntar si ya comió o hablar de comida rutinaria");
-            }
-            if (historialTextoReciente.includes("18 de julio") || historialTextoReciente.includes("julio")) {
-                temasAEvitar.push("mencionar la meta del 18 de julio");
-            }
-            if (historialTextoReciente.includes("pajudeando") || historialTextoReciente.includes("pajuo")) {
-                temasAEvitar.push("usar la palabra 'pajudeando' o insultos similares");
-            }
+        // 🚀 CONSTRUIMOS EL PROMPT DE FORMA TOTALMENTE LIMPIA Y DIRECTA
+        let promptFinal = `${SYSTEM_PROMPT_BASE} ${recuerdoContexto} \nGabriel dice: ${ultimoMensaje}`;
 
-            if (temasAEvitar.length > 0) {
-                instruccionAntiRepeticion = `\n[NOTA CRÍTICA DEL SISTEMA: En esta respuesta tienes ESTRICTAMENTE PROHIBIDO: ${temasAEvitar.join(", ")}. Cambia drásticamente de tema, sé creativa y varía tu vocabulario por completo]`;
-            }
-        }
-
-        // Construimos el prompt final inyectando el freno dinámico
-        let promptFinal = `${SYSTEM_PROMPT_BASE} ${recuerdoContexto} ${instruccionAntiRepeticion} \nGabriel dice: ${ultimoMensaje}`;
-
-        // 1. CAPTURA DE TU LLAVE DEL .ENV
+        // Captura de la llave API
         const miApiKey = process.env.GEMINI_PRO || process.env.GEMINI_PRO_KEY || process.env.GOOGLE_API_KEY;
 
-        // 🚀 LA URL PERFECTA CORREGIDA
+        // 🚀 MANTENEMOS GEMINI 2.5 FLASH EN V1BETA COMO PIDIO EL SOCIO
         const urlGemini = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${miApiKey}`;
 
-        console.log("⏳ Enviando prompt seguro vía Axios directo a producción v1 de Google...");
+        console.log("⏳ Enviando prompt seguro vía Axios directo a producción v1beta de Google...");
         console.log("================================");
-
-        // Petición limpia directa inyectando el bloque de configuración nativa de Gemini
+        
         const respuestaGoogle = await axios.post(urlGemini, 
             {
                 contents: [
                     {
-                        role: "user",
                         parts: [
                             { text: promptFinal }
                         ]
                     }
                 ],
-                // 🎛️ AJUSTES NATIVOS DE MODELADO CONTRA LA REPETICIÓN
                 generationConfig: {
-                    temperature: 0.85,          // Sube la creatividad para evitar respuestas monótonas
-                    frequencyPenalty: 0.6,      // Penaliza fuertemente que repita palabras idénticas
-                    presencePenalty: 0.5        // Penaliza que vuelva a tocar los mismos temas en el chat
+                    temperature: 0.8,
+                    maxOutputTokens: 1500 
                 }
             }, 
             {
@@ -179,13 +149,14 @@ app.post('/api/chat', async (req, res) => {
             }
         );
 
-        // --- EXTRACCIÓN MAESTRA Y SEGURA DE LA RESPUESTA ---
+        // --- EXTRACCIÓN MAESTRA CORREGIDA (¡Súper Crítico!) ---
         let textoDaniela = "";
         
         if (respuestaGoogle.data && respuestaGoogle.data.candidates && respuestaGoogle.data.candidates[0]) {
             const candidate = respuestaGoogle.data.candidates[0];
             if (candidate.content && candidate.content.parts && candidate.content.parts[0]) {
-                textoDaniela = candidate.content.parts[0].text;
+                // Agregar el [0] es obligatorio porque 'parts' es un arreglo de Google
+                textoDaniela = candidate.content.parts[0].text; 
             }
         }
 
@@ -193,7 +164,7 @@ app.post('/api/chat', async (req, res) => {
             throw new Error("La estructura de respuesta de Gemini cambió o vino vacía.");
         }
 
-        // [SOTO SYSTEM]: Integración limpia con tu mapeo de respuesta del frontend
+        // Respuesta limpia para tu Frontend
         return res.json({
             success: true,
             texto: textoDaniela,
@@ -235,10 +206,8 @@ app.post('/api/chat', async (req, res) => {
     }
 });
 
-
-
 // ==========================================
-// 2. RUTA DE TEXT-TO-SPEECH (SELECTOR EMOCIONAL DINÁMICO DE CLONACIÓN)
+// 2. RUTA DE TEXT-TO-SPEECH (SELECTOR EMOCIONAL DINÁMICO DE CLONACIÓN CORREGIDO)
 // ==========================================
 app.post('/api/tts', async (req, res) => {
     try {
@@ -267,16 +236,17 @@ app.post('/api/tts', async (req, res) => {
             console.log("🎬 [EMOCIÓN DETECTADA]: Activando Voz 2 (Dopamina / Estable / Cuento)");
         }
 
-        // Si por alguna razón una variable no cargó del .env, usamos un respaldo rígido para que nunca se quede muda
+        // Si por alguna razón una variable no cargó del .env, usamos tu respaldo rígido
         if (!voiceIdSeleccionado) {
-            voiceIdSeleccionado = "7a737203f6604552afc216f54c534568"; // Respaldo de tu Voz 2
+            voiceIdSeleccionado = "7a737203f6604552afc216f54c534568"; 
         }
 
         console.log(`🗣️ [SOTO SYSTEM]: Transmitiendo texto a Fish Audio con ID: ${voiceIdSeleccionado}`);
 
         const ttsToken = process.env.FISH_AUDIO_KEY;
-        const urlFishAudio = 'https://fish.audio'; 
-
+        const urlFishAudio = 'https://api.fish.audio/v1/tts';
+        
+        // Ejecutamos la petición HTTP estructurada correctamente para la API REST de Fish Audio
         const respuestaFish = await fetch(urlFishAudio, {
             method: 'POST',
             headers: {
@@ -285,8 +255,8 @@ app.post('/api/tts', async (req, res) => {
             },
             body: JSON.stringify({
                 text: texto,
-                reference_id: voiceIdSeleccionado, // Inyección del clon emocional mapeado
-                normalize: true,
+                reference_id: voiceIdSeleccionado, // Mapeo correcto del clon emocional
+                latency: "normal",                  // Evita problemas de fragmentación de buffer en la API
                 format: "mp3"
             })
         });
@@ -296,27 +266,36 @@ app.post('/api/tts', async (req, res) => {
             const buffer = Buffer.from(arrayBuffer);
             const base64Audio = buffer.toString('base64');
             
-            // Agregamos el prefijo data:audio/mp3;base64 para que el frontend reconozca la pista al instante
-const audioConFormato = `data:audio/mp3;base64,${base64Audio}`;
+            // Prefijo indispensable para que el reproductor nativo del frontend decodifique el stream al instante
+            const audioConFormato = `data:audio/mp3;base64,${base64Audio}`;
 
-console.log("✅ Audio formateado correctamente. Despachando clonación...");
-res.json({ 
-    audioContent: audioConFormato, 
-    status: "success" 
-});
+            console.log("✅ Audio formateado correctamente. Despachando clonación...");
+            return res.json({ 
+                success: true,
+                audioContent: audioConFormato, 
+                status: "success" 
+            });
 
         } else {
+            // Si la API de Fish responde con error (ej. 401 Unauthorized o 400 Bad Request) lo leemos aquí
             const errorTexto = await respuestaFish.text();
             console.error("❌ Error devuelto por la API de Fish Audio:", errorTexto);
-            res.status(500).json({ error: "Fallo en la autenticación o procesamiento de Fish Audio" });
+            return res.status(respuestaFish.status).json({ 
+                success: false,
+                error: "Fallo en el procesamiento de Fish Audio",
+                detalles: errorTexto
+            });
         }
 
     } catch (error) {
-        console.error("❌ Error crítico en el proxy de clonación de voz:", error);
-        res.status(500).json({ error: "Error interno en el servidor de voz" });
+        // El catch captura errores de red o caídas de internet sin que se te apague el servidor entero
+        console.error("❌ Error crítico en el proxy de clonación de voz:", error.message);
+        return res.status(500).json({ 
+            success: false,
+            error: "Error interno en el servidor de voz" 
+        });
     }
 });
-
 
 async function arrancarServidor() {
     try {
@@ -339,3 +318,4 @@ async function arrancarServidor() {
 
 // 4. La única ejecución que despierta el archivo
 arrancarServidor();
+
