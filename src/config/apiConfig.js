@@ -1,7 +1,7 @@
 import { Platform } from 'react-native';
 
 // --- CONFIGURACIÓN DE PRODUCCIÓN (ACTIVA) ---
-export const BASE_URL = 'https://daniela-ia-production.up.railway.app';
+export const BASE_URL = 'daniela-ia-production-23ef.up.railway.app';
 
 // --- CONFIGURACIÓN DE DESARROLLO LOCAL (COMENTADA) ---
 // const PC_IP = '192.168.1.119'; 
