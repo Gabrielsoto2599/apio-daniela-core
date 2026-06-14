@@ -297,6 +297,13 @@ app.post('/api/tts', async (req, res) => {
     }
 });
 
+        return res.status(500).json({
+            success: false,
+            error: "Error interno en el servidor de voz"
+        });
+    }
+});
+
 async function arrancarServidor() {
     try {
         console.log("⚙️ Inicializando memoria...");
