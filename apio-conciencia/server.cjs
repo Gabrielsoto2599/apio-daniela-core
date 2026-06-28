@@ -302,7 +302,7 @@ async function arrancarServidor() {
         console.log("⚙️ Inicializando memoria...");
         await inicializarMemoria(); 
         
-        const PORT = 3001;
+        const PORT = process.env.PORT || 3001;
         app.listen(PORT, '0.0.0.0', () => { 
             console.log("--------------------------------------------------");
             console.log("🚀 SOTO SYSTEM ONLINE");
