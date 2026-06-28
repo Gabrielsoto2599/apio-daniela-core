@@ -4,15 +4,14 @@
   "description": "",
   "main": "node_modules/expo/AppEntry.js",
   "scripts": {
-  "start": "node apio-conciencia/server.cjs",
-  "expo-start": "expo start",
-  "android": "expo run:android",
-  "ios": "expo run:ios",
-  "web": "expo start --web",
-  "server": "node apio-conciencia/server.cjs",
-  "dev": "npx nodemon apio-conciencia/server.cjs"
-},
-
+    "start": "node apio-conciencia/server.cjs",
+    "expo-start": "expo start",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "web": "expo start --web",
+    "server": "node apio-conciencia/server.cjs",
+    "dev": "npx nodemon apio-conciencia/server.cjs"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -38,7 +37,6 @@
     "expo-status-bar": "~55.0.5",
     "expo-system-ui": "~55.0.16",
     "express": "^5.2.1",
-    "faiss-node": "^0.5.1",
     "fish-audio": "^0.1.0",
     "multer": "^2.1.1",
     "node-cron": "^4.2.1",
