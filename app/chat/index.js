@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+
 import { 
   View, Text, StyleSheet, TextInput, TouchableOpacity, 
   Image, ScrollView, KeyboardAvoidingView, Platform,
@@ -12,17 +13,18 @@ import { Camera } from 'expo-camera';
 import { Audio } from 'expo-av';
 
 // --- CONFIGURACIÓN DINÁMICA DE RED ---
-const API_BASE_URL = Platform.OS === 'android' ? 'http://10.0.2.2:3001' : 'http://localhost:3001';
+const API_BASE_URL = 'https://daniela-ia-production-5356.up.railway.app';
 const API_URL = `${API_BASE_URL}/api/chat`;
+
 
 const profilePic = require('../../apio-app/assets/images/foto-perfil-apio.png');
 
-export default function ChatScreen({ alCerrar, onReproducirVoz }) { // 👈 Recibimos el prop aquí
+export default function ChatScreen({ alCerrar, onReproducirVoz }) { 
 
   const [message, setMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [chatHistory, setChatHistory] = useState([]); 
-  const [grabacion, setGrabacion] = useState(null); // 🚀 Estado para capturar notas de voz nativas
+  const [grabacion, setGrabacion] = useState(null); 
   const scrollViewRef = useRef(null);
 
   // --- SOLICITUD DE PERMISOS NATIVOS AL ENTRAR AL CHAT ---
