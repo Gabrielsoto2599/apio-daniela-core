@@ -16,14 +16,17 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from django.conf import settings # Importante
-from django.conf.urls.static import static # Importante
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('chat/', include('chat.urls')),
+    
+    # 🚀 ENLACE MAESTRO DIRECTO: Eliminamos 'chat/' y dejamos la raíz libre.
+    # Ahora las peticiones del frontend de Expo entrarán directo al sub-enrutador
+    path('', include('chat.urls')), 
 ] 
 
-# Esta línea es la que permite que el navegador encuentre tus voces mp3
+# Despacho de archivos estáticos y notas de voz multimedia en desarrollo
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -9,9 +9,8 @@
     "allowJs": true
   },
   "include": [
-    "apio-conciencia/**/*.ts",
-    "apio-conciencia/**/*.tsx",
-    "apio-conciencia/server.cjs",
+    "app/**/*.ts",
+    "app/**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
   ]

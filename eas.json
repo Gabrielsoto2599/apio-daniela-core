@@ -7,18 +7,22 @@
       "developmentClient": true,
       "distribution": "internal"
     },
-        "preview": {
+    "preview": {
       "distribution": "internal",
       "android": {
         "buildType": "apk"
       },
       "env": {
         "NPM_CONFIG_LEGACY_PEER_DEPS": "true",
-        "BASE_URL": "http://172.31.192.1:3001"
+        "BASE_URL": "http://172.31.192.1:8000" 
       }
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "env": {
+        "NPM_CONFIG_LEGACY_PEER_DEPS": "true",
+        "BASE_URL": "http://172.31.192.1:8000"
+      }
     }
   },
   "submit": {

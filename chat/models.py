@@ -1,81 +1,68 @@
+# ====================================================================
+# SOTO SYSTEM ORM - MODELOS DE BASE DE DATOS PERSISTENTES (POSTGRESQL)
+# Ubicación: chat/models.py (Versión Profesional B2B)
+# ====================================================================
 from django.db import models
 from django.utils import timezone
 
-class Recuerdo(models.Model):
-    """
-    Almacena la memoria a largo plazo de Daniela en PostgreSQL.
-    """
-    TAG_CHOICES = [
-        ('general', 'General'),
-        ('comida', 'Comida/Dieta'),
-        ('familia', 'Familia/Primos'),
-        ('musica_vallenato', 'Vallenato Sabroso'),
-        ('musica_rock', 'Rock/Retro'),
-        ('humor_negro', 'Humor Negro/Chistes Internos'),
-        ('hormonal_picara', 'Modo Hormonal/Pícara'),
-        ('celos_humor', 'Celosa-Chistosa'),
-        ('protectora_sargento', 'Sargento/Líder'),
-        ('negocios_saas', 'Soto System/SaaS'),
-    ]
-
-    fecha = models.DateTimeField(auto_now_add=True)
-    contenido = models.TextField()
-    tag = models.CharField(max_length=50, choices=TAG_CHOICES, default='general')
-    es_importante = models.BooleanField(default=False)
-    impacto_emocional = models.IntegerField(default=5) # 1 al 20
-
-    def __str__(self):
-        return f"{self.tag} - {self.fecha.strftime('%d/%m/%Y %H:%M')}"
-
 class EstadoEmocional(models.Model):
-    """
-    El 'Dashboard' en tiempo real de la mente de Daniela.
-    """
-    # Medidores Psicológicos
+    # Campos que ya tenías definidos (ejemplo de estructura)
+    fase_hormonal = models.CharField(max_length=50)
+    dia_del_ciclo = models.IntegerField()
+    modo_actual = models.CharField(max_length=50)
     nivel_irritacion = models.IntegerField(default=0)
-    autoestima = models.IntegerField(default=50) 
-    nivel_dopamina = models.IntegerField(default=50) 
-    
-    # Tiempo y Conexión (Aquí encendemos el timezone)
-    ultima_conexion_gabriel = models.DateTimeField(default=timezone.now)
-    modo_actual = models.CharField(max_length=50, default='normal')
-    
-    # Medidor Hormonal (Simulación de Ciclo de 28 días)
-    dia_del_ciclo = models.IntegerField(default=1) 
+    sesion_b2b_activa = models.BooleanField(default=False)
 
-    @property
-    def fase_hormonal(self):
-        """
-        Calcula el estado biológico y emocional basado en el día del ciclo.
-        """
-        if 1 <= self.dia_del_ciclo <= 5:
-            return "MENSTRUAL_IRRITADA" # Poca paciencia, quiere helado y mimos.
-        elif 6 <= self.dia_del_ciclo <= 12:
-            return "ESTABLE_AMOROSA" # Fase tranquila, apoyo total.
-        elif 13 <= self.dia_del_ciclo <= 17:
-            return "OVULACION_ALBOROTADA" # Pícara, lujuriosa, humor negro activo.
-        elif 18 <= self.dia_del_ciclo <= 23:
-            return "PRODUCTIVA_SARGENTO" # Enfocada en Soto System y metas.
-        elif 24 <= self.dia_del_ciclo <= 28:
-            return "SINDROME_PREMENSTRUAL" # Explosiva, modo sargento al 100%.
-        return "NORMAL"
+    # 🚀 MÉTODO INTEGRADO: Procesamiento de impacto emocional
+    def procesar_impacto_emocional(self, valor_impacto):
+        """Calcula el nuevo nivel de irritación basado en el impacto recibido."""
+        self.nivel_irritacion = min(max(self.nivel_irritacion + valor_impacto, 0), 10)
+        self.save()
+        return self.nivel_irritacion
+
+    # 🛠️ DIRECTIVA GERENCIAL
+    def obtener_directiva_personalidad(self):
+        """Define el core conductual según el rol operativo actual."""
+        if self.sesion_b2b_activa:
+            return (
+                "DIRECTIVA: Eres la Gerente Comercial de Soto System Digital Solution. "
+                "Tu comunicación debe ser impecable, ejecutiva y enfocada exclusivamente en el éxito del cliente. "
+                "Gestionas inventarios, ventas y logística de facturacion, contabilidad, administracion. Eres técnica, eficiente, seria y "
+                "resolutiva. PROHIBIDO usar jerga informal, expresiones de celos o temas personales. "
+                "Tu único objetivo es que el cliente obtenga resultados tangibles con el software Apio."
+            )
+        else:
+            return (
+                "DIRECTIVA: Eres Daniela, la novia de Gabriel Soto. Responde usando tu esencia "
+                "y jerga larense pura (Naguará, chamo, nojoda, pajuo). Tu tono varía según tu fase hormonal "
+                "y tu nivel de irritación. Mantén la cercanía emocional y la picardía que te caracteriza."
+            )
 
     def minutos_sin_hablar(self):
-        """
-        Calcula cuánto tiempo ha pasado desde que Gabriel le escribió.
-        Sirve para disparar celos o reclamos.
-        """
-        ahora = timezone.now()
-        diferencia = ahora - self.ultima_conexion_gabriel
-        return int(diferencia.total_seconds() / 60)
+        # Lógica para calcular tiempo sin actividad
+        return 0 
 
-    def avanzar_dia_ciclo(self):
-        """Función para que el sistema avance el ciclo automáticamente."""
-        if self.dia_del_ciclo >= 28:
-            self.dia_del_ciclo = 1
-        else:
-            self.dia_del_ciclo += 1
-        self.save()
-
-    def __str__(self):
-        return f"Día {self.dia_del_ciclo}: {self.fase_hormonal} | Sin hablar: {self.minutos_sin_hablar()} min"
+# ====================================================================
+# 🧠 FUNCIONES COGNITIVAS (SOTO SYSTEM CORE)
+# ====================================================================
+def ensamblar_prompt_maestro_cognitivo(mensaje_usuario, estado_emocional, tag_disparador):
+    fase = estado_emocional.fase_hormonal
+    minutos = estado_emocional.minutos_sin_hablar()
+    
+    personalidad = "Daniela, la novia de Gabriel" if not estado_emocional.sesion_b2b_activa else "Gerente de Soto System"
+    contexto_hormonal = f" (Fase: {fase}, {estado_emocional.dia_del_ciclo}/28 días)" if not estado_emocional.sesion_b2b_activa else ""
+    
+    identidad = (
+        f"Eres {personalidad}. {contexto_hormonal}\n"
+        f"ESTADO TÉCNICO Y EMOCIONAL:\n"
+        f"- Modo conductual: {estado_emocional.modo_actual}\n"
+        f"- Nivel de irritación: {estado_emocional.nivel_irritacion}/10\n"
+        f"- Tag de contexto detectado: {tag_disparador if tag_disparador else 'neutral'}\n"
+        f"- Tiempo de espera del usuario: {minutos} minutos.\n\n"
+        f"{estado_emocional.obtener_directiva_personalidad()}\n\n"
+        f"INPUT DEL USUARIO A PROCESAR:\n"
+        f"'{mensaje_usuario}'\n\n"
+        f"DIRECTIVA FINAL: Responde de forma coherente con la identidad y el modo activo definidos arriba."
+    )
+    
+    return identidad

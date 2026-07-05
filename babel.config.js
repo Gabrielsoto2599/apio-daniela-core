@@ -1,9 +1,13 @@
+// ====================================================================
+// COMPILADOR DE VARIABLES DE ENTORNO SOTO SYSTEM
+// Ubicación: babel.config.js
+// ====================================================================
 module.exports = function (api) {
   api.cache(true);
   return {
     presets: ['babel-preset-expo'],
     plugins: [
-      // Este plugin es el que permite usar process.env.BASE_URL
+      // 🚀 INYECCIÓN MAESTRA: Mapea tu archivo .env hacia el empaquetador de Expo
       [
         'module:react-native-dotenv',
         {

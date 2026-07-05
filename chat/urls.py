@@ -1,8 +1,13 @@
+# ====================================================================
+# ENRUTADOR COGNITIVO LOCAL - PUENTE FRONTEND EXPO (SOTO SYSTEM 2026)
+# Ubicación: cerebro/urls.py o chat/urls.py
+# ====================================================================
 from django.urls import path
-from . import views # Importamos el módulo completo para usar views.nombre_funcion
+from . import views  # Importamos el módulo completo de tus vistas unificadas
 
 urlpatterns = [
-    # Esta es la ruta exacta que Node.js está consultando desde el puerto 3001
-    # Asegúrate de que termine en '/' para evitar redirecciones 301 que causen errores
-    path('api/chat/preguntar/', views.respuesta_apio, name='preguntar'),
+    # 🚀 RUTA DEFINITIVA UNIFICADA: Procesa texto, notas de voz y fotos en un solo endpoint
+    # Coincide exactamente con la llamada HTTP fetch del orquestador App.js
+    path('api/chat/', views.respuesta_apio, name='chat_maestro'),
 ]
+
