@@ -1,33 +1,46 @@
 # ====================================================================
 # APIO BACKEND CONFIGURATION - SOTO SYSTEM GENERAL SETTINGS (2026)
-# Ubicación: apio_backend/settings.py (Versión Final de Producción)
+# Ubicación: apio_backend/settings.py (Versión Híbrida de Producción)
 # ====================================================================
 import os
-import environ # 🚀 INYECCIÓN MAESTRA: Activa el lector de variables
+import dj_database_url  # 🚀 LLAVE MAESTRA: Traduce las URLs de bases de datos de la nube
 from pathlib import Path
 
-# Base del directorio de Django (apio-ia/)
+# Base del directorio de Django
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# 🚀 ENRUTAMIENTO INDESTRUCTIBLE CON PATH (REGLA DE GABRIEL)
-# Le dice de forma nativa a Python: "Busca la carpeta apio-conciencia y abre el .env"
-env = environ.Env()
-environ.Env.read_env(str(BASE_DIR / 'apio-conciencia' / '.env'))
+# ====================================================================
+# ENRUTAMIENTO INTELIGENTE DE VARIABLES (REGLA DE GABRIEL CLOUD)
+# ====================================================================
+# Si Railway ya inyectó las variables en el entorno global de Linux, las toma directo de la RAM.
+# Si estás en tu PC, viaja a la carpeta local a buscar el archivo de configuración.
+if "GEMINI_PRO_KEY" in os.environ:
+    SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "django-insecure-cloud-production-key-soto-system")
+    DEBUG = os.environ.get("DEBUG", "False") == "True"
+    GEMINI_PRO_KEY = os.environ.get("GEMINI_PRO_KEY")
+else:
+    # Soporte de respaldo para tu entorno de desarrollo local en Windows
+    import environ
+    env = environ.Env()
+    environ.Env.read_env(str(BASE_DIR / 'apio-conciencia' / '.env'))
+    SECRET_KEY = "django-insecure-local-development-key"
+    DEBUG = True
+    GEMINI_PRO_KEY = env("GEMINI_PRO_KEY", default="")
 
-# Setea la variable en el entorno global de la RAM
-os.environ["GEMINI_PRO_KEY"] = env("GEMINI_PRO_KEY", default="")
+# Asegura que quede inyectada en la RAM global para tus views.py
+os.environ["GEMINI_PRO_KEY"] = GEMINI_PRO_KEY
 
 # ====================================================================
 # CONFIGURACIÓN DE RED AMPLIVOLTAICA (ALLOWED HOSTS)
 # ====================================================================
-# Permite que la IP local de tu computadora en la red Wi-Fi y tu APK de Android se conecten sin rechazo
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'soto_system_app', '*']
+# Abrimos las compuertas para tu localhost, tu IP de Wi-Fi y los dominios de Railway
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'soto_system_app', '.railway.app', '*']
 
 # ====================================================================
 # APPLICATION DEFINITION (INSTALLED APPS REFORZADO CON WEBSOCKETS)
 # ====================================================================
 INSTALLED_APPS = [
-    'daphne',  # 🚀 CRÍTICO: Debe ser el primero absoluto en la lista para domar el puerto 8000
+    'daphne',  # 🚀 CRÍTICO: Debe ser el primero absoluto para domar el puerto de producción
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -38,11 +51,8 @@ INSTALLED_APPS = [
     'chat', 
 ]
 
-# ====================================================================
-# MIDDLEWARE CON INTERCEPTOR DE CORS (REVISIÓN DE FLUJO)
-# ====================================================================
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',  # 🚀 DEBE IR DE PRIMERO ABSOLUTO para interceptar peticiones de Expo
+    'corsheaders.middleware.CorsMiddleware',  # 🚀 DEBE IR DE PRIMERO ABSOLUTO para interceptar a Expo y Node
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -69,18 +79,14 @@ TEMPLATES = [
     },
 ]
 
-# 🚀 SECCIÓN DE APLICACIÓN ASÍNCRONA UNIFICADA (SIN DUPLICADOS)
 WSGI_APPLICATION = 'apio_backend.wsgi.application'
-ASGI_APPLICATION = 'apio_backend.asgi.application' # Enrutador maestro para los WebSockets de Apio SaaS
+ASGI_APPLICATION = 'apio_backend.asgi.application'
 
-# ====================================================================
-# POLÍTICAS DE PERMISOS CORS (SOTO SYSTEM DIRECTIVE)
-# ====================================================================
-CORS_ALLOW_ALL_ORIGINS = True  # Abre los canales para que tu frontend móvil de Expo hable directo con el backend
+CORS_ALLOW_ALL_ORIGINS = True  
 CORS_ALLOW_CREDENTIALS = True
 
 # ====================================================================
-# DATABASE - CONFIGURACIÓN POSTGRESQL (SINCRONIZADA CON EL PUERTO REAL DOCKER)
+# DATABASE - CONFIGURACIÓN POSTGRESQL AUTOCONFIGURABLE DESDE LA NUBE
 # ====================================================================
 DATABASES = {
     'default': {
@@ -89,9 +95,14 @@ DATABASES = {
         'USER': 'postgres',
         'PASSWORD': 'Daniela.14',
         'HOST': '127.0.0.1',
-        'PORT': '5433', # 🚀 CORRECCIÓN CRÍTICA: Mapeo exacto de tu Docker Desktop
+        'PORT': '5433', 
     }
 }
+
+# 🚀 INTERCEPTOR INDUSTRIAL DE RED: Si Railway inyecta una base de datos en el panel,
+# Django borra la configuración de arriba y se conecta al Postgres eterno de internet automáticamente.
+if os.environ.get("DATABASE_URL"):
+    DATABASES["default"] = dj_database_url.config(conn_max_age=600, ssl_require=False)
 
 # ====================================================================
 # CONFIGURACIÓN DE MEDIOS Y ALMACENAMIENTO DE AUDIO (BLOQUE MULTIMEDIA)
@@ -100,7 +111,6 @@ STATIC_URL = 'static/'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# Configuración de Idioma y Zona Horaria para el Reloj Emocional de Daniela en Venezuela
 LANGUAGE_CODE = 'es-ve'
 TIME_ZONE = 'America/Caracas'
 USE_I18N = True
