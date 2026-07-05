@@ -44,8 +44,7 @@ app.post('/api/chat', async (req, res) => {
         console.log("🧠 Memoria local consultada.");
         console.log("⏳ Enviando prompt seguro vía Axios directo al Cerebro de Django...");
 
-        // 🚀 COMPUERTA MAESTRA EXCLUSIVA HACIA PYTHON PUERTO 8000
-        const respuestaDjango = await axios.post("http://192.168.0.125:8000/api/chat/", {
+        const respuestaDjango = await axios.post("https://railway.app", {
             texto: ultimoMensaje,
             contexto: req.body.contexto || "NOVIA_POSESIVA",
             historial: messages,

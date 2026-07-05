@@ -1,12 +1,10 @@
 // ====================================================================
-// SOTO SYSTEM NETWORKING - ENRUTAMIENTO INTELIGENTE POR WI-FI REAL
+// SOTO SYSTEM NETWORKING - ENRUTAMIENTO GLOBAL EN LA NUBE REAL (RAILWAY)
 // Ubicación: src/config/apiConfig.js
 // ====================================================================
 import { Platform } from 'react-native';
 
-export const BASE_URL =
-  Platform.OS === 'web'
-    ? 'http://127.0.0.1:3001'
-    : 'http://192.168.0.125:3001'; // 🚀 TU IP REAL DE IPCONFIG REPARADA
+// 🚀 CAMBIO MAESTRO DE INFRAESTRUCTURA CLOUD COMPLETADO
+export const BASE_URL = 'https://apio-daniela-core-production.up.railway.app';
 
-console.log(`📡 [SOTO NET]: Interfaz móvil enrutada hacia: ${BASE_URL}`);
+console.log(`📡 [SOTO NET]: Interfaz móvil enrutada hacia la nube: ${BASE_URL}`);
