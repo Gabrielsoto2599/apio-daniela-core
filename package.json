@@ -15,6 +15,7 @@
   "license": "ISC",
   "dependencies": {
     "@expo/metro-runtime": "~55.0.10",
+    "@google/generative-ai": "^0.24.1",
     "axios": "^1.18.1",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",

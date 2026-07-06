@@ -6,6 +6,7 @@ import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 
+
 class ApioBrainConsumer(AsyncWebsocketConsumer):
     """
     Controlador asíncrono maestro. Maneja la sincronización B2B y 

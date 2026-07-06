@@ -6,68 +6,65 @@ require('dotenv').config({ path: path.join(__dirname, '.env') });
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
+const { GoogleGenerativeAI } = require("@google/generative-ai"); // Importación necesaria
 
-// 🛠️ CONTROLADOR DE ERRORES OCULTOS: Evita que Node se apague sin decir el porqué
+// Inicializamos el motor de IA con tu API Key de Railway
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_PRO || process.env.GEMINI_PRO_KEY || process.env.GOOGLE_API_KEY);
+
+// 🛠️ CONTROLADOR DE ERRORES OCULTOS
 process.on('unhandledRejection', (reason, promise) => {
     console.error('❌ Promesa no controlada rota en:', promise, 'Razón:', reason);
 });
 
 const app = express();
-
 app.use(cors()); 
 app.use(express.json());
 
-// --- CONFIGURACIÓN DE CREDENCIALES FORZADA A PRODUCCIÓN ---
-// Se conserva como respaldo para el módulo multimedia de Fish Audio
-const miApiKey = process.env.GEMINI_PRO || process.env.GEMINI_PRO_KEY || process.env.GOOGLE_API_KEY;
-
-console.log("⚙️ [SOTO PROXY]: Ecosistema Node inicializado en limpio.");
-console.log("🛡️ [SOTO PROXY]: Memoria estática de LangChain extirpada. Modo relacional activo.");
+console.log("⚙️ [SOTO PROXY]: Ecosistema Node inicializado con Gemini 1.5 Pro.");
+console.log("🛡️ [SOTO PROXY]: Memoria estática extirpada. Modo Orquestador Activo.");
 
 // ====================================================================
-// 🚀 ENDPOINT DE CHAT PURIFICADO - TUBERÍA ESTRICTA NODE-DJANGO
+// 🚀 ENDPOINT DE CHAT ORQUESTADO (GEMINI + DJANGO)
 // ====================================================================
 app.post('/api/chat', async (req, res) => {
-    let ultimoMensaje = "";
     try {
         const messages = req.body.historial || req.body.messages || [];
-        
-        ultimoMensaje = (messages.length > 0) 
+        const ultimoMensaje = (messages.length > 0) 
             ? (messages[messages.length - 1].text || messages[messages.length - 1].texto || "") 
             : (req.body.texto || "");
 
-        if (!ultimoMensaje || ultimoMensaje.trim() === "" || ultimoMensaje === "connect_event") {
+        if (!ultimoMensaje || ultimoMensaje === "connect_event") {
             return res.json({ respuestaDeDaniela: "..." });
         }
 
-       // 🧠 LOG HOMOLOGADO HISTÓRICO DE GABRIEL
-        console.log("🧠 Memoria local consultada.");
-        console.log("⏳ Enviando prompt seguro vía Axios directo al Cerebro de Django...");
+        // 🧠 PASO 1: ORQUESTACIÓN CON GEMINI 1.5 PRO (Razonamiento de Daniela)
+        console.log("🧠 [SOTO SYSTEM]: Consultando razonamiento con Gemini 1.5 Pro...");
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+        const result = await model.generateContent(`Actúa como Daniela, asistente virtual de Soto System. Contexto: ${req.body.contexto || 'B2B'}. Mensaje: ${ultimoMensaje}`);
+        const respuestaIA = result.response.text();
 
-        // 🚀 CORRECCIÓN CRÍTICA: Homologamos el nombre del campo a 'texto' 
-        // para que coincida exactamente con views.py
+        // 🧠 PASO 2: SINCRONIZACIÓN CON EL CEREBRO DE DJANGO (Persistencia)
+        console.log("⏳ Enviando razonamiento y datos a Django para registro...");
         const respuestaDjango = await axios.post("https://apio-backend-core-production.up.railway.app/api/chat", {
-            texto: ultimoMensaje, // <--- Este campo coincide ahora con views.py (data.get("texto"))
-            contexto: req.body.contexto || "NOVIA_POSESIVA",
-            historial: messages,
+            texto: respuestaIA, // Enviamos el razonamiento de Gemini para que Django lo guarde y gestione
+            original_input: ultimoMensaje,
+            contexto: req.body.contexto || "PRODUCTIVA_SARGENTO",
             user_id: req.body.user_id || "gabriel" 
         }, {
             headers: { 'Content-Type': 'application/json' },
             timeout: 15000
         });
 
-        console.log("✅ [SOTO SYSTEM]: Cerebro de Django respondió con éxito.");
-        return res.json(respuestaDjango.data);
+        console.log("✅ [SOTO SYSTEM]: Orquestación completada.");
+        // Devolvemos el texto final listo para Fish Audio
+        return res.json({ 
+            ...respuestaDjango.data, 
+            texto_procesado: respuestaIA 
+        });
 
     } catch (error) {
-        // 🛡️ CONTROL DE CAÍDAS PURO: Si Django falla, el proxy se limita a reportar el error técnico real sin inventar texto
-        console.error("❌ [SOTO CORE CRASH]: Conexión rechazada o caída en el motor de Django:", error.message);
-        
-        return res.status(500).json({
-            success: false,
-            error: "BACKEND_DISCONNECTED",
-            details: error.message
-        });
+        console.error("❌ [SOTO CORE CRASH]:", error.message);
+        return res.status(500).json({ success: false, error: "BACKEND_ORCHESTRATION_FAILED", details: error.message });
     }
 });
 
