@@ -31,10 +31,19 @@ else:
 os.environ["GEMINI_PRO_KEY"] = GEMINI_PRO_KEY
 
 # ====================================================================
-# CONFIGURACIÓN DE RED AMPLIVOLTAICA (ALLOWED HOSTS)
+# CONFIGURACIÓN DE RED AMPLIVOLTAICA (ALLOWED HOSTS - SOTO SYSTEM)
+# Ubicación: src/apio_backend/settings.py
 # ====================================================================
-# Abrimos las compuertas para tu localhost, tu IP de Wi-Fi y los dominios de Railway
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'soto_system_app', '.railway.app', '*']
+
+# Abrimos las compuertas estrictas para los microservicios en la nube de Railway
+ALLOWED_HOSTS = [
+    'apio-daniela-core-production.up.railway.app',  # Tu proxy de Node
+    'apio-backend-core-production.up.railway.app',   # Tu cerebro de Django (Dominio Limpio)
+    '127.0.0.1',                                    # Respaldo local de Windows
+    'localhost',                                    # Respaldo de desarrollo
+    '*'                                             # 🛡️ BYPASS MAESTRO: Acepta tráfico de cualquier IP móvil externa
+]
+
 
 # ====================================================================
 # APPLICATION DEFINITION (INSTALLED APPS REFORZADO CON WEBSOCKETS)
