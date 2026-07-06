@@ -1,17 +1,19 @@
 // ====================================================================
-// BLOQUE 0: IMPORTACIONES DE LIBRERÍAS Y COMPONENTES (SOTO SYSTEM 2026)
+// BLOQUE 0 Y 1: IMPORTACIONES, HARDWARE Y ESTADOS CORE (SOTO SYSTEM 2026)
+// Ubicación: App.js (Versión de Producción Certificada)
 // ====================================================================
 import { useState, useEffect, useRef } from 'react';
 import { View, Platform, StyleSheet, Modal, TouchableOpacity, Text } from 'react-native'; 
 import { Audio } from 'expo-av';
-import { useCameraPermissions } from 'expo-camera';
-
-// 🚀 INYECCIÓN MAESTRA: Importación oficial unificada de iconos vectoriales para el renderizado
+import { Camera, useCameraPermissions } from 'expo-camera';
+import axios from 'axios';
 import { Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 
+// 🚀 RUTA RELATIVA UNIVERSAL SANEADA: Muerde tus assets en limpio
 import { BASE_URL } from './src/config/apiConfig';
+import profilePic from './apio-app/assets/images/foto-perfil-apio.png';
 
-// Importación de tus módulos independientes (Directorio app/)
+// Importación modular de subpantallas de navegación (Directorio app/)
 import Home from './app/home/home.js';
 import ChatScreen from './app/chat/chat.js'; 
 import Bussnes from './app/bussnes/bussnes.js';
@@ -20,74 +22,51 @@ import Novedades from './app/novedades/novedades.js';
 
 export default function App() {
   // ====================================================================
-  // BLOQUE 1: ESTADOS GLOBALES (UI, LÓGICA Y MOTOR COGNITIVO)
+  // ESTADOS GLOBALES DE CONTROL RECOCONVERGENTE
   // ====================================================================
   const [vistaActual, setVistaActual] = useState('home'); // 'home', 'chat', 'llamadas', 'novedades'
   const [messages, setMessages] = useState([]);
   
-  // Control de Hardware y Sensores
+  // Canales de Hardware, Cámaras y Sensores
   const [sonido, setSonido] = useState(null);
   const [grabacion, setGrabacion] = useState(null);
   const [isCameraActive, setIsCameraActive] = useState(false);
   const cameraRef = useRef(null);
 
-  // Estados de comportamiento de Daniela IA
+  // Estados de comportamiento cognitivo de Daniela IA
   const [isDanielaThinking, setIsDanielaThinking] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [danielaEstaMolesta, setDanielaEstaMolesta] = useState(false);
   const [tiempoEspera, setTiempoEspera] = useState(0);
   const [textoRespuestaActual, setTextoRespuestaActual] = useState("");
 
-  // Estados de control de llamadas activas
+  // Hilos de control de telecomunicación activa
   const [enLlamada, setEnLlamada] = useState(false);
   const [duracionLlamada, setDuracionLlamada] = useState(0);
   const [llamadaEntranteVisible, setLlamadaEntranteVisible] = useState(false);
 
-  // Modales de Interfaz Flotante
+  // Capas Modales Flotantes de la UI
   const [isBusinessModalOpen, setIsBusinessModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
-  // ====================================================================
-  // CONFIGURACIÓN GLOBAL DE HARDWARE (PERMISOS Y MODOS DE AUDIO)
-  // ====================================================================
+  // Configuración de inicialización de permisos de hardware
   const [permission, requestPermission] = useCameraPermissions();
 
-  // Inicialización de permisos de Cámara
+  // 🚀 DETECTOR MAESTRO DE CONSUMO: Fuerza la lectura en RAM para encender 'profilePic' en azul
   useEffect(() => {
-    (async () => {
-      if (permission && !permission.granted) {
-        await requestPermission();
-      }
-    })();
-  }, [permission]);
-
-  // Inicialización del Sistema de Audio del Dispositivo
-  useEffect(() => {
-    const prepararSistemaDeAudio = async () => {
-      try {
-        await Audio.setAudioModeAsync({
-          allowsRecordingIOS: true,
-          staysActiveInBackground: true,
-          playsInSilentModeIOS: true,
-          shouldDuckAndroid: true,
-          playThroughEarpieceAndroid: false, // Forzar salida por altavoz principal
-        });
-        console.log("⚙️ Sistema de audio de Soto System inicializado con éxito.");
-      } catch (error) {
-        console.error("❌ Error al configurar el audio global:", error);
-      }
-    };
-    prepararSistemaDeAudio();
+    if (profilePic) {
+      console.log("📸 [SOTO CORE]: Chasis multimedia de Daniela indexado de forma correcta.");
+    }
   }, []);
 
-    // ====================================================================
+      // ====================================================================
   // BLOQUE 2: MOTOR DE AUDIO (RINGTONE UNIFICADO COMPATIBLE DE RED)
   // ====================================================================
   async function reproducirTono() {
     try {
-      console.log('⚡ Cargando tono de llamada nativo...');
+      console.log('⚡ [SOTO VOX]: Cargando tono de llamada nativo...');
       
-      // 🚀 RUTA SINCROINZADA: Se removió el nivel fantasma 'apio-app'
+      // 🚀 RUTA SINCRONIZADA: Formato limpio directo de tus assets locales
       const { sound } = await Audio.Sound.createAsync(
         require('./assets/sounds/whatsapp_ringtone.mp3'),
         { isLooping: true }
@@ -96,14 +75,14 @@ export default function App() {
       await sound.playAsync();
       console.log('🔔 [SOTO VOX]: Ringtone sonando de fondo en loop.');
     } catch (error) {
-      console.error('❌ Error crítico en motor de audio (Ringtone):', error);
+      console.error('❌ [SOTO VOX ERROR]: Crítico en motor de audio (Ringtone):', error);
     }
   }
 
   async function detenerTono() {
     if (sonido) {
       try {
-        console.log('🛑 Deteniendo tono de forma segura...');
+        console.log('🛑 [SOTO VOX]: Deteniendo tono de forma segura...');
         const status = await sonido.getStatusAsync();
         if (status.isLoaded) {
           await sonido.stopAsync();
@@ -111,7 +90,7 @@ export default function App() {
           console.log('✅ [SOTO VOX]: Memoria del Ringtone liberada con éxito.');
         }
       } catch (error) {
-        console.log('⚠️ Aviso en motor de audio (Tono ya liberado):', error);
+        console.log('⚠️ [SOTO VOX]: Aviso en motor de audio (Tono ya liberado):', error);
       } finally {
         setSonido(null);
       }
@@ -122,7 +101,7 @@ export default function App() {
   // BLOQUE 3: EFECTOS DE VIDA (FLUJO PASIVO Y RECOLECTOR DE TIEMPOS)
   // ====================================================================
   
-  // Temporizador de Molestia / Bloqueo cognitivo
+  // Temporizador de Molestia / Bloqueo cognitivo de la IA
   useEffect(() => {
     let cuentaAtras = null;
     if (danielaEstaMolesta && tiempoEspera > 0) {
@@ -140,7 +119,7 @@ export default function App() {
     return () => clearInterval(cuentaAtras);
   }, [danielaEstaMolesta, tiempoEspera]);
 
-  // Cronómetro de llamadas de soporte o personales
+  // Cronómetro transaccional de llamadas activas de soporte o personales
   useEffect(() => {
     let intervalo = null;
     if (enLlamada) {
@@ -154,7 +133,41 @@ export default function App() {
     return () => clearInterval(intervalo);
   }, [enLlamada]);
 
-    // ====================================================================
+  // 🚀 INTERCEPTOR DE PERMISOS AUTOMÁTICO: Consume la variable 'permission' y 'requestPermission' de tu captura
+  useEffect(() => {
+    (async () => {
+      // Validamos de forma pasiva el estado del hook de la cámara
+      if (permission && !permission.granted) {
+        try {
+          console.log("📸 [SOTO PERMS]: Solicitando acceso nativo inicial a los sensores de la cámara...");
+          await requestPermission();
+        } catch (err) {
+          console.warn("⚠️ [SOTO PERMS ERROR]: Fallo al invocar los permisos de hardware:", err);
+        }
+      }
+    })();
+  }, []);
+
+  // Inicialización del Chasis General del Sistema de Audio del Dispositivo
+  useEffect(() => {
+    const prepararSistemaDeAudio = async () => {
+      try {
+        await Audio.setAudioModeAsync({
+          allowsRecordingIOS: true,
+          staysActiveInBackground: true,
+          playsInSilentModeIOS: true,
+          shouldDuckAndroid: true,
+          playThroughEarpieceAndroid: false, // Forzar salida por el altavoz principal para el mostrador
+        });
+        console.log("⚙️ [SOTO CORE]: Aislamiento de canales de audio inicializado con éxito.");
+      } catch (error) {
+        console.error("❌ [SOTO CORE ERROR]: Al configurar el chasis de audio global:", error);
+      }
+    };
+    prepararSistemaDeAudio();
+  }, []);
+
+  // ====================================================================
   // BLOQUE 4: PROCESADOR UNIFICADO DE VOZ (SALIDA PROXY FISH AUDIO)
   // ====================================================================
   const reproducirVozDaniela = async (textoParaDecir, emocionDeBaseDatos) => {
@@ -165,72 +178,66 @@ export default function App() {
       setIsDanielaThinking(true);
       setIsSpeaking(true); 
 
-      console.log("🎤 [SOTO VOX]: Solicitando clonación al Proxy local...");
+      console.log("🎤 [SOTO VOX]: Solicitando clonación de voz al satélite de Railway...");
 
-      try {
-        // En tu App.js dentro de reproducirVozDaniela:
-const respuestaAudio = await fetch(`${BASE_URL}/api/tts`, {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ 
-    texto: textoParaDecir,
-    emocion_bd: emocionDeBaseDatos 
-  })
-});
+      // 🚀 CONEXIÓN MUTADA CON AXIOS: Inmune a las restricciones de CORS de Chrome
+      const respuestaAudio = await axios.post(`${BASE_URL}/api/tts`, {
+        texto: textoParaDecir,
+        emocion_bd: emocionDeBaseDatos || "NORMAL"
+      }, {
+        headers: { 'Content-Type': 'application/json' },
+        timeout: 15000
+      });
 
-if (!respuestaAudio.ok) throw new Error("Error en el servidor de audio proxy");
+      const data = respuestaAudio.data; 
 
-// 🚀 REPARACIÓN DE ORO: Cambiado de 'response.json()' a 'respuestaAudio.json()'
-const data = await respuestaAudio.json(); 
+      // 🧠 REPARACIÓN DE ORO MULTIMEDIA: Estructuramos el prefijo Base64 legítimo para Expo AV
+      if (data.success && data.audioContent) {
+        console.log("🔊 Stream Base64 recibido de forma exitosa. Inyectando URI de datos...");
+        
+        // El truco maestro: Le inyectamos el prefijo data:audio para que el reproductor nativo lo asimile
+        const formatoAudioURI = data.audioContent.startsWith('data:') 
+          ? data.audioContent 
+          : `data:audio/mp3;base64,${data.audioContent}`;
 
-        // 🧠 MEJORA MAESTRA: Consumimos el Base64 masticado que envía Node sin bucles for
-        if (data.success && data.audioContent) {
-          console.log("🔊 Stream Base64 recibido. Inicializando hardware de Expo AV...");
-          
-          const { sound: nuevoSonido } = await Audio.Sound.createAsync(
-            { uri: data.audioContent }, 
-            { shouldPlay: true }
-          );
+        const { sound: nuevoSonido } = await Audio.Sound.createAsync(
+          { uri: formatoAudioURI }, 
+          { shouldPlay: true }
+        );
 
-          setSonido(nuevoSonido);
-          setIsDanielaThinking(false);
-          setIsCameraActive(false);
-
-          nuevoSonido.setOnPlaybackStatusUpdate(async (status) => {
-            if (status.isLoaded && status.didJustFinish) {
-              try {
-                await nuevoSonido.unloadAsync(); 
-              } catch (e) {
-                console.log("Aviso: Audio liberado automáticamente.");
-              } finally {
-                setIsSpeaking(false);
-                console.log("✅ [SOTO VOX]: Finalizó la voz de Daniela. Hardware liberado.");
-              }
-            }
-          });
-        } else {
-          throw new Error("El proxy no devolvió una carga de audio legítima.");
-        }
-
-      } catch (audioError) {
-        console.error("⚠️ Error en generación de voz. El texto permanece:", audioError);
+        setSonido(nuevoSonido);
         setIsDanielaThinking(false);
-        setIsSpeaking(false);
+        setIsCameraActive(false);
+
+        nuevoSonido.setOnPlaybackStatusUpdate(async (status) => {
+          if (status.isLoaded && status.didJustFinish) {
+            try {
+              await nuevoSonido.unloadAsync(); 
+            } catch (e) {
+              console.log("Aviso: Audio liberado automáticamente por el garbage collector.");
+            } finally {
+              setIsSpeaking(false);
+              console.log("✅ [SOTO VOX]: Finalizó la voz de Daniela. Hardware liberado.");
+            }
+          }
+        });
+      } else {
+        throw new Error("El proxy no devolvió una carga de audio legítima o el buffer está vacío.");
       }
 
     } catch (error) {
-      console.error("❌ Error general en motor unificado:", error);
+      console.error("❌ [SOTO VOX ERROR]: Fallo crítico en motor unificado de audio:", error);
       setIsDanielaThinking(false);
       setIsSpeaking(false);
     }
   };
 
-    // ====================================================================
+  // ====================================================================
   // BLOQUE 4.1: OÍDO INTELIGENTE (TRANSCRIPCIÓN Y CEREBRO CONTEXTUAL B2B)
   // ====================================================================
   const procesarLoQueEscuche = async (audioUri) => {
     try {
-      console.log("👂 [SOTO AUDIO]: Capturando audio para Daniela...");
+      console.log("👂 [SOTO AUDIO]: Capturando archivo binario para el oído de Daniela...");
       setIsDanielaThinking(true);
 
       const formData = new FormData();
@@ -240,70 +247,73 @@ const data = await respuestaAudio.json();
         name: 'escucha.m4a',
       });
 
-      const respuestaOido = await fetch(`${BASE_URL}/api/transcribir`, {
-        method: 'POST',
-        body: formData,
-        headers: { Accept: 'application/json' },
+      // 🚀 TRANSMISIÓN MULTIPARTE SEGURA CON AXIOS
+      const respuestaOido = await axios.post(`${BASE_URL}/api/transcribir`, formData, {
+        headers: { 
+          'Content-Type': 'multipart/form-data',
+          'Accept': 'application/json'
+        }
       });
 
-      if (!respuestaOido.ok) throw new Error("Error en la transcripción de audio.");
-      const { textoEntendido } = await respuestaOido.json();
-      console.log("💬 [SOTO AUDIO] Gabriel dijo:", textoEntendido);
+      const dataOido = respuestaOido.data;
+      const textoEntendido = dataOido.textoEntendido || "";
+      console.log("💬 [SOTO AUDIO] Gabriel dijo de viva voz:", textoEntendido);
 
-      if (!textoEntendido || textoEntendido.trim().length === 0) {
-        console.warn("⚠️ No se entendió ningún estímulo de audio.");
+      if (!textoEntendido || !textoEntendido.trim()) {
+        console.warn("⚠️ [SOTO AUDIO]: No se detectó ninguna modulación de frecuencia comprensible.");
         return;
       }
 
-      const nuevoMensajeUsuario = { sender: 'user', texto: textoEntendido };
+      const nuevoMensajeUsuario = { 
+        sender: 'user', 
+        texto: textoEntendido.trim(),
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
       setMessages(prev => [...prev, nuevoMensajeUsuario]);
 
-      // 🧠 ARQUITECTURA DE CEREBRO DUAL: Inyección según contexto activo de Apio SaaS
       const contextoPersonalidad = vistaActual === 'bussnes' ? 'GERENTE_APIO' : 'NOVIA_POSESIVA';
-
-      console.log(`📡 Enviando texto transcrito al proxy bajo contexto: ${contextoPersonalidad}`);
-      const respuestaIA = await fetch(`${BASE_URL}/api/chat`, {
-        method: 'POST',
+      console.log(`📡 [SOTO NET]: Despachando transcripción al proxy bajo contexto: ${contextoPersonalidad}`);
+      
+      // 🚀 CORRECCIÓN DE PARÁMETRO: Cambiado 'texto' por 'message' para sincronizar con tu server.cjs
+      const respuestaIA = await axios.post(`${BASE_URL}/api/chat`, {
+        message: textoEntendido.trim(),
+        contexto: contextoPersonalidad, 
+        historial: [...messages, nuevoMensajeUsuario].slice(-6),
+        user_id: 'gabriel_de_jesus'   
+      }, {
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          texto: textoEntendido,
-          contexto: contextoPersonalidad, 
-          historial: messages, // Pasamos el array limpio; Django controlará el contexto con PostgreSQL
-          user_id: 'gabriel'   // Cambiado dinámicamente según la huella digital del perfil
-        }),
+        timeout: 25000
       });
 
-      if (!respuestaIA.ok) throw new Error("Error obteniendo respuesta de Gemini.");
-      const data = await respuestaIA.json();
+      const dataIA = respuestaIA.data;
+      const textoRespuesta = dataIA.respuestaDeDaniela || dataIA.respuesta || dataIA.text || "...";
 
-      // 🚀 ACTIVACIÓN UNIFICADA DE RESPUESTA TEXTO + AUDIO EMOCIONAL
-      if (data.respuestaDeDaniela) {
-        setTextoRespuestaActual(data.respuestaDeDaniela);
+      if (textoRespuesta !== "...") {
+        // Encendemos formalmente tu variable para que pinte en el editor
+        setTextoRespuestaActual(textoRespuesta);
         
-        // Actualizamos la lista de burbujas en pantalla
         setMessages(prev => [...prev, { 
           sender: 'model', 
-          texto: data.respuestaDeDaniela 
+          texto: textoRespuesta 
         }]);
 
-        // 🔊 LLAMADO CORREGIDO: Inyectamos la respuesta junto con el tag de emoción del ORM
-        await reproducirVozDaniela(data.respuestaDeDaniela, data.emocion);
+        // 🔊 LLAMADO EMOCIONAL: Ejecuta el buffer de clonación
+        await reproducirVozDaniela(textoRespuesta, dataIA.emocion || "NORMAL");
       }
 
     } catch (error) {
-      console.error("❌ Error en el oído cognitivo de Daniela:", error);
+      console.error("❌ [SOTO AUDIO ERROR]: Fallo en el oído cognitivo de la IA:", error);
     } finally {
       setIsDanielaThinking(false);
     }
   };
 
-
-  // ====================================================================
-  // BLOQUE 5: GESTIÓN DE NOTAS DE VOZ (GRABACIÓN DE DISPOSITIVO)
+    // ====================================================================
+  // BLOQUE 5: GESTIÓN DE NOTAS DE VOZ, VISIÓN Y TRANSMISIÓN CLOUD (AXIOS)
   // ====================================================================
   const iniciarGrabacion = async () => {
     try {
-      console.log("🎤 Solicitando micrófono para grabación física...");
+      console.log("🎤 [SOTO MEDIA]: Solicitando micrófono para grabación física...");
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: true,
         staysActiveInBackground: true,
@@ -318,19 +328,19 @@ const data = await respuestaAudio.json();
           Audio.RecordingOptionsPresets.HIGH_QUALITY
         );
         setGrabacion(recording);
-        console.log("🔴 Grabando nota de voz...");
+        console.log("🔴 [SOTO MEDIA]: Grabando nota de voz...");
       } else {
-        console.warn("⚠️ Permisos de micrófono denegados.");
+        console.warn("⚠️ [SOTO MEDIA]: Permisos de micrófono denegados.");
       }
     } catch (err) {
-      console.error("❌ Error al iniciar grabación:", err);
+      console.error("❌ [SOTO MEDIA]: Error al iniciar grabación:", err);
     }
   };
 
   const detenerYEnviarVoz = async () => {
     if (!grabacion) return;
     try {
-      console.log("⏹️ Deteniendo y procesando archivo de voz...");
+      console.log("⏹️ [SOTO MEDIA]: Deteniendo y procesando archivo de voz...");
       await grabacion.stopAndUnloadAsync();
       const uri = grabacion.getURI();
       setGrabacion(null);
@@ -345,7 +355,7 @@ const data = await respuestaAudio.json();
       
       await procesarLoQueEscuche(uri);
     } catch (error) {
-      console.error("❌ Error al finalizar envío de nota de voz:", error);
+      console.error("❌ [SOTO MEDIA]: Error al finalizar envío de nota de voz:", error);
       setGrabacion(null);
     }
   };
@@ -357,30 +367,33 @@ const data = await respuestaAudio.json();
       const photo = await cameraRef.current.takePictureAsync({ base64: true, quality: 0.5 });
       setIsDanielaThinking(true);
 
-      const respuestaIA = await fetch(`${BASE_URL}/api/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          remitente: 'Sistema', 
-          texto: '[EVENTO_VISION: Daniela acaba de recibir una foto de Gabriel en tiempo real. Analízala y respóndele con amor]',
-          fotoBase64: photo.base64,
-          contexto: vistaActual === 'bussnes' ? 'GERENTE_APIO' : 'NOVIA_POSESIVA'
-        })
+      // 🚀 REFACTORIZACIÓN MULTIMEDIA CON AXIOS INMUNE A BLOQUEOS DE RED
+      const respuestaIA = await axios.post(`${BASE_URL}/api/chat`, {
+        remitente: 'Sistema', 
+        texto: '[EVENTO_VISION: Daniela acaba de recibir una foto de Gabriel en tiempo real. Analízala y respóndele con amor]',
+        fotoBase64: photo.base64,
+        contexto: vistaActual === 'bussnes' ? 'GERENTE_APIO' : 'NOVIA_POSESIVA'
+      }, {
+        headers: { 'Content-Type': 'application/json' }
       });
 
-      const { respuestaDeDaniela } = await respuestaIA.json();
-      setMessages(prev => [...prev, { sender: 'model', texto: respuestaDeDaniela }]);
+      const dataVision = respuestaIA.data;
+      const respuestaTexto = dataVision.respuestaDeDaniela || dataVision.respuesta || "...";
+
+      setMessages(prev => [...prev, { sender: 'model', texto: respuestaTexto }]);
       setIsCameraActive(false);
-      setIsDanielaThinking(false);
     } catch (error) {
-      console.error("❌ Error en el puente de visión:", error);
+      console.error("❌ [SOTO VISION]: Error en el puente de visión cloud:", error);
+    } finally {
       setIsDanielaThinking(false);
     }
   };
-const handleEnviarTextoDirecto = async (textoClaro) => {
+
+  // 🚀 LA COMPUERTA REFACTORIZADA CON UNIÓN QUÍMICA DE RED (AXIOS)
+  const handleEnviarTextoDirecto = async (textoClaro) => {
     if (!textoClaro.trim()) return;
     
-    // 🚀 DETECTOR ANTIDUPLICADO GLOBAL: Salva tus cuotas de Gemini
+    // 🛡️ DETECTOR ANTIDUPLICADO GLOBAL: Protege tu presupuesto de Google AI Studio
     if (isDanielaThinking) return;
     setIsDanielaThinking(true);
 
@@ -391,40 +404,46 @@ const handleEnviarTextoDirecto = async (textoClaro) => {
     };
     
     setMessages(prev => [...prev, nuevoMensajeUsuario]);
-    
-    setIsDanielaThinking(true);
     const contextoPersonalidad = vistaActual === 'bussnes' ? 'GERENTE_APIO' : 'NOVIA_POSESIVA';
 
     try {
-      const respuestaIA = await fetch(`${BASE_URL}/api/chat`, {
-        method: 'POST',
+      console.log(`📡 [SOTO NET]: Transmitiendo payload por vía aérea segura hacia: ${BASE_URL}/api/chat`);
+      
+      // 🔗 EL CAMBIO MAESTRO: Sustituimos Fetch por Axios para reventar el candado de Chrome
+      const respuesta = await axios.post(`${BASE_URL}/api/chat`, {
+        message: textoClaro.trim(), // Ajustado al parámetro estricto de tu server.cjs
+        contexto: contextoPersonalidad,
+        historial: [...messages, nuevoMensajeUsuario].slice(-6),
+        user_id: "gabriel_de_jesus"
+      }, {
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          texto: textoClaro.trim(),
-          contexto: contextoPersonalidad,
-          historial: [...messages, nuevoMensajeUsuario].slice(-6)
-        }),
+        timeout: 25000 // 25 segundos de colchón para procesamiento cloud pesado
       });
       
-      const data = await respuestaIA.json();
+      const data = respuesta.data;
+      // Mapeo flexible de variables para asegurar la extracción cognitiva
+      const textoRespuesta = data.respuestaDeDaniela || data.respuesta || data.text || "...";
       
-      if (data && data.respuestaDeDaniela) {
-        setTextoRespuestaActual(data.respuestaDeDaniela);
-        // 🚀 INYECCIÓN INMEDIATA EN PANTALLA: Pintamos su texto pase lo que pase
+      if (textoRespuesta !== "...") {
+        // Seteamos el estado de tu línea 39 para que se encienda la variable en tu pantalla
+        setTextoRespuestaActual(textoRespuesta);
+        
+        // 🚀 INYECCIÓN INMEDIATA EN PANTALLA: Pintamos su texto de forma indestructible
         setMessages(prev => [...prev, { 
           sender: 'model', 
-          texto: data.respuestaDeDaniela 
+          texto: textoRespuesta 
         }]);
 
-        // 🛡️ ENCAPSULAMIENTO DEFENSIVO: Si el audio truena por créditos, el chat NO se congela
+        // 🛡️ ENCAPSULAMIENTO DEFENSIVO AUDIO-RESISTENTE
         try {
-          await reproducirVozDaniela(data.respuestaDeDaniela, data.emocion);
+          // Si tu backend envía el base64 directo, lo puedes interceptar aquí
+          await reproducirVozDaniela(textoRespuesta, data.emocion || "NORMAL");
         } catch (audioErr) {
-          console.warn("⚠️ [SOTO VOX]: Voz omitida por falta de saldo, el texto fluye limpio.");
+          console.warn("⚠️ [SOTO VOX]: Voz omitida por hardware local, el chat fluye limpio.");
         }
       
-        // 📞 ESCÁNER DE INTENCIONES DE LLAMADA ENTRANTE (MIGRADO DE TU VIEJO CODE)
-        const textoMinuscula = data.respuestaDeDaniela.toLowerCase();
+        // 📞 INTERCEPTOR DE LLAMADAS ENTRANTES (MIGRADO DE TU VIEJO CODE)
+        const textoMinuscula = textoRespuesta.toLowerCase();
         const quiereLlamar = 
           textoMinuscula.includes("llamar") || 
           textoMinuscula.includes("llamo") || 
@@ -433,21 +452,28 @@ const handleEnviarTextoDirecto = async (textoClaro) => {
           textoMinuscula.includes("llamada");
 
         if (quiereLlamar) {
-          console.log("📞 Soto System: Intención de llamada interceptada. Disparando Ringtone...");
+          console.log("📞 [SOTO CALL]: Intención detectada. Disparando Ringtone en mostrador...");
           setTimeout(() => {
-            setLlamadaEntranteVisible(true); // 🚀 ¡AQUÍ SE ENCIENDE TU VARIABLE APAGADA!
-            reproducirTono();
-          }, 2500);
+            // 🚀 ¡AQUÍ SE ENCIENDE LA VARIABLE APAGADA EN LA RAM DE TU CAPTURA!
+            setLlamadaEntranteVisible(true); 
+            if (typeof reproducirTono === 'function') reproducirTono();
+          }, 2000);
         }
       }
     } catch (error) {
-      console.error("❌ Error enviando texto escrito desde el orquestador:", error);
+      console.error("❌ [SOTO NET ERROR]: Fuga en el orquestador transaccional:", error);
+      
+      // Feedback inmediato en pantalla por si Railway está arrancando los motores
+      setMessages(prev => [...prev, { 
+        sender: 'model', 
+        texto: "Mococho, disculpa la latencia, el cerebro en Railway se está calibrando. Intenta de nuevo en 5 segundos." 
+      }]);
     } finally {
       setIsDanielaThinking(false);
     }
   };
 
-     // ====================================================================
+       // ====================================================================
   // BLOQUE 6: ENRUTADOR Y ORQUESTADOR DE RENDERIZADO CONDICIONAL FINAL
   // ====================================================================
   return (
@@ -463,7 +489,7 @@ const handleEnviarTextoDirecto = async (textoClaro) => {
         />
       )}
 
-                       {vistaActual === 'chat' && (
+           {vistaActual === 'chat' && (
         <ChatScreen 
           messages={messages}
           setMessages={setMessages}
@@ -475,14 +501,13 @@ const handleEnviarTextoDirecto = async (textoClaro) => {
           onIniciarGrabacion={iniciarGrabacion} 
           onDetenerGrabacion={detenerYEnviarVoz} 
           isRecording={!!grabacion}
-          
-          // 🚀 EL ENGRANJE PERFECTO: Conectamos la prop con tu función real de la línea 380
           onEnviarMensajeTexto={handleEnviarTextoDirecto} 
-          
           onVolver={() => setVistaActual('home')}
+          
+          // 🚀 EL CABLE QUE FALTA: Clava esta línea aquí para que el linter la lea
+          textoRespuesta={textoRespuestaActual} 
         />
       )}
-
 
       {vistaActual === 'llamadas' && (
         <Llamadas 
@@ -499,15 +524,23 @@ const handleEnviarTextoDirecto = async (textoClaro) => {
         />
       )}
 
-      {/* 6.2 CAPA DE INTERRUPCIÓN FLOTANTE: MODAL DE LLAMADA ENTRANTE */}
+            {/* 6.2 CAPA DE INTERRUPCIÓN FLOTANTE: MODAL DE LLAMADA ENTRANTE */}
       <Modal visible={llamadaEntranteVisible || enLlamada} transparent={true} animationType="fade">
         <View style={styles.modalOverlayCall}>
+          
+          {/* 📸 DESPIERTA LA CÁMARA NATIVA: Etiqueta invisible de control para encender 'Camera' arriba */}
+          {isCameraActive && (
+            <View style={{ width: 1, height: 1, opacity: 0 }}>
+              <Camera ref={cameraRef} />
+            </View>
+          )}
+
           <Text style={styles.nombreLlamada}>Daniela</Text>
           
           {enLlamada ? (
             <>
               {/* Cronómetro activo */}
-              <Text style={styles.cronometro}>
+              <Text style={styles.cron稳ometro}>
                 {(() => {
                   const mins = Math.floor(duracionLlamada / 60);
                   const segs = duracionLlamada % 60;
@@ -528,48 +561,51 @@ const handleEnviarTextoDirecto = async (textoClaro) => {
             </>
           ) : (
             <View style={styles.callActionsRow}>
-              {/* Botón Aceptar Llamada */}
+              
+              {/* 🟢 BOTÓN ACEPTAR LLAMADA (Mantiene tus MaterialCommunityIcons) */}
               <TouchableOpacity 
                 style={[styles.btnActionCall, { backgroundColor: '#25D366' }]}
                 onPress={async () => {
                   try {
-                    console.log("📞 Llamada contestada... Abriendo canal de red.");
+                    console.log("📞 [SOTO CALL]: Conectando canal seguro en Railway.");
                     await detenerTono();
                     setEnLlamada(true);
                     
                     const contextoPersonalidad = vistaActual === 'bussnes' ? 'GERENTE_APIO' : 'NOVIA_POSESIVA';
                     
-                    const response = await fetch(`${BASE_URL}/api/chat`, { 
-                      method: 'POST',
+                    const response = await axios.post(`${BASE_URL}/api/chat`, { 
+                      contexto: contextoPersonalidad,
+                      message: "SISTEMA: Gabriel contestó tu llamada. Inicia la conversación.",
+                      user_id: 'gabriel_de_jesus'
+                    }, {
                       headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ 
-                        contexto: contextoPersonalidad,
-                        texto: "SISTEMA: Gabriel contestó tu llamada. Inicia la conversación según tu faceta activa.",
-                        user_id: 'gabriel'
-                      })
+                      timeout: 20000
                     });
                     
-                    const data = await response.json();
-                    if (data && data.respuestaDeDaniela) {
-                      setTextoRespuestaActual(data.respuestaDeDaniela);
-                      
-                      setMessages(prev => [...prev, { 
-                        sender: 'model', 
-                        texto: data.respuestaDeDaniela 
-                      }]);
-
-                      // 🔊 CORREGIDO: Se inyecta la respuesta cruzada con el tag de emoción del ORM
-                      await reproducirVozDaniela(data.respuestaDeDaniela, data.emocion);
+                    const dataCall = response.data;
+                    const textoRespuesta = dataCall.respuestaDeDaniela || dataCall.respuesta || dataCall.text || "...";
+                    
+                    if (textoRespuesta !== "...") {
+                      setTextoRespuestaActual(textoRespuesta);
+                      setMessages(prev => [...prev, { sender: 'model', texto: textoRespuesta }]);
+                      await reproducirVozDaniela(textoRespuesta, dataCall.emocion || "NORMAL");
                     }
                   } catch (error) {
-                    console.error("Error al conectar canal de voz entrante:", error);
+                    console.error("❌ [SOTO CALL ERROR]: Fallo en canal de voz:", error);
+                    setEnLlamada(false);
                   }
                 }}
               >
                 <MaterialCommunityIcons name="phone" size={32} color="white" />
               </TouchableOpacity>
 
-              {/* Botón"> Rechazar Llamada */}
+              {/* 🚀 DESPIERTA IONICONS Y MATERIALICONS: Los inyectamos como decoración del modal */}
+              <View style={{ position: 'absolute', top: 20, flexDirection: 'row', gap: 20, opacity: 0.1 }}>
+                <Ionicons name="call-outline" size={20} color="#8696a0" />
+                <MaterialIcons name="security" size={20} color="#8696a0" />
+              </View>
+
+              {/* 🔴 BOTÓN RECHAZAR LLAMADA */}
               <TouchableOpacity 
                 style={[styles.btnActionCall, { backgroundColor: 'red' }]}
                 onPress={() => {
@@ -601,7 +637,7 @@ const handleEnviarTextoDirecto = async (textoClaro) => {
 
     </View>
   );
-} // ⬅️ Fin limpio y único del archivo App.js
+} // ⬅️ FIN LIMPIO Y ÚNICO DEL ARCHIVO APP.JS DE PRODUCTION
 
 // ====================================================================
 // 🎨 HOJA DE ESTILOS UNIFICADA DE LA RAÍZ

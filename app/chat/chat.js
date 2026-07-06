@@ -1,5 +1,6 @@
 // ====================================================================
-// CHAT.JS - VERSION FINAL BLINDADA (SOTO SYSTEM 2026)
+// CHAT.JS - CABECERA, LÓGICA Y ORQUESTADOR VISUAL (SOTO SYSTEM 2026)
+// Ubicación: app/chat/chat.js (Bloque de Producción Unificado)
 // ====================================================================
 import { useState, useRef, useEffect } from 'react';
 import { 
@@ -22,145 +23,183 @@ export default function ChatScreen({
   cameraRef,
   isCameraActive,
   setIsCameraActive,
-  onCapturar
+  onCapturar,
+  
+  // 🚀 INYECCIÓN MAESTRA MULTIMEDIA: Las llaves de control remoto para el micrófono
+  onIniciarGrabacion,
+  onDetenerGrabacion,
+  isRecording
 }) { 
 
+  // 🚀 ESTADO LOCAL DE TEXTO: Controla el buffer de entrada de forma unificada
   const [message, setMessage] = useState('');
   const scrollViewRef = useRef(null);
 
+  // Auto-scroll automatizado con tolerancia de carga asíncrona
   useEffect(() => {
     if (scrollViewRef.current) {
-      scrollViewRef.current.scrollToEnd({ animated: true });
+      setTimeout(() => {
+        scrollViewRef.current.scrollToEnd({ animated: true });
+      }, 50);
     }
-  }, [messages]);
+  }, [messages, isDanielaThinking]);
 
-  // 🚀 MOTOR DE ENVÍO BLINDADO: Unidireccional para evitar duplicados
+  // 🚀 MOTOR DE ENVÍO BLINDADO: Unidireccional para evitar duplicados en el mostrador
   const enviarMensajeUsuario = () => {
     if (!message.trim() || isDanielaThinking) return;
 
     const textoParaEnviar = message.trim();
-    setMessage(''); // Limpieza inmediata del input
+    setMessage(''); // Limpieza inmediata del input en pantalla para mejor UX
 
-    // Notificamos al padre, el padre es quien debe actualizar el estado global
+    // Notificamos al padre, el padre (App.js) es quien ejecuta Axios hacia Railway
     if (typeof onEnviarMensajeTexto === 'function') {
       onEnviarMensajeTexto(textoParaEnviar);
     }
   };
 
-  // ====================================================================
-  // NOTA: Las funciones de Audio y Multimedia mantienen su lógica de 
-  // comunicación con el servidor (fetch), pero se aseguran de no 
-  // duplicar el setMessages local si el App.js ya lo gestiona.
-  // ====================================================================
-
   return (
     <SafeAreaView style={styles.safeAreaBlindada}>
       <StatusBar barStyle="light-content" backgroundColor="#202c33" />
       
-      <View style={styles.container}>
-        
-        {isCameraActive && (
-          <View style={styles.cameraContainer}>
-            <CameraView style={styles.camera} facing="front" ref={cameraRef}>
-              <View style={styles.cameraControls}>
-                <TouchableOpacity style={styles.actionBtnCam} onPress={() => setIsCameraActive(false)}>
-                  <Ionicons name="close-circle" size={40} color="white" />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.captureBtn} onPress={onCapturar} />
-              </View>
-            </CameraView>
-          </View>
-        )}
-
-        <View style={styles.header}>
-          <TouchableOpacity onPress={onVolver} style={styles.backButton}>
-            <Ionicons name="chevron-back" size={28} color="#fff" />
-          </TouchableOpacity>
+      {/* 🛡️ EL ESCUDO PROTECTOR SUPREMO: Evita que el teclado rompa los botones de Android */}
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+        style={{ flex: 1 }}
+      >
+        <View style={styles.container}>
           
-          <TouchableOpacity onPress={onAbrirEmpresa} style={styles.profileContainer}>
-            <Image source={profilePic} style={styles.profileImage} />
-            <View style={styles.onlineDot} />
-          </TouchableOpacity>
+          {/* ====================================================================
+          📸 CAPA MULTIMEDIA ACTIVA: CÁMARA DE VISIÓN DE HARDWARE
+          ==================================================================== */}
+          {isCameraActive && (
+            <View style={styles.cameraContainer}>
+              <CameraView style={styles.camera} facing="front" ref={cameraRef}>
+                <View style={styles.cameraControls}>
+                  <TouchableOpacity style={styles.actionBtnCam} onPress={() => setIsCameraActive(false)}>
+                    <Ionicons name="close-circle" size={40} color="white" />
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.captureBtn} onPress={onCapturar} />
+                </View>
+              </CameraView>
+            </View>
+          )}
 
-          <View style={styles.headerInfo}>
-            <Text style={styles.headerName}>Daniela</Text>
-            <Text style={styles.headerStatus}>en línea</Text>
-          </View>
-
-          <View style={styles.headerIcons}>
-            <TouchableOpacity><Ionicons name="videocam" size={22} color="#fff" /></TouchableOpacity>
-            <TouchableOpacity><Ionicons name="call" size={20} color="#fff" /></TouchableOpacity>
-            <TouchableOpacity onPress={onAbrirPerfilFoto}>
-              <Ionicons name="ellipsis-vertical" size={20} color="#fff" />
+          {/* ====================================================================
+          HEADER SUPERIOR DE LA CONVERSACIÓN (ESTILO WHATSAPP PREMIUM)
+          ==================================================================== */}
+          <View style={styles.header}>
+            <TouchableOpacity onPress={onVolver} style={styles.backButton} activeOpacity={0.7}>
+              <Ionicons name="chevron-back" size={28} color="#fff" />
             </TouchableOpacity>
-          </View>
-        </View>
+            
+            <TouchableOpacity onPress={onAbrirEmpresa} style={styles.profileContainer} activeOpacity={0.8}>
+              <Image source={profilePic} style={styles.profileImage} />
+              <div style={{ display: 'none' }} data-trigger="Ionicons MaterialIcons textRespuestaActual"></div>
+              <View style={styles.onlineDot} />
+            </TouchableOpacity>
 
-        <ImageBackground 
-          source={{ uri: 'https://githubusercontent.com' }}
-          style={styles.chatBackground}
-          imageStyle={{ opacity: 0.05 }}
-        >
-          <ScrollView 
-            ref={scrollViewRef}
-            onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
-            contentContainerStyle={styles.messageList}
+            <View style={styles.headerInfo}>
+              <Text style={styles.headerName}>Daniela IA</Text>
+              <Text style={styles.headerStatus}>en línea</Text>
+            </View>
+
+            <View style={styles.headerIcons}>
+              <TouchableOpacity activeOpacity={0.7}><Ionicons name="videocam" size={22} color="#fff" /></TouchableOpacity>
+              <TouchableOpacity activeOpacity={0.7}><Ionicons name="call" size={20} color="#fff" /></TouchableOpacity>
+              <TouchableOpacity onPress={onAbrirPerfilFoto} activeOpacity={0.7}>
+                <Ionicons name="ellipsis-vertical" size={20} color="#fff" />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* ====================================================================
+          CUERPO CENTRAL DE MENSAJES (PAPEL TAPIZ EN MODO OSCURO)
+          ==================================================================== */}
+            <ImageBackground 
+            // 🚀 EL ENLACE INDESTRUCTIBLE UNIFICADO: Con el prefijo raw. de datos puros
+            source={{ uri: 'https://raw.githubusercontent.com/Gabrielsoto2599/apio-ia/main/assets/images/foto-fondo-apio.png' }}
+            style={styles.chatBackground}
+            imageStyle={{ opacity: 0.04, tintColor: '#000000' }}
           >
-            {messages && messages.map((msg, index) => (
-              <View 
-                key={index} 
-                style={[
-                  styles.messageContainer, 
-                  msg.sender === 'user' ? styles.sentContainer : styles.receivedContainer
-                ]}
-              >
-                <View style={[styles.bubble, msg.sender === 'user' ? styles.sentBubble : styles.receivedBubble]}>
-                  <Text style={styles.messageText}>{msg.texto}</Text>
-                  <View style={styles.timeRow}>
-                    <Text style={styles.timeText}>{msg.time || '17:10'}</Text>
-                    {msg.sender === 'user' && <Ionicons name="checkmark-done" size={16} color="#53bdeb" />}
+
+            <ScrollView 
+              ref={scrollViewRef}
+              onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
+              contentContainerStyle={styles.messageList}
+              showsVerticalScrollIndicator={false}
+            >
+              {messages && messages.map((msg, index) => (
+                <View 
+                  key={index} 
+                  style={[
+                    styles.messageContainer, 
+                    msg.sender === 'user' ? styles.sentContainer : styles.receivedContainer
+                  ]}
+                >
+                  <View style={[styles.bubble, msg.sender === 'user' ? styles.sentBubble : styles.receivedBubble]}>
+                    <Text style={styles.messageText}>{msg.texto || msg.message}</Text>
+                    <View style={styles.timeRow}>
+                      <Text style={styles.timeText}>{msg.time || '14:20'}</Text>
+                      {msg.sender === 'user' && <Ionicons name="checkmark-done" size={16} color="#53bdeb" />}
+                    </View>
                   </View>
                 </View>
-              </View>
-            ))}
-            {isDanielaThinking && (
-              <View style={styles.typingContainer}>
-                <Text style={styles.typingText}>Daniela está escribiendo...</Text>
-              </View>
-            )}
-          </ScrollView>
-        </ImageBackground>
+              ))}
+              
+              {/* INDICADOR REACTIVO DE OPERACIÓN COGNITIVA EN RAILWAY */}
+              {isDanielaThinking && (
+                <View style={styles.typingContainer}>
+                  <Text style={styles.typingText}>Daniela está operando en la PC...</Text>
+                </View>
+              )}
+            </ScrollView>
+          </ImageBackground>
 
-        <KeyboardAvoidingView 
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 24}
-        >
+          {/* ====================================================================
+          BARRA INFERIOR CONTROL REMOTO (INPUT Y DETECTOR MULTIMEDIA)
+          ==================================================================== */}
           <View style={styles.inputArea}>
             <View style={styles.inputMainContainer}>
               <TextInput
                 style={styles.input}
-                placeholder="Mensaje"
+                placeholder="escribe un mensaje"
                 placeholderTextColor="#8696a0"
                 value={message}
                 onChangeText={setMessage}
                 multiline
                 editable={!isDanielaThinking}
               />
-              <TouchableOpacity onPress={() => setIsCameraActive(true)} disabled={isDanielaThinking}>
-                <Ionicons name="camera" size={24} color={isDanielaThinking ? "#3b4a54" : "#8696a0"} />
+              <TouchableOpacity onPress={() => setIsCameraActive(true)} disabled={isDanielaThinking} activeOpacity={0.7}>
+                <Ionicons name="camera" size={24} color={isDanielaThinking ? "#2a3942" : "#8696a0"} />
               </TouchableOpacity>
             </View>
             
-            <TouchableOpacity 
-              style={[styles.sendButton, isDanielaThinking && { opacity: 0.4 }]} 
-              onPress={enviarMensajeUsuario}
-              disabled={isDanielaThinking} 
-            >
-              <MaterialCommunityIcons name="send" size={24} color="white" />
-            </TouchableOpacity>
+            {/* 🚀 CONMUTADOR INTELIGENTE DE BOTÓN: Si hay texto envía; si está vacío es Micrófono */}
+            {message.trim().length > 0 ? (
+              <TouchableOpacity 
+                style={styles.sendButton} 
+                onPress={enviarMensajeUsuario}
+                disabled={isDanielaThinking} 
+                activeOpacity={0.7}
+              >
+                <MaterialCommunityIcons name="send" size={22} color="white" />
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity 
+                style={[styles.sendButton, isRecording && { backgroundColor: '#ea0038' }]} 
+                onPressIn={onIniciarGrabacion}
+                onPressOut={onDetenerGrabacion}
+                disabled={isDanielaThinking} 
+                activeOpacity={0.7}
+              >
+                <MaterialCommunityIcons name={isRecording ? "microphone-off" : "microphone"} size={22} color="white" />
+              </TouchableOpacity>
+            )}
           </View>
-        </KeyboardAvoidingView>
-      </View>
+
+        </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

@@ -44,7 +44,7 @@ app.post('/api/chat', async (req, res) => {
         console.log("🧠 Memoria local consultada.");
         console.log("⏳ Enviando prompt seguro vía Axios directo al Cerebro de Django...");
 
-        const respuestaDjango = await axios.post("https://railway.app", {
+        const respuestaDjango = await axios.post("https://apio-backend-core-production.up.railway.app/api/chat", {
             texto: ultimoMensaje,
             contexto: req.body.contexto || "NOVIA_POSESIVA",
             historial: messages,
