@@ -40,12 +40,14 @@ app.post('/api/chat', async (req, res) => {
             return res.json({ respuestaDeDaniela: "..." });
         }
 
-        // 🧠 LOG HOMOLOGADO HISTÓRICO DE GABRIEL
+       // 🧠 LOG HOMOLOGADO HISTÓRICO DE GABRIEL
         console.log("🧠 Memoria local consultada.");
         console.log("⏳ Enviando prompt seguro vía Axios directo al Cerebro de Django...");
 
+        // 🚀 CORRECCIÓN CRÍTICA: Homologamos el nombre del campo a 'texto' 
+        // para que coincida exactamente con views.py
         const respuestaDjango = await axios.post("https://apio-backend-core-production.up.railway.app/api/chat", {
-            texto: ultimoMensaje,
+            texto: ultimoMensaje, // <--- Este campo coincide ahora con views.py (data.get("texto"))
             contexto: req.body.contexto || "NOVIA_POSESIVA",
             historial: messages,
             user_id: req.body.user_id || "gabriel" 

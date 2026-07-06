@@ -1,55 +1,42 @@
 # ====================================================================
 # APIO BACKEND CONFIGURATION - SOTO SYSTEM GENERAL SETTINGS (2026)
-# Ubicación: apio_backend/settings.py (Versión Híbrida de Producción)
 # ====================================================================
 import os
-import dj_database_url  # 🚀 LLAVE MAESTRA: Traduce las URLs de bases de datos de la nube
+import dj_database_url
 from pathlib import Path
 
-# Base del directorio de Django
+# Base del directorio: /apio-ia/
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # ====================================================================
-# ENRUTAMIENTO INTELIGENTE DE VARIABLES (REGLA DE GABRIEL CLOUD)
+# ENRUTAMIENTO INTELIGENTE (REGLA DE GABRIEL CLOUD)
 # ====================================================================
-# Si Railway ya inyectó las variables en el entorno global de Linux, las toma directo de la RAM.
-# Si estás en tu PC, viaja a la carpeta local a buscar el archivo de configuración.
 if "GEMINI_PRO_KEY" in os.environ:
     SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "django-insecure-cloud-production-key-soto-system")
     DEBUG = os.environ.get("DEBUG", "False") == "True"
     GEMINI_PRO_KEY = os.environ.get("GEMINI_PRO_KEY")
 else:
-    # Soporte de respaldo para tu entorno de desarrollo local en Windows
     import environ
     env = environ.Env()
-    environ.Env.read_env(str(BASE_DIR / 'apio-conciencia' / '.env'))
+    env_path = BASE_DIR / 'apio-conciencia' / '.env'
+    if env_path.exists():
+        environ.Env.read_env(str(env_path))
     SECRET_KEY = "django-insecure-local-development-key"
     DEBUG = True
     GEMINI_PRO_KEY = env("GEMINI_PRO_KEY", default="")
 
-# Asegura que quede inyectada en la RAM global para tus views.py
 os.environ["GEMINI_PRO_KEY"] = GEMINI_PRO_KEY
 
 # ====================================================================
-# CONFIGURACIÓN DE RED AMPLIVOLTAICA (ALLOWED HOSTS - SOTO SYSTEM)
-# Ubicación: src/apio_backend/settings.py
+# CONFIGURACIÓN DE RED Y SEGURIDAD
 # ====================================================================
-
-# Abrimos las compuertas estrictas para los microservicios en la nube de Railway
-ALLOWED_HOSTS = [
-    'apio-daniela-core-production.up.railway.app',  # Tu proxy de Node
-    'apio-backend-core-production.up.railway.app',   # Tu cerebro de Django (Dominio Limpio)
-    '127.0.0.1',                                    # Respaldo local de Windows
-    'localhost',                                    # Respaldo de desarrollo
-    '*'                                             # 🛡️ BYPASS MAESTRO: Acepta tráfico de cualquier IP móvil externa
-]
-
+ALLOWED_HOSTS = ['apio-daniela-core-production.up.railway.app', 'apio-backend-core-production.up.railway.app', '127.0.0.1', 'localhost', '*']
 
 # ====================================================================
-# APPLICATION DEFINITION (INSTALLED APPS REFORZADO CON WEBSOCKETS)
+# APLICACIONES E INTEGRACIÓN ASGI/DAPHNE
 # ====================================================================
 INSTALLED_APPS = [
-    'daphne',  # 🚀 CRÍTICO: Debe ser el primero absoluto para domar el puerto de producción
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -57,11 +44,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',  
+    'channels', 
     'chat', 
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',  # 🚀 DEBE IR DE PRIMERO ABSOLUTO para interceptar a Expo y Node
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -73,6 +61,9 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'apio_backend.urls'
 
+# ====================================================================
+# PLANTILLAS (CORREGIDO PARA EL PANEL ADMIN)
+# ====================================================================
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -80,7 +71,8 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
-                'django.template.context_processors.request',
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request', # 🚀 CORRECCIÓN: Soluciona error admin.E403
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
@@ -95,12 +87,12 @@ CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
 # ====================================================================
-# DATABASE - CONFIGURACIÓN POSTGRESQL AUTOCONFIGURABLE DESDE LA NUBE
+# DATABASE - POSTGRESQL (LOCAL / NUBE HÍBRIDA)
 # ====================================================================
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
+        'NAME': 'apio_bodega', 
         'USER': 'postgres',
         'PASSWORD': 'Daniela.14',
         'HOST': '127.0.0.1',
@@ -108,13 +100,11 @@ DATABASES = {
     }
 }
 
-# 🚀 INTERCEPTOR INDUSTRIAL DE RED: Si Railway inyecta una base de datos en el panel,
-# Django borra la configuración de arriba y se conecta al Postgres eterno de internet automáticamente.
 if os.environ.get("DATABASE_URL"):
     DATABASES["default"] = dj_database_url.config(conn_max_age=600, ssl_require=False)
 
 # ====================================================================
-# CONFIGURACIÓN DE MEDIOS Y ALMACENAMIENTO DE AUDIO (BLOQUE MULTIMEDIA)
+# CONFIGURACIÓN DE MEDIOS Y AUDIO
 # ====================================================================
 STATIC_URL = 'static/'
 MEDIA_URL = '/media/'

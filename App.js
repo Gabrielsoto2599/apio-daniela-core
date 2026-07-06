@@ -360,14 +360,20 @@ export default function App() {
     }
   };
 
-  // Función puente para disparar la Visión desde la cámara de Expo
   const capturarYReconocer = async () => {
     if (!cameraRef.current) return;
     try {
       const photo = await cameraRef.current.takePictureAsync({ base64: true, quality: 0.5 });
+      
+      // 🛡️ ADICIÓN RECOMENDADA: Validar que el base64 realmente exista
+      if (!photo.base64) {
+        console.error("❌ [SOTO VISION]: Error, no se generó el buffer de la foto.");
+        return;
+      }
+
       setIsDanielaThinking(true);
 
-      // 🚀 REFACTORIZACIÓN MULTIMEDIA CON AXIOS INMUNE A BLOQUEOS DE RED
+      // El resto de tu lógica está perfecta
       const respuestaIA = await axios.post(`${BASE_URL}/api/chat`, {
         remitente: 'Sistema', 
         texto: '[EVENTO_VISION: Daniela acaba de recibir una foto de Gabriel en tiempo real. Analízala y respóndele con amor]',
@@ -376,7 +382,6 @@ export default function App() {
       }, {
         headers: { 'Content-Type': 'application/json' }
       });
-
       const dataVision = respuestaIA.data;
       const respuestaTexto = dataVision.respuestaDeDaniela || dataVision.respuesta || "...";
 
@@ -540,7 +545,7 @@ export default function App() {
           {enLlamada ? (
             <>
               {/* Cronómetro activo */}
-              <Text style={styles.cron稳ometro}>
+              <Text style={styles.cronometro}>
                 {(() => {
                   const mins = Math.floor(duracionLlamada / 60);
                   const segs = duracionLlamada % 60;

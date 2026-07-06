@@ -3,10 +3,9 @@
 # Ubicación: chat/routing.py (Solución Final Absoluta)
 # ====================================================================
 from django.urls import re_path
-from . import consumers
+from .consumers import ApioBrainConsumer # 🚀 IMPORTACIÓN DIRECTA
 
 websocket_urlpatterns = [
-    # 🚀 CORRECCIÓN MAESTRA: Se cambió '.as_view()' por '.as_asgi()'
-    # Mapea de forma legítima el flujo asíncrono para el código QR
-    re_path(r'ws/apio/(?P<session_id>[\w-]+)/$', consumers.ApioBrainConsumer.as_asgi()),
+    # Asegúrate de que esta expresión regular coincida con lo que esperas en tu frontend
+    re_path(r'ws/chat/(?P<session_id>[\w-]+)/$', ApioBrainConsumer.as_asgi()),
 ]

@@ -14,14 +14,14 @@
       },
       "env": {
         "NPM_CONFIG_LEGACY_PEER_DEPS": "true",
-        "BASE_URL": "http://172.31.192.1:8000" 
+        "BASE_URL": "https://apio-backend-core-production.up.railway.app" 
       }
     },
     "production": {
       "autoIncrement": true,
       "env": {
         "NPM_CONFIG_LEGACY_PEER_DEPS": "true",
-        "BASE_URL": "http://172.31.192.1:8000"
+        "BASE_URL": "https://apio-backend-core-production.up.railway.app"
       }
     }
   },

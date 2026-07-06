@@ -29,7 +29,7 @@ def respuesta_apio(request):
 
     try:
         data = json.loads(request.body) if request.body else {}
-        mensaje_usuario = str(data.get("texto", "")).strip()
+        mensaje_usuario = str(data.get("message", "")).strip()
         contexto_pantalla = data.get("contexto", "NOVIA_POSESIVA")
         foto_base64 = data.get("fotoBase64")
 
