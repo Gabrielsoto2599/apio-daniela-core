@@ -12,10 +12,10 @@ from django.views.decorators.csrf import csrf_exempt
 from google import genai
 from google.genai import types
 
-# 🛡️ IMPORTACIONES SEGURAS (Sin riesgos de bucle)
+# 🛡️ IMPORTACIONES SEGURAS (Corregidas para llamar al modelo correctamente)
 from .utils import procesar_impacto_emocional, obtener_estado_tiempo, buscar_recuerdo_especial
 from .memoria_viva import memoria_ejecutiva_orm
-from main import ensamblar_prompt_maestro_cognitivo
+from .models import EstadoEmocional, ensamblar_prompt_maestro_cognitivo
 
 # Carga de entorno
 env = environ.Env()
@@ -28,9 +28,6 @@ def respuesta_apio(request):
         return JsonResponse({"error": "Método POST requerido"}, status=405)
 
     try:
-        # Importación diferida del modelo dentro de la función (cierre total del bucle)
-        from .models import EstadoEmocional
-        
         data = json.loads(request.body) if request.body else {}
         mensaje_usuario = str(data.get("texto", "")).strip()
         contexto_pantalla = data.get("contexto", "NOVIA_POSESIVA")
@@ -46,7 +43,7 @@ def respuesta_apio(request):
         modo_tiempo, _ = obtener_estado_tiempo(estado)
         recuerdo_texto, tag_emocion = buscar_recuerdo_especial(mensaje_usuario)
 
-        # 3. Ensamble (usando la lógica centralizada de main.py)
+        # 3. Ensamble (usando la función corregida desde models.py)
         prompt_maestro = ensamblar_prompt_maestro_cognitivo(mensaje_usuario, estado, tag_emocion)
         
         if recuerdo_texto:
@@ -69,4 +66,3 @@ def respuesta_apio(request):
     except Exception as error:
         traceback.print_exc()
         return JsonResponse({"success": False, "error": str(error)}, status=500)
-
