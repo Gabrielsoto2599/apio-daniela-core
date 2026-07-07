@@ -23,9 +23,8 @@ app.use(express.json());
 console.log("⚙️ [SOTO PROXY]: Ecosistema Node inicializado con gemini-1.0-pro.");
 console.log("🛡️ [SOTO PROXY]: Memoria estática extirpada. Modo Orquestador Activo.");
 
-
 // ====================================================================
-// 🚀 ENDPOINT DE CHAT ORQUESTADO (GEMINI + DJANGO) - DEBUG MODIFICADO
+// 🚀 ENDPOINT DE CHAT ORQUESTADO (GEMINI + DJANGO) - CONEXIÓN SEGURA
 // ====================================================================
 app.post('/api/chat', async (req, res) => {
     try {
@@ -38,49 +37,36 @@ app.post('/api/chat', async (req, res) => {
             return res.json({ respuestaDeDaniela: "..." });
         }
 
-        // 🧠 PASO 1: ORQUESTACIÓN CON GEMINI 1.5 flash
-        console.log("🧠 [SOTO SYSTEM]: Consultando razonamiento con Gemini 1.5 flash...");
-<<<<<<< HEAD
-        const model = genAI.getGenerativeModel({ model: "gemini-1.0-pro" });
-=======
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-001" });
->>>>>>> 3a9a21c0f56333ce5d3d5e5b2cff570fe90340fb
+        // 🧠 PASO 1: ORQUESTACIÓN CON GEMINI 1.5-FLASH
+        console.log("🧠 [SOTO SYSTEM]: Consultando razonamiento con Gemini 1.5-flash...");
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
         const result = await model.generateContent(`Actúa como Daniela, asistente virtual de Soto System. Contexto: ${req.body.contexto || 'B2B'}. Mensaje: ${ultimoMensaje}`);
         const respuestaIA = result.response.text();
 
-        // 🧠 PASO 2: SINCRONIZACIÓN CON EL CEREBRO DE DJANGO (DEBUGGING)
-        console.log("⏳ Enviando razonamiento y datos a Django para registro...");
-        
-        // DEBUG: Imprimimos los datos que estamos enviando
-        console.log("📤 Datos enviados a Django:", { texto: respuestaIA, original_input: ultimoMensaje });
+        // 🧠 PASO 2: SINCRONIZACIÓN CON EL CEREBRO DE DJANGO
+        console.log("⏳ Enviando razonamiento a Django...");
 
+        // NOTA: Asegúrate de que esta URL apunte al endpoint de RECEPCIÓN de Django
+        // y NO a esta misma ruta /api/chat para evitar el bucle.
         const respuestaDjango = await axios.post("https://apio-daniela-core-production.up.railway.app/api/chat", {
             texto: respuestaIA,
             original_input: ultimoMensaje,
             contexto: req.body.contexto || "PRODUCTIVA_SARGENTO",
             user_id: req.body.user_id || "gabriel" 
         }, {
-            headers: { 'Content-Type': 'application/json' },
-            timeout: 15000
+            timeout: 10000
         });
 
-        // DEBUG: Imprimimos lo que recibimos de vuelta
         console.log("📥 Status recibido de Django:", respuestaDjango.status);
-        console.log("📥 Datos recibidos de Django (Data):", respuestaDjango.data); 
 
-        console.log("✅ [SOTO SYSTEM]: Orquestación completada.");
-        
+        // Retornamos la respuesta consolidada
         return res.json({ 
             ...respuestaDjango.data, 
-            texto_procesado: respuestaIA 
+            respuestaDeDaniela: respuestaIA 
         });
 
     } catch (error) {
-        // DEBUG: Capturamos el detalle del error si falla
         console.error("❌ [SOTO CORE CRASH]:", error.message);
-        if (error.response) {
-            console.error("❌ [ERROR RESPONSE DATA]:", error.response.data); // Aquí veremos el HTML si es error
-        }
         return res.status(500).json({ success: false, error: "BACKEND_ORCHESTRATION_FAILED", details: error.message });
     }
 });
