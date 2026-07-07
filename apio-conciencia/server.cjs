@@ -37,9 +37,10 @@ app.post('/api/chat', async (req, res) => {
             return res.json({ respuestaDeDaniela: "..." });
         }
 
-        // 🧠 PASO 1: ORQUESTACIÓN CON GEMINI 1.5-FLASH
-        console.log("🧠 [SOTO SYSTEM]: Consultando razonamiento con Gemini 1.5-flash...");
-        const model = genAI.getGenerativeModel({ model: "gemini-3-pro" });
+        // 🧠 PASO 1: ORQUESTACIÓN 
+        // DEBUG: Ver qué modelos tengo disponibles realmente
+        const models = await genAI.listModels();
+        console.log("🔍 Modelos disponibles:", models.models.map(m => m.name));
         const result = await model.generateContent(`Actúa como Daniela, asistente virtual de Soto System. Contexto: ${req.body.contexto || 'B2B'}. Mensaje: ${ultimoMensaje}`);
         const respuestaIA = result.response.text();
 
