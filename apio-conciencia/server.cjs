@@ -24,7 +24,7 @@ console.log("⚙️ [SOTO PROXY]: Ecosistema Node inicializado con Gemini 1.5 Pr
 console.log("🛡️ [SOTO PROXY]: Memoria estática extirpada. Modo Orquestador Activo.");
 
 // ====================================================================
-// 🚀 ENDPOINT DE CHAT ORQUESTADO (GEMINI + DJANGO)
+// 🚀 ENDPOINT DE CHAT ORQUESTADO (GEMINI + DJANGO) - DEBUG MODIFICADO
 // ====================================================================
 app.post('/api/chat', async (req, res) => {
     try {
@@ -37,16 +37,20 @@ app.post('/api/chat', async (req, res) => {
             return res.json({ respuestaDeDaniela: "..." });
         }
 
-        // 🧠 PASO 1: ORQUESTACIÓN CON GEMINI 1.5 PRO (Razonamiento de Daniela)
+        // 🧠 PASO 1: ORQUESTACIÓN CON GEMINI 1.5 PRO
         console.log("🧠 [SOTO SYSTEM]: Consultando razonamiento con Gemini 1.5 Pro...");
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
         const result = await model.generateContent(`Actúa como Daniela, asistente virtual de Soto System. Contexto: ${req.body.contexto || 'B2B'}. Mensaje: ${ultimoMensaje}`);
         const respuestaIA = result.response.text();
 
-        // 🧠 PASO 2: SINCRONIZACIÓN CON EL CEREBRO DE DJANGO (Persistencia)
+        // 🧠 PASO 2: SINCRONIZACIÓN CON EL CEREBRO DE DJANGO (DEBUGGING)
         console.log("⏳ Enviando razonamiento y datos a Django para registro...");
+        
+        // DEBUG: Imprimimos los datos que estamos enviando
+        console.log("📤 Datos enviados a Django:", { texto: respuestaIA, original_input: ultimoMensaje });
+
         const respuestaDjango = await axios.post("https://apio-backend-core-production.up.railway.app/api/chat", {
-            texto: respuestaIA, // Enviamos el razonamiento de Gemini para que Django lo guarde y gestione
+            texto: respuestaIA,
             original_input: ultimoMensaje,
             contexto: req.body.contexto || "PRODUCTIVA_SARGENTO",
             user_id: req.body.user_id || "gabriel" 
@@ -55,15 +59,23 @@ app.post('/api/chat', async (req, res) => {
             timeout: 15000
         });
 
+        // DEBUG: Imprimimos lo que recibimos de vuelta
+        console.log("📥 Status recibido de Django:", respuestaDjango.status);
+        console.log("📥 Datos recibidos de Django (Data):", respuestaDjango.data); 
+
         console.log("✅ [SOTO SYSTEM]: Orquestación completada.");
-        // Devolvemos el texto final listo para Fish Audio
+        
         return res.json({ 
             ...respuestaDjango.data, 
             texto_procesado: respuestaIA 
         });
 
     } catch (error) {
+        // DEBUG: Capturamos el detalle del error si falla
         console.error("❌ [SOTO CORE CRASH]:", error.message);
+        if (error.response) {
+            console.error("❌ [ERROR RESPONSE DATA]:", error.response.data); // Aquí veremos el HTML si es error
+        }
         return res.status(500).json({ success: false, error: "BACKEND_ORCHESTRATION_FAILED", details: error.message });
     }
 });
@@ -150,12 +162,13 @@ async function arrancarServidor() {
     try {
         console.log("⚙️ [SOTO CORE]: Inicializando orquestador proxy de alta fidelidad...");
         
+        // Usamos la variable PORT de Railway si existe, de lo contrario usamos 3001
         const PORT = process.env.PORT || 3001;
-        app.listen(PORT, '0.0.0.0', () => { 
+        app.listen(PORT, '0.0.0.0', () => {  
             console.log("----------------------------------------------------------------");
-            console.log("🚀 SOTO SYSTEM ONLINE - PROXY DE ALTA VELOCIDAD COMPLETO");
+            console.log(`🚀 SOTO SYSTEM ONLINE - PROXY DE ALTA VELOCIDAD COMPLETO`);
             console.log("¡Mueve ese culo, Gabriel! Daniela está esperando por el Wi-Fi.");
-            console.log(`Servidor activo en el puerto local y de red: ${PORT}`);
+            console.log(`Servidor escuchando exitosamente en el puerto asignado: ${PORT}`);
             console.log("----------------------------------------------------------------");
         });
     } catch (error) {
