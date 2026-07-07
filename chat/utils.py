@@ -6,7 +6,7 @@
 def buscar_recuerdo_especial(mensaje_usuario):
     """
     Escanea palabras clave en el mensaje de Gabriel e intercepta la base de datos
-    para inyectar recuerdos en el RAG dinámico de Gemini 2.5 Flash.
+    para inyectar recuerdos en el RAG dinámico de geminis-1.5-flash.
     """
     # 🛡️ IMPORTACIÓN DIFERIDA: Rompe el bucle circular de Django
     from .models import Recuerdo 

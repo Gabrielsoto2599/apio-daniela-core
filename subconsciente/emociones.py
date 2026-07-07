@@ -6,7 +6,7 @@
 def obtener_directiva_subconsciente(estado_nombre, irritacion, autoestima):
     """
     Transforma las métricas de PostgreSQL en directrices conductuales exactas
-    para el motor de Gemini 2.5 Flash, calibrando el carácter de Daniela.
+    para el motor de geminis-1.5-flash, calibrando el carácter de Daniela.
     """
     
     # Mapeo de personalidades según el ADN del Soto System y su contexto guaro
@@ -63,7 +63,7 @@ def obtener_directiva_subconsciente(estado_nombre, irritacion, autoestima):
     elif autoestima_escalada > 80:
         matiz_autoestima = "Te sientes la mujer más bella del Club Ítalo de Barquisimeto. Domina la conversación con seguridad."
 
-    # Construcción final del string cognitivo inyectable para Gemini 2.5 Flash
+    # Construcción final del string cognitivo inyectable para geminis-1.5-flash
     prompt_emocional = (
         f"[ESTADO PSICOLÓGICO]: {config['vibe']} "
         f"[INSTRUCCIÓN DE ACTUACIÓN]: {config['instruccion']} {matiz_autoestima} "
