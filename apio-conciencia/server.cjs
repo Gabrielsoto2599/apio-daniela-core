@@ -20,7 +20,7 @@ const app = express();
 app.use(cors()); 
 app.use(express.json());
 
-console.log("⚙️ [SOTO PROXY]: Ecosistema Node inicializado con gemini-1.0-pro.");
+console.log("⚙️ [SOTO PROXY]: Ecosistema Node inicializado con gemini-3-pro.");
 console.log("🛡️ [SOTO PROXY]: Memoria estática extirpada. Modo Orquestador Activo.");
 
 // ====================================================================
@@ -39,7 +39,7 @@ app.post('/api/chat', async (req, res) => {
 
         // 🧠 PASO 1: ORQUESTACIÓN CON GEMINI 1.5-FLASH
         console.log("🧠 [SOTO SYSTEM]: Consultando razonamiento con Gemini 1.5-flash...");
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const model = genAI.getGenerativeModel({ model: "gemini-3-pro" });
         const result = await model.generateContent(`Actúa como Daniela, asistente virtual de Soto System. Contexto: ${req.body.contexto || 'B2B'}. Mensaje: ${ultimoMensaje}`);
         const respuestaIA = result.response.text();
 
