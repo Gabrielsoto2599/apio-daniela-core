@@ -39,7 +39,7 @@ app.post('/api/chat', async (req, res) => {
 
         // 🧠 PASO 1: ORQUESTACIÓN CON GEMINI 1.5 flash
         console.log("🧠 [SOTO SYSTEM]: Consultando razonamiento con Gemini 1.5 flash...");
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
         const result = await model.generateContent(`Actúa como Daniela, asistente virtual de Soto System. Contexto: ${req.body.contexto || 'B2B'}. Mensaje: ${ultimoMensaje}`);
         const respuestaIA = result.response.text();
 
