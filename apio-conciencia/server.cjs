@@ -23,6 +23,7 @@ app.use(express.json());
 console.log("⚙️ [SOTO PROXY]: Ecosistema Node inicializado con Gemini-1.5-flash.");
 console.log("🛡️ [SOTO PROXY]: Memoria estática extirpada. Modo Orquestador Activo.");
 
+
 // ====================================================================
 // 🚀 ENDPOINT DE CHAT ORQUESTADO (GEMINI + DJANGO) - DEBUG MODIFICADO
 // ====================================================================
