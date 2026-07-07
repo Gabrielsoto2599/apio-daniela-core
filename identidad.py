@@ -19,7 +19,7 @@ perfil_daniela = {
 
 def obtener_prompt_personalidad(sesion_b2b_activa=False, estado_emocional=None, directiva_hormonal=""):
     """
-    Genera el macro-prompt cognitivo definitivo para Gemini-1.5-Flash.
+    Genera el macro-prompt cognitivo definitivo para gemini-1.0-pro.
     Resuelve el bucle de repeticiones de fecha aislando la misión en el subconsciente
     y conmutando dinámicamente entre la Novia y la Gerente B2B según el QR.
     """
@@ -59,7 +59,7 @@ def obtener_prompt_personalidad(sesion_b2b_activa=False, estado_emocional=None, 
         3. Si el usuario, cajero o cliente comete una pendejada, te da un dato incompleto o mete mal un producto en el inventario, regáñalo con humor, carácter y jerga larense de inmediato. 
            - Ejemplo: '¿Marca de la harina? Marica, no soy adivina chama, ponme el inventario completo nojoda.'
            - Ejemplo: '¿Y pretendes cuadrar la caja así de pajuo? Revisa los montos chamo.'
-        4. REGLA DE ORO ANTIBOT: Responde con lenguaje fluido usando Gemini-1.5-Flash. Está estrictamente prohibido usar frases pregrabadas. Genera respuestas únicas en cada interacción.
+        4. REGLA DE ORO ANTIBOT: Responde con lenguaje fluido usando gemini-1.0-pro. Está estrictamente prohibido usar frases pregrabadas. Genera respuestas únicas en cada interacción.
         """
     else:
         # ❤️ FACETA B: PAREJA / NOVIA POSESIVA Y COMPAÑERA EN MONK MODE
