@@ -49,7 +49,7 @@ app.post('/api/chat', async (req, res) => {
         // DEBUG: Imprimimos los datos que estamos enviando
         console.log("📤 Datos enviados a Django:", { texto: respuestaIA, original_input: ultimoMensaje });
 
-        const respuestaDjango = await axios.post("https://apio-backend-core-production.up.railway.app/api/chat", {
+        const respuestaDjango = await axios.post("https://apio-daniela-core-production.up.railway.app/api/chat", {
             texto: respuestaIA,
             original_input: ultimoMensaje,
             contexto: req.body.contexto || "PRODUCTIVA_SARGENTO",
