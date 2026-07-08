@@ -30,7 +30,7 @@ os.environ["GEMINI_PRO_KEY"] = GEMINI_PRO_KEY
 # ====================================================================
 # CONFIGURACIÓN DE RED Y SEGURIDAD
 # ====================================================================
-ALLOWED_HOSTS = ['apio-daniela-core-production.up.railway.app','127.0.0.1', 'localhost', '*']
+ALLOWED_HOSTS = ['apio-daniela-core-production.up.railway.app', 'localhost', '127.0.0.1']
 
 # ====================================================================
 # APLICACIONES E INTEGRACIÓN ASGI/DAPHNE

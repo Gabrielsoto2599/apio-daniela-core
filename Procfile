@@ -1,1 +1,1 @@
-web: gunicorn apio_backend.wsgi:application --bind 0.0.0.0:$PORT
+web: gunicorn tu_nombre_de_proyecto_django.wsgi:application
