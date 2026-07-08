@@ -12,8 +12,7 @@ import { Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-ic
 // 🚀 RUTA RELATIVA UNIVERSAL SANEADA: Muerde tus assets en limpio
 import { BASE_URL } from './src/config/apiConfig';
 import profilePic from './apio-app/assets/images/foto-perfil-apio.png';
-// 📦 COLOQUE ESTA LÍNEA EN LAS IMPORTACIONES (ARRIBA DEL TODO DE TU APP.JS)
-import whatsappRingtoneSource from './assets/sounds/whatsapp_ringtone.mp3';
+import whatsappRingtoneSource from '../apio-app/assets/sounds/whatsapp_ringtone.mp3';
 
 // Importación modular de subpantallas de navegación (Directorio app/)
 import Home from './app/home/home.js';
