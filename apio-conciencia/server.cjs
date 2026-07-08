@@ -2,6 +2,7 @@
 // BLOQUE 1: CORE DE RED, MIDDLEWARES Y CONFIGURACIÓN (SOTO PROXY 2026)
 // ====================================================================
 const path = require('path');
+const fs = require('fs'); // 📂 El sistema de archivos agrupado en su zona núcleo
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 const express = require('express');
 const cors = require('cors');
@@ -22,6 +23,9 @@ process.on('unhandledRejection', (reason, promise) => {
 const app = express();
 app.use(cors()); 
 app.use(express.json());
+
+// Exponemos la carpeta pública de audios hacia internet de forma segura
+app.use('/audios', express.static(path.join(__dirname, 'public/audios')));
 
 console.log("⚙️ [SOTO PROXY]: Ecosistema Node inicializado con la nueva API @google/genai.");
 console.log("🛡️ [SOTO PROXY]: Memoria estática extirpada. Modo Orquestador Activo.");
@@ -107,11 +111,27 @@ app.post('/api/chat', async (req, res) => {
                 })
             });
 
-            if (respuestaFish.ok) {
+                      if (respuestaFish.ok) {
                 const arrayBuffer = await respuestaFish.arrayBuffer();
-                // Construimos el String Data-URL con Base64 listo para que Expo AV lo procese directamente
-                audioConFormato = `data:audio/mp3;base64,${Buffer.from(arrayBuffer).toString('base64')}`;
-                console.log("✅ [SOTO VOX]: Clonación procesada y buffer de audio inyectado en la carga útil.");
+                const buffer = Buffer.from(arrayBuffer);
+                
+                // 📂 [SOTO MEDIA STORAGE]: Creamos la ruta física en el contenedor de Railway si no existe
+                const dirAudios = path.join(__dirname, 'public/audios');
+                if (!fs.existsSync(dirAudios)){
+                    fs.mkdirSync(dirAudios, { recursive: true });
+                }
+
+                // Generamos un nombre dinámico basado en el id de usuario para evitar colisiones en RAM
+                const nombreArchivo = `voz_${req.body.user_id || 'gabriel'}.mp3`;
+                const rutaCompleta = path.join(dirAudios, nombreArchivo);
+                
+                // Escribimos el buffer de audio recibido de Fish Audio directamente en el disco
+                fs.writeFileSync(rutaCompleta, buffer);
+
+                // 🚀 LA REPARACIÓN MAESTRA: Despachamos una URL estática inmune a bloqueos de Chrome
+                // Usamos un timestamp (?v=...) para que Expo y el navegador no guarden el audio viejo en caché
+                audioConFormato = `https://railway.app${nombreArchivo}?v=${Date.now()}`;
+                console.log("✅ [SOTO VOX]: Archivo físico guardado en Railway y URL despachada con éxito.");
             } else {
                 console.warn("⚠️ [SOTO VOX]: Satélite Fish Audio rechazó el buffer.");
             }
@@ -123,7 +143,7 @@ app.post('/api/chat', async (req, res) => {
         return res.json({ 
             ...dataDjango, 
             respuestaDeDaniela: respuestaIA,
-            audioContent: audioConFormato, // Clave exacta que tu App.js buscará para reproducir
+            audioContent: audioConFormato, // Ahora esta clave lleva la URL web directa hacia el .mp3
             status: audioConFormato ? "success" : "bypass_texto_puro"
         });
 
