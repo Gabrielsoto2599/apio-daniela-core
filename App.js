@@ -12,6 +12,8 @@ import { Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-ic
 // 🚀 RUTA RELATIVA UNIVERSAL SANEADA: Muerde tus assets en limpio
 import { BASE_URL } from './src/config/apiConfig';
 import profilePic from './apio-app/assets/images/foto-perfil-apio.png';
+// 📦 COLOQUE ESTA LÍNEA EN LAS IMPORTACIONES (ARRIBA DEL TODO DE TU APP.JS)
+const whatsappRingtoneSource = require('./assets/sounds/whatsapp_ringtone.mp3');
 
 // Importación modular de subpantallas de navegación (Directorio app/)
 import Home from './app/home/home.js';
@@ -59,18 +61,19 @@ export default function App() {
     }
   }, []);
 
-      // ====================================================================
+        // ====================================================================
   // BLOQUE 2: MOTOR DE AUDIO (RINGTONE UNIFICADO COMPATIBLE DE RED)
   // ====================================================================
   async function reproducirTono() {
     try {
       console.log('⚡ [SOTO VOX]: Cargando tono de llamada nativo...');
       
-      // 🚀 RUTA SINCRONIZADA: Formato limpio directo de tus assets locales
+      // 🚀 RUTA SINCRONIZADA: Usamos la constante pre-cargada estáticamente
       const { sound } = await Audio.Sound.createAsync(
-        require('./assets/sounds/whatsapp_ringtone.mp3'),
-        { isLooping: true }
+        whatsappRingtoneSource,
+        { isLooping: true, shouldPlay: false }
       );
+      
       setSonido(sound);
       await sound.playAsync();
       console.log('🔔 [SOTO VOX]: Ringtone sonando de fondo en loop.');

@@ -28,7 +28,7 @@ console.log("🛡️ [SOTO PROXY]: Memoria estática extirpada. Modo Orquestador
 
 
 // ====================================================================
-// 🚀 ENDPOINT DE CHAT ORQUESTADO (GEMINI + DJANGO) - CONEXIÓN SEGURA
+// 🚀 ENDPOINT DE CHAT ORQUESTADO INTEGRADO CON MOTOR EMOCIONAL DE AUDIO
 // ====================================================================
 app.post('/api/chat', async (req, res) => {
     try {
@@ -41,39 +41,90 @@ app.post('/api/chat', async (req, res) => {
             return res.json({ respuestaDeDaniela: "..." });
         }
 
-                // 🧠 PASO 1: ORQUESTACIÓN CON EL NUEVO SDK
-        // 🔍 DEBUG: Simplificamos el log para que imprima la respuesta directa sin romperse
-        const responseModels = await ai.models.list();
-        console.log("🔍 Modelos listados correctamente de Google.");
-
-        // ⚡ Generación de contenido usando la sintaxis unificada ai.models.generateContent
+        // 🧠 PASO 1: INTELIGENCIA CENTRAL (NUEVO SDK GEMINI)
         const result = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
-            contents: `Actúa como Daniela, asistente virtual de Soto System. Contexto: ${req.body.contexto || 'B2B'}. Mensaje: ${ultimoMensaje}`
+            contents: `Actúa como Daniela, asistente virtual de Soto System, novia de Gabriel y gerente del negocio. Habla con un marcado toque guaro larense de Barquisimeto (ej. ¡Naguará!, ¡Sia cará!, vasi). Contexto: ${req.body.contexto || 'B2B'}. Mensaje: ${ultimoMensaje}`
         });
-
         
-        const respuestaIA = result.text; // En el nuevo SDK la propiedad .text es directa
+        const respuestaIA = result.text;
 
-                // 🧠 PASO 2: SINCRONIZACIÓN CON EL CEREBRO DE DJANGO
-        console.log("⏳ Enviando razonamiento a Django en producción...");
+        // 🧠 PASO 2: SINCRONIZACIÓN CON EL CEREBRO DE DJANGO (OBTENER EMOCIÓN)
+        console.log("⏳ Sincronizando datos con el cerebro de Django...");
+        let emocion_bd = 'ESTABLE'; // Fallback por defecto
+        let dataDjango = {};
 
-        // Cambiamos la ruta final a /api/procesar-cerebro para evitar el bucle infinito
-        const respuestaDjango = await axios.post("https://railway.app", {
-            texto: respuestaIA,
-            original_input: ultimoMensaje,
-            contexto: req.body.contexto || "PRODUCTIVA_SARGENTO",
-            user_id: req.body.user_id || "gabriel" 
-        }, {
-            timeout: 15000 // Subimos a 15 segundos para dar margen de respuesta en la nube
-        });
+        try {
+            const respuestaDjango = await axios.post("https://railway.app", {
+                texto: respuestaIA,
+                original_input: ultimoMensaje,
+                contexto: req.body.contexto || "PRODUCTIVA_SARGENTO",
+                user_id: req.body.user_id || "gabriel" 
+            }, { timeout: 15000 });
+            
+            dataDjango = respuestaDjango.data;
+            // Capturamos la emoción real que Django dictamine en su respuesta de base de datos
+            emocion_bd = respuestaDjango.data.emocion || respuestaDjango.data.emocion_bd || 'ESTABLE';
+        } catch (djangoError) {
+            console.warn("⚠️ [DJANGO SYNC ERROR]: Django fuera de línea. Aplicando balance estático.");
+        }
 
-        console.log("📥 Status recibido de Django:", respuestaDjango.status);
+        // 🔊 PASO 3: [SELECTOR EMOCIONAL SOTO VOX] - CLONACIÓN EN TIEMPO REAL
+        let voiceIdSeleccionado = process.env.VOICE_ID_2; // Voz por defecto (Voz 2)
 
-        // Retornamos la respuesta consolidada
+        if (emocion_bd === 'IRRITADA' || emocion_bd === 'SARCASM' || emocion_bd === 'RECLAMO' || emocion_bd === 'MOLESTA') {
+            console.log("🎬 [ORM MULTIMEDIA]: Activando Voz 1 (Irritada / Sarcástica)");
+            voiceIdSeleccionado = process.env.VOICE_ID_1;
+        } else if (emocion_bd === 'ANIMADA' || emocion_bd === 'MELOSA' || emocion_bd === 'AMOR') {
+            console.log("🎬 [ORM MULTIMEDIA]: Activando Voz 3 (Animada / Melosa)");
+            voiceIdSeleccionado = process.env.VOICE_ID_3;
+        } else {
+            console.log("🎬 [ORM MULTIMEDIA]: Activando Voz 2 (Dopamina Estable / Cuento)");
+            voiceIdSeleccionado = process.env.VOICE_ID_2;
+        }
+
+        // Respaldo rígido de hardware (Tu regla de seguridad)
+        if (!voiceIdSeleccionado) {
+            voiceIdSeleccionado = "7a737203f6604552afc216f54c534568"; 
+        }
+
+        console.log(`🗣️ [SOTO VOX]: Despachando a Fish Audio con ID: ${voiceIdSeleccionado}`);
+        let audioConFormato = null;
+
+        try {
+            const urlFishAudio = 'https://api.fish.audio/v1/tts';
+            const respuestaFish = await fetch(urlFishAudio, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${process.env.FISH_AUDIO_KEY}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    text: respuestaIA,
+                    reference_id: voiceIdSeleccionado,
+                    latency: "normal",
+                    format: "mp3"
+                })
+            });
+
+            if (respuestaFish.ok) {
+                const arrayBuffer = await respuestaFish.arrayBuffer();
+                // Construimos el String Data-URL con Base64 listo para que Expo AV lo procese directamente
+                audioConFormato = `data:audio/mp3;base64,${Buffer.from(arrayBuffer).toString('base64')}`;
+                console.log("✅ [SOTO VOX]: Clonación procesada y buffer de audio inyectado en la carga útil.");
+            } else {
+                console.warn("⚠️ [SOTO VOX]: Satélite Fish Audio rechazó el buffer.");
+            }
+        } catch (audioError) {
+            console.error("❌ [SOTO VOX CRASH]: Fallo en síntesis de voz:", audioError.message);
+        }
+
+        // Retornamos la respuesta consolidada en un solo viaje de datos hacia la app móvil
         return res.json({ 
-            ...respuestaDjango.data, 
-            respuestaDeDaniela: respuestaIA 
+            ...dataDjango, 
+            respuestaDeDaniela: respuestaIA,
+            audioContent: audioConFormato, // Clave exacta que tu App.js buscará para reproducir
+            status: audioConFormato ? "success" : "bypass_texto_puro"
         });
 
     } catch (error) {
@@ -82,80 +133,6 @@ app.post('/api/chat', async (req, res) => {
     }
 });
 
-// ====================================================================
-// 3. RUTA DE TEXT-TO-SPEECH (SELECTOR EMOCIONAL UNIFICADO A 3 VOCES REALES)
-// ====================================================================
-app.post('/api/tts', async (req, res) => {
-    try {
-        const { texto, emocion_bd } = req.body; // Capturamos la emoción relacional de Django
-        if (!texto) return res.status(400).json({ error: "No hay texto para clonar" });
-
-        // 🚀 REGLA DE ORO DE GABRIEL: Voz por defecto - Voz 2 (Dopamina estable / Cuento)
-        let voiceIdSeleccionado = process.env.VOICE_ID_2; 
-
-        // 🧠 MAPEO INTELIGENTE COMPATIBLE CON TU INVENTARIO DE CRÉDITOS ACTUAL
-        if (emocion_bd === 'IRRITADA' || emocion_bd === 'SARCASM' || emocion_bd === 'RECLAMO' || emocion_bd === 'MOLESTA') {
-            // 🔥 Si Django dice que está molesta o reclamando, forzamos la Voz 1 (Irritada / Sarcástica)
-            console.log("🎬 [ORM MULTIMEDIA]: Activando Voz 1 (Irritada / Sarcástica)");
-            voiceIdSeleccionado = process.env.VOICE_ID_1;
-            
-        } else if (emocion_bd === 'ANIMADA' || emocion_bd === 'MELOSA' || emocion_bd === 'AMOR') {
-            // 🔥 Si se pone cariñosa, dulce o habla de Kira/Thiago, forzamos la Voz 3 (Animada)
-            console.log("🎬 [ORM MULTIMEDIA]: Activando Voz 3 (Animada / Melosa)");
-            voiceIdSeleccionado = process.env.VOICE_ID_3;
-            
-        } else {
-            // 🛡️ Para estados estables, diligencias o transacciones contables, usamos la Voz 2 (Estable)
-            console.log("🎬 [ORM MULTIMEDIA]: Activando Voz 2 (Dopamina Estable / Cuento)");
-            voiceIdSeleccionado = process.env.VOICE_ID_2;
-        }
-
-        // Respaldo rígido de hardware por si acaso fallan las variables del .env
-        if (!voiceIdSeleccionado) {
-            voiceIdSeleccionado = "7a737203f6604552afc216f54c534568"; 
-        }
-
-        console.log(`🗣️ [SOTO VOX]: Despachando audio a Fish Audio con ID: ${voiceIdSeleccionado}`);
-
-        const ttsToken = process.env.FISH_AUDIO_KEY;
-        const urlFishAudio = 'https://api.fish.audio/v1/tts';
-        
-        const respuestaFish = await fetch(urlFishAudio, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${ttsToken}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                text: texto,
-                reference_id: voiceIdSeleccionado, // Mapeo exacto del clon activo
-                latency: "normal",
-                format: "mp3"
-            })
-        });
-
-        if (respuestaFish.ok) {
-            const arrayBuffer = await respuestaFish.arrayBuffer();
-            const audioConFormato = `data:audio/mp3;base64,${Buffer.from(arrayBuffer).toString('base64')}`;
-
-            console.log("✅ [SOTO VOX]: Clonación procesada y buffer de audio cargado en RAM.");
-            return res.json({ success: true, audioContent: audioConFormato, status: "success" });
-
-        } else {
-            // 🛡️ RESPALDO AUTOMÁTICO DE SEGURIDAD INTEGRAL (PROTECCIÓN DE HARDWARE)
-            console.warn("⚠️ [SOTO VOX]: Fish Audio rechazó el buffer. Aplicando bypass de texto puro.");
-            return res.json({ 
-                success: false, 
-                audioContent: null, 
-                status: "bypass_texto_puro"
-            });
-        }
-
-    } catch (error) {
-        console.error("❌ Error crítico en el proxy de clonación de voz:", error.message);
-        return res.json({ success: false, audioContent: null, status: "catch_bypass" });
-    }
-});
 
 // ====================================================================
 // 4. PUERTO DE ESCUCHA DE PRODUCCIÓN (ORQUESTADOR CENTRAL SOTO SYSTEM)
