@@ -139,7 +139,6 @@ useEffect(() => {
 }, [enLlamada]);
 
 // 📸 INTERCEPTOR DE PERMISOS AUTOMÁTICO COMPATIBLE CON EXPO 55
-// Asegúrate de usar los hooks modernos: const [status, requestPermission] = Camera.useCameraPermissions();
 useEffect(() => {
   const verificarSensoresCámara = async () => {
     try {
@@ -156,7 +155,7 @@ useEffect(() => {
     }
   };
   verificarSensoresCámara();
-}, [permission]); // Agregamos la dependencia para evitar ejecuciones huérfanas
+}, []); // 🚀 CORRECCIÓN DEFINITIVA: Array vacío para que corra UNA SOLA VEZ y no haga bucle en web
 
 // Inicialización del Chasis General del Sistema de Audio del Dispositivo
 useEffect(() => {
