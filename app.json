@@ -31,9 +31,9 @@
       }
     },
     "web": {
-      "output": "static",
-      "favicon": "./apio-app/assets/images/favicon.png"
-    },
+  "bundler": "metro",
+  "output": "static"
+},
     "plugins": [
       [
         "expo-splash-screen",
