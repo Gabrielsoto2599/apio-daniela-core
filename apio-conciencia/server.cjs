@@ -6,10 +6,13 @@ require('dotenv').config({ path: path.join(__dirname, '.env') });
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
-const { GoogleGenerativeAI } = require("@google/generative-ai"); // Importación necesaria
 
-// Inicializamos el motor de IA con tu API Key de Railway
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_PRO || process.env.GEMINI_PRO_KEY || process.env.GOOGLE_API_KEY);
+// 🚀 NUEVO SDK UNIFICADO DE GOOGLE GEMINI (2026)
+const { GoogleGenAI } = require("@google/genai"); 
+
+// Inicializamos el motor de IA con las variables de entorno de Railway
+const apiKey = process.env.GEMINI_PRO || process.env.GEMINI_PRO_KEY || process.env.GOOGLE_API_KEY;
+const ai = new GoogleGenAI({ apiKey: apiKey });
 
 // 🛠️ CONTROLADOR DE ERRORES OCULTOS
 process.on('unhandledRejection', (reason, promise) => {
@@ -20,8 +23,9 @@ const app = express();
 app.use(cors()); 
 app.use(express.json());
 
-console.log("⚙️ [SOTO PROXY]: Ecosistema Node inicializado con gemini-3-pro.");
+console.log("⚙️ [SOTO PROXY]: Ecosistema Node inicializado con la nueva API @google/genai.");
 console.log("🛡️ [SOTO PROXY]: Memoria estática extirpada. Modo Orquestador Activo.");
+
 
 // ====================================================================
 // 🚀 ENDPOINT DE CHAT ORQUESTADO (GEMINI + DJANGO) - CONEXIÓN SEGURA
@@ -37,12 +41,19 @@ app.post('/api/chat', async (req, res) => {
             return res.json({ respuestaDeDaniela: "..." });
         }
 
-        // 🧠 PASO 1: ORQUESTACIÓN 
-        // DEBUG: Ver qué modelos tengo disponibles realmente
-        const models = await genAI.listModels();
-        console.log("🔍 Modelos disponibles:", models.models.map(m => m.name));
-        const result = await model.generateContent(`Actúa como Daniela, asistente virtual de Soto System. Contexto: ${req.body.contexto || 'B2B'}. Mensaje: ${ultimoMensaje}`);
-        const respuestaIA = result.response.text();
+        // 🧠 PASO 1: ORQUESTACIÓN CON EL NUEVO SDK
+        // 🔍 DEBUG: Listar modelos disponibles con el método moderno .models.list()
+        const responseModels = await ai.models.list();
+        console.log("🔍 Modelos disponibles:", responseModels.models.map(m => m.name));
+
+        // ⚡ Generación de contenido usando la sintaxis unificada ai.models.generateContent
+        // He configurado 'gemini-2.5-flash' por defecto, el cual es ideal para baja latencia
+        const result = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: `Actúa como Daniela, asistente virtual de Soto System. Contexto: ${req.body.contexto || 'B2B'}. Mensaje: ${ultimoMensaje}`
+        });
+        
+        const respuestaIA = result.text; // En el nuevo SDK la propiedad .text es directa
 
         // 🧠 PASO 2: SINCRONIZACIÓN CON EL CEREBRO DE DJANGO
         console.log("⏳ Enviando razonamiento a Django...");
