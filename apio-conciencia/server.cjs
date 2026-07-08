@@ -55,18 +55,17 @@ app.post('/api/chat', async (req, res) => {
         
         const respuestaIA = result.text; // En el nuevo SDK la propiedad .text es directa
 
-        // 🧠 PASO 2: SINCRONIZACIÓN CON EL CEREBRO DE DJANGO
-        console.log("⏳ Enviando razonamiento a Django...");
+                // 🧠 PASO 2: SINCRONIZACIÓN CON EL CEREBRO DE DJANGO
+        console.log("⏳ Enviando razonamiento a Django en producción...");
 
-        // NOTA: Asegúrate de que esta URL apunte al endpoint de RECEPCIÓN de Django
-        // y NO a esta misma ruta /api/chat para evitar el bucle.
-        const respuestaDjango = await axios.post("https://apio-daniela-core-production.up.railway.app/api/chat", {
+        // Cambiamos la ruta final a /api/procesar-cerebro para evitar el bucle infinito
+        const respuestaDjango = await axios.post("https://railway.app", {
             texto: respuestaIA,
             original_input: ultimoMensaje,
             contexto: req.body.contexto || "PRODUCTIVA_SARGENTO",
             user_id: req.body.user_id || "gabriel" 
         }, {
-            timeout: 10000
+            timeout: 15000 // Subimos a 15 segundos para dar margen de respuesta en la nube
         });
 
         console.log("📥 Status recibido de Django:", respuestaDjango.status);
