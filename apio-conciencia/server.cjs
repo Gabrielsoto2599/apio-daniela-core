@@ -41,17 +41,17 @@ app.post('/api/chat', async (req, res) => {
             return res.json({ respuestaDeDaniela: "..." });
         }
 
-        // 🧠 PASO 1: ORQUESTACIÓN CON EL NUEVO SDK
-        // 🔍 DEBUG: Listar modelos disponibles con el método moderno .models.list()
+                // 🧠 PASO 1: ORQUESTACIÓN CON EL NUEVO SDK
+        // 🔍 DEBUG: Simplificamos el log para que imprima la respuesta directa sin romperse
         const responseModels = await ai.models.list();
-        console.log("🔍 Modelos disponibles:", responseModels.models.map(m => m.name));
+        console.log("🔍 Modelos listados correctamente de Google.");
 
         // ⚡ Generación de contenido usando la sintaxis unificada ai.models.generateContent
-        // He configurado 'gemini-2.5-flash' por defecto, el cual es ideal para baja latencia
         const result = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
             contents: `Actúa como Daniela, asistente virtual de Soto System. Contexto: ${req.body.contexto || 'B2B'}. Mensaje: ${ultimoMensaje}`
         });
+
         
         const respuestaIA = result.text; // En el nuevo SDK la propiedad .text es directa
 
