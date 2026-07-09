@@ -8,6 +8,7 @@ import { Audio } from 'expo-av';
 import { Camera, useCameraPermissions } from 'expo-camera';
 import axios from 'axios';
 import { Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
+import * as Speech from 'expo-speech';
 
 // 🚀 RUTA RELATIVA UNIVERSAL SANEADA: Muerde tus assets en limpio
 import { BASE_URL } from './src/config/apiConfig';
@@ -60,14 +61,19 @@ export default function App() {
     }
   }, []);
 
-        // ====================================================================
+          // ====================================================================
   // BLOQUE 2: MOTOR DE AUDIO (RINGTONE UNIFICADO COMPATIBLE DE RED)
   // ====================================================================
   async function reproducirTono() {
     try {
       console.log('⚡ [SOTO VOX]: Cargando tono de llamada nativo...');
       
-      // 🚀 RUTA SINCRONIZADA: Usamos la constante pre-cargada estáticamente
+      // Detenemos cualquier rastro previo en memoria antes de instanciar uno nuevo
+      if (sonido) {
+        try { await sonido.unloadAsync(); } catch(e) {}
+      }
+
+      // Guardamos la carga útil estática pre-importada en la cabecera
       const { sound } = await Audio.Sound.createAsync(
         whatsappRingtoneSource,
         { isLooping: true, shouldPlay: false }
@@ -77,25 +83,31 @@ export default function App() {
       await sound.playAsync();
       console.log('🔔 [SOTO VOX]: Ringtone sonando de fondo en loop.');
     } catch (error) {
-      console.error('❌ [SOTO VOX ERROR]: Crítico en motor de audio (Ringtone):', error);
+      console.error('❌ [SOTO VOX ERROR]: Crítico en motor de audio (Ringtone):', error.message);
     }
   }
 
   async function detenerTono() {
-    if (sonido) {
-      try {
-        console.log('🛑 [SOTO VOX]: Deteniendo tono de forma segura...');
-        const status = await sonido.getStatusAsync();
-        if (status.isLoaded) {
-          await sonido.stopAsync();
-          await sonido.unloadAsync();
-          console.log('✅ [SOTO VOX]: Memoria del Ringtone liberada con éxito.');
-        }
-      } catch (error) {
-        console.log('⚠️ [SOTO VOX]: Aviso en motor de audio (Tono ya liberado):', error);
-      } finally {
-        setSonido(null);
+    // 🛡️ PROTECCIÓN DE CRASH INTEGRAL: Si la referencia es nula o vacía, salimos sin tocar el hardware
+    if (!sonido) {
+      console.log('📱 [SOTO VOX]: Canal de Ringtone vacío. Salida segura.');
+      return;
+    }
+    
+    try {
+      console.log('🛑 [SOTO VOX]: Analizando estado del tono en la RAM...');
+      const status = await sonido.getStatusAsync();
+      
+      // Validamos estrictamente que el archivo esté cargado en Android antes de apagarlo
+      if (status && status.isLoaded) {
+        await sonido.stopAsync();
+        await sonido.unloadAsync();
+        console.log('✅ [SOTO VOX]: Memoria del Ringtone liberada con éxito.');
       }
+    } catch (error) {
+      console.log('⚠️ [SOTO VOX]: Aviso en motor de audio (Bypass de limpieza):', error.message);
+    } finally {
+      setSonido(null); // Limpiamos la variable para el próximo ciclo
     }
   }
 
@@ -176,58 +188,41 @@ useEffect(() => {
   prepararSistemaDeAudio();
 }, []);
 
+   // ====================================================================
+  // BLOQUE 4: PROCESADOR UNIFICADO DE VOZ (SOTO VOX NATIVO GRATUITO)
   // ====================================================================
-// BLOQUE 4: PROCESADOR UNIFICADO DE VOZ (SALIDA INTEGRADA CHAT)
-// ====================================================================
-const reproducirVozDaniela = async (audioBase64Recibido) => {
-  if (isSpeaking || danielaEstaMolesta) return; 
+  const reproducirVozDaniela = async (textoParaDecir) => {
+    // Si la IA está hablando o está molesta, bloqueamos el hilo de hardware
+    if (isSpeaking || danielaEstaMolesta || !textoParaDecir) return; 
 
-  try {
-    await detenerTono();
-    setIsDanielaThinking(false); // Apagamos el estado de carga porque el audio ya llegó
-    setIsSpeaking(true); 
-
-    console.log("🎤 [SOTO VOX]: Procesando buffer de audio recibido del proxy...");
-
-    // 🧠 REPARACIÓN DE ORO MULTIMEDIA: Validamos que el string Base64 exista
-    if (audioBase64Recibido) {
-      console.log("🔊 Stream Base64 detectado con éxito. Inyectando URI de datos...");
-      
-      // El truco maestro corregido: Sincroniza con el formato del backend unificado
-      const formatoAudioURI = audioBase64Recibido.startsWith('data:') 
-        ? audioBase64Recibido 
-        : `data:audio/mp3;base64,${audioBase64Recibido}`;
-
-      const { sound: nuevoSonido } = await Audio.Sound.createAsync(
-        { uri: formatoAudioURI }, 
-        { shouldPlay: true }
-      );
-
-      setSonido(nuevoSonido);
+    try {
+      await detenerTono(); // Apaga el Ringtone si venía una llamada en camino
+      setIsDanielaThinking(false);
+      setIsSpeaking(true); 
       setIsCameraActive(false);
 
-      nuevoSonido.setOnPlaybackStatusUpdate(async (status) => {
-        if (status.isLoaded && status.didJustFinish) {
-          try {
-            await nuevoSonido.unloadAsync(); 
-          } catch (e) {
-            console.log("Aviso: Audio liberado automáticamente por el garbage collector.");
-          } finally {
-            setIsSpeaking(false);
-            console.log("✅ [SOTO VOX]: Finalizó la voz de Daniela. Hardware liberado.");
-          }
+      console.log("🗣️ [SOTO VOX NATIVO]: Procesando lectura local en español latino...");
+
+      // El teléfono procesa el texto de Gemini y lo convierte en voz al instante
+      Speech.speak(textoParaDecir, {
+        language: 'es-419', // Configura el acento en Español Latinoamericano
+        pitch: 1.15,        // Tono un poco más agudo para que suene como una mujer joven
+        rate: 0.95,         // Velocidad natural de conversación venezolana
+        onDone: () => {
+          setIsSpeaking(false);
+          console.log("✅ [SOTO VOX NATIVO]: Finalizó el habla de Daniela. Hardware libre.");
+        },
+        onError: (error) => {
+          console.error("⚠️ [SOTO VOX NATIVO ERROR]: Fallo en el motor del teléfono:", error);
+          setIsSpeaking(false);
         }
       });
-    } else {
-      throw new Error("El payload del chat llegó sin datos binarios de audioContent.");
-    }
 
-  } catch (error) {
-    console.error("❌ [SOTO VOX ERROR]: Fallo crítico en motor unificado de audio:", error.message);
-    setIsDanielaThinking(false);
-    setIsSpeaking(false);
-  }
-};
+    } catch (error) {
+      console.error("❌ [SOTO VOX ERROR]: Fallo crítico en bypass local:", error.message);
+      setIsSpeaking(false);
+    }
+  };
 
   // ====================================================================
 // BLOQUE 4.1: OÍDO INTELIGENTE (TRANSCRIPCIÓN Y CEREBRO CONTEXTUAL B2B)
@@ -446,12 +441,14 @@ const procesarLoQueEscuche = async (audioUri) => {
         }]);
 
         // 🛡️ ENCAPSULAMIENTO DEFENSIVO AUDIO-RESISTENTE
+                // 🛡️ ENCAPSULAMIENTO MULTIMEDIA NATIVO GRATUITO
         try {
-          // Si tu backend envía el base64 directo, lo puedes interceptar aquí
-          await reproducirVozDaniela(textoRespuesta, data.emocion || "NORMAL");
+          // Le pasamos el texto puro de la respuesta directamente al altavoz del teléfono
+          await reproducirVozDaniela(textoRespuesta);
         } catch (audioErr) {
-          console.warn("⚠️ [SOTO VOX]: Voz omitida por hardware local, el chat fluye limpio.");
+          console.warn("⚠️ [SOTO VOX]: Voz omitida por hardware local.");
         }
+
       
         // 📞 INTERCEPTOR DE LLAMADAS ENTRANTES (MIGRADO DE TU VIEJO CODE)
         const textoMinuscula = textoRespuesta.toLowerCase();
