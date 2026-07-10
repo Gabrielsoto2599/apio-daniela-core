@@ -13,7 +13,6 @@ import * as Speech from 'expo-speech';
 // 🚀 RUTA RELATIVA UNIVERSAL SANEADA: Muerde tus assets en limpio
 import { BASE_URL } from './src/config/apiConfig';
 import profilePic from './apio-app/assets/images/foto-perfil-apio.png';
-import whatsappRingtoneSource from './apio-app/assets/sounds/whatsapp_ringtone.mp3';
 
 // Importación modular de subpantallas de navegación (Directorio app/)
 import Home from './app/home/home.js';
@@ -61,53 +60,29 @@ export default function App() {
     }
   }, []);
 
-          // ====================================================================
-  // BLOQUE 2: MOTOR DE AUDIO (RINGTONE UNIFICADO COMPATIBLE DE RED)
+           // ====================================================================
+  // BLOQUE 2: MOTOR DE AUDIO (RINGTONE DINÁMICO INMUNE A CRASHES DE APK)
   // ====================================================================
   async function reproducirTono() {
     try {
-      console.log('⚡ [SOTO VOX]: Cargando tono de llamada nativo...');
+      console.log('⚡ [SOTO VOX]: Cargando tono de llamada nativo asíncronamente...');
       
       // Detenemos cualquier rastro previo en memoria antes de instanciar uno nuevo
       if (sonido) {
         try { await sonido.unloadAsync(); } catch(e) {}
       }
 
-      // Guardamos la carga útil estática pre-importada en la cabecera
+      // 🚀 REPARACIÓN DE PRODUCCIÓN COMERCIAL: Invocamos el archivo con require en caliente
       const { sound } = await Audio.Sound.createAsync(
-        whatsappRingtoneSource,
+        require('./apio-app/assets/sounds/whatsapp_ringtone.mp3'),
         { isLooping: true, shouldPlay: false }
       );
       
       setSonido(sound);
       await sound.playAsync();
-      console.log('🔔 [SOTO VOX]: Ringtone sonando de fondo en loop.');
+      console.log('🔔 [SOTO VOX]: Ringtone sonando de fondo en loop seguro.');
     } catch (error) {
       console.error('❌ [SOTO VOX ERROR]: Crítico en motor de audio (Ringtone):', error.message);
-    }
-  }
-
-  async function detenerTono() {
-    // 🛡️ PROTECCIÓN DE CRASH INTEGRAL: Si la referencia es nula o vacía, salimos sin tocar el hardware
-    if (!sonido) {
-      console.log('📱 [SOTO VOX]: Canal de Ringtone vacío. Salida segura.');
-      return;
-    }
-    
-    try {
-      console.log('🛑 [SOTO VOX]: Analizando estado del tono en la RAM...');
-      const status = await sonido.getStatusAsync();
-      
-      // Validamos estrictamente que el archivo esté cargado en Android antes de apagarlo
-      if (status && status.isLoaded) {
-        await sonido.stopAsync();
-        await sonido.unloadAsync();
-        console.log('✅ [SOTO VOX]: Memoria del Ringtone liberada con éxito.');
-      }
-    } catch (error) {
-      console.log('⚠️ [SOTO VOX]: Aviso en motor de audio (Bypass de limpieza):', error.message);
-    } finally {
-      setSonido(null); // Limpiamos la variable para el próximo ciclo
     }
   }
 

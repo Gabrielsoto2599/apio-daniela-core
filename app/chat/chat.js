@@ -57,9 +57,16 @@ export default function ChatScreen({
     }
   };
 
-  return (
-    <SafeAreaView style={styles.safeAreaBlindada}>
-      <StatusBar barStyle="light-content" backgroundColor="#202c33" />
+    return (
+    <SafeAreaView style={[
+      styles.safeAreaBlindada,
+      { 
+        flex: 1, 
+        backgroundColor: '#0b141a', // Mantiene el fondo oscuro de WhatsApp
+        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 
+      }
+    ]}>
+      <StatusBar barStyle="light-content" backgroundColor="#202c33" translucent={true} />
       
       {/* 🛡️ EL ESCUDO PROTECTOR SUPREMO: Evita que el teclado rompa los botones de Android */}
       <KeyboardAvoidingView 
@@ -86,7 +93,7 @@ export default function ChatScreen({
           )}
 
           {/* ====================================================================
-          HEADER SUPERIOR DE LA CONVERSACIÓN (ESTILO WHATSAPP PREMIUM)
+          HEADER SUPERIOR DE LA CONVERSACIÓN (ESTILO WHATSAPP PREMIUM BLINDADO)
           ==================================================================== */}
           <View style={styles.header}>
             <TouchableOpacity onPress={onVolver} style={styles.backButton} activeOpacity={0.7}>
@@ -95,7 +102,8 @@ export default function ChatScreen({
             
             <TouchableOpacity onPress={onAbrirEmpresa} style={styles.profileContainer} activeOpacity={0.8}>
               <Image source={profilePic} style={styles.profileImage} />
-              <div style={{ display: 'none' }} data-trigger="Ionicons MaterialIcons textRespuestaActual"></div>
+              {/* 🛡️ REPARACIÓN COGNITIVA ANTI-CRASH: Sustituido 'div' web por '<View>' nativo de Expo */}
+              <View style={{ display: 'none' }} data-trigger="Ionicons MaterialIcons textRespuestaActual" />
               <View style={styles.onlineDot} />
             </TouchableOpacity>
 
@@ -122,7 +130,6 @@ export default function ChatScreen({
             style={styles.chatBackground}
             imageStyle={{ opacity: 0.04, tintColor: '#000000' }}
           >
-
             <ScrollView 
               ref={scrollViewRef}
               onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
@@ -138,9 +145,10 @@ export default function ChatScreen({
                   ]}
                 >
                   <View style={[styles.bubble, msg.sender === 'user' ? styles.sentBubble : styles.receivedBubble]}>
-                    <Text style={styles.messageText}>{msg.texto || msg.message}</Text>
+                    {/* 🛡️ BLINDAJE DE EXTRACCIÓN: Garantiza renderizar el texto sin importar qué clave responda el ORM */}
+                    <Text style={styles.messageText}>{msg.texto || msg.text || msg.message || "..."}</Text>
                     <View style={styles.timeRow}>
-                      <Text style={styles.timeText}>{msg.time || '14:20'}</Text>
+                      <Text style={styles.timeText}>{msg.time || '08:59 PM'}</Text>
                       {msg.sender === 'user' && <Ionicons name="checkmark-done" size={16} color="#53bdeb" />}
                     </View>
                   </View>
@@ -157,28 +165,67 @@ export default function ChatScreen({
           </ImageBackground>
 
           {/* ====================================================================
-          BARRA INFERIOR CONTROL REMOTO (INPUT Y DETECTOR MULTIMEDIA)
+          BARRA INFERIOR CONTROL REMOTO (INPUT Y DETECTOR MULTIMEDIA WHATSAPP REAL)
           ==================================================================== */}
-          <View style={styles.inputArea}>
-            <View style={styles.inputMainContainer}>
+          <View style={[
+            styles.inputArea, 
+            { 
+              flexDirection: 'row', 
+              alignItems: 'center', 
+              paddingHorizontal: 8, 
+              paddingTop: 6,
+              // 🚀 AISLAMIENTO INFERIOR: Colchón de seguridad para que no choque con la barra de gestos de Android
+              paddingBottom: Platform.OS === 'ios' ? 22 : 12, 
+              backgroundColor: 'transparent' 
+            }
+          ]}>
+            
+            {/* 🛠️ CHASIS PREMIUM DE ENTRADA (ESTILO WHATSAPP COMPLETO) */}
+            <View style={[
+              styles.inputMainContainer, 
+              { 
+                flex: 1, 
+                flexDirection: 'row', 
+                alignItems: 'center', 
+                backgroundColor: '#202c33', // Color de barra oscura de WhatsApp
+                borderRadius: 25, 
+                paddingHorizontal: 10,
+                paddingVertical: 4,
+                marginRight: 6
+              }
+            ]}>
+              
+              {/* 😃 ICONO DE STICKERS / EMOJIS */}
+              <TouchableOpacity style={{ padding: 4 }} disabled={isDanielaThinking} activeOpacity={0.7}>
+                <MaterialCommunityIcons name="emoticon-happy-outline" size={24} color="#8696a0" />
+              </TouchableOpacity>
+
               <TextInput
-                style={styles.input}
-                placeholder="escribe un mensaje"
+                style={[styles.input, { flex: 1, color: '#e9edef', fontSize: 16, paddingHorizontal: 8, maxHeight: 100 }]}
+                placeholder="Escribe un mensaje"
                 placeholderTextColor="#8696a0"
                 value={message}
                 onChangeText={setMessage}
                 multiline
                 editable={!isDanielaThinking}
               />
-              <TouchableOpacity onPress={() => setIsCameraActive(true)} disabled={isDanielaThinking} activeOpacity={0.7}>
+
+              {/* 📎 ICONO DE ADJUNTAR ARCHIVOS (CLIP) */}
+              <TouchableOpacity style={{ padding: 4, marginRight: 6 }} disabled={isDanielaThinking} activeOpacity={0.7}>
+                <MaterialCommunityIcons name="paperclip" size={22} color="#8696a0" style={{ transform: [{ rotate: '315deg' }] }} />
+              </TouchableOpacity>
+
+              {/* 📸 ICONO DE CÁMARA INYECTADA */}
+              <TouchableOpacity style={{ padding: 4 }} onPress={() => setIsCameraActive(true)} disabled={isDanielaThinking} activeOpacity={0.7}>
                 <Ionicons name="camera" size={24} color={isDanielaThinking ? "#2a3942" : "#8696a0"} />
               </TouchableOpacity>
+
             </View>
             
-            {/* 🚀 CONMUTADOR INTELIGENTE DE BOTÓN: Si hay texto envía; si está vacío es Micrófono */}
+            {/* 🚀 CONMUTADOR INTELIGENTE DE BOTÓN ACCIÓN DIRECTA */}
             {message.trim().length > 0 ? (
               <TouchableOpacity 
-                style={styles.sendButton} 
+                style={[styles.sendButton, { width: 48, height: 48, borderRadius: 24, backgroundColor: '#00a884', justifyContent: 'center', alignItems: 'center' }]} 
                 onPress={enviarMensajeUsuario}
                 disabled={isDanielaThinking} 
                 activeOpacity={0.7}
@@ -187,7 +234,11 @@ export default function ChatScreen({
               </TouchableOpacity>
             ) : (
               <TouchableOpacity 
-                style={[styles.sendButton, isRecording && { backgroundColor: '#ea0038' }]} 
+                style={[
+                  styles.sendButton, 
+                  { width: 48, height: 48, borderRadius: 24, backgroundColor: '#00a884', justifyContent: 'center', alignItems: 'center' },
+                  isRecording && { backgroundColor: '#ea0038' }
+                ]} 
                 onPressIn={onIniciarGrabacion}
                 onPressOut={onDetenerGrabacion}
                 disabled={isDanielaThinking} 
@@ -202,7 +253,7 @@ export default function ChatScreen({
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
-}
+} // ⬅️ LLAVE FINAL DE CIERRE DE TU COMPONENTE CHAT
 
 // ==========================================================
 // 🎨 HOJA DE ESTILOS UNIFICADA CON ESPACIADO DEFENSIVO

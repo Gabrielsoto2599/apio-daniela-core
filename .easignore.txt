@@ -1,0 +1,16 @@
+# Excluir entornos virtuales de Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Excluir el backend de Node
+apio-conciencia/
+node_modules/
+
+# Archivos de Git y logs de error
+.git/
+.github/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
