@@ -52,15 +52,41 @@ export default function Home({ messages, onCambiarVista, onAbrirPerfil, onAbrirE
     }
   ];
 
-        // ====================================================================
+    // ====================================================================
+  // BLOQUE 2: COMPONENTES DE RENDERIZADO INTERNOS (FILAS DE CHAT)
+  // ====================================================================
+  const renderFilaChat = ({ item }) => (
+    <TouchableOpacity style={styles.chatRow} onPress={() => onCambiarVista('chat')}>
+      
+      {/* 🚀 AVATAR INTELIGENTE: Al tocar la foto pequeña del chat, abre la sección Business */}
+      <TouchableOpacity 
+        style={styles.avatarTouch} 
+        onPress={() => item.id === 'daniela_ia' ? onAbrirEmpresa() : null}
+      >
+        <Image source={profilePic} style={styles.avatarImage} />
+        {item.id === 'daniela_ia' && <View style={styles.onlineIndicator} />}
+      </TouchableOpacity>
+
+      <View style={styles.chatDetails}>
+        <View style={styles.chatHeaderInfo}>
+          <Text style={styles.chatName}>{item.nombre}</Text>
+          <Text style={styles.chatTime}>{obtenerHoraUltimoMensaje()}</Text>
+        </View>
+        <View style={styles.chatMessageInfo}>
+          <Text style={styles.chatSubtext} numberOfLines={1}>
+            {obtenerUltimoMensajeVivo()}
+          </Text>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+
+  // ====================================================================
   // BLOQUE 3: INTERFAZ GRÁFICA PRINCIPAL (RETORNO DE UI)
   // ====================================================================
   return (
-    <SafeAreaView style={[
-      styles.safeArea, 
-      { paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 }
-    ]}>
-      <StatusBar backgroundColor="#111b21" barStyle="light-content" translucent={true} />
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar backgroundColor="#111b21" barStyle="light-content" />
 
       {/* 3.1 ENCABEZADO SUPERIOR DE LA APLICACIÓN (BRAND & ACCIONES) */}
       <View style={styles.topBarHeader}>
@@ -132,65 +158,65 @@ export default function Home({ messages, onCambiarVista, onAbrirPerfil, onAbrirE
         </TouchableOpacity>
       )}
 
-      {/* ====================================================================
-      🚀 BLOQUE 4 TRANSFORMADO: MENU FLOTANTE + CAMARA QR INYECTADA (REGLA DE GABRIEL)
-      ==================================================================== */}
-      
-      {/* 1. EL MENU DE OPCIONES QUE ABRE LA ELIPSE */}
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={modalFotoVisible}
-        onRequestClose={() => setModalFotoVisible(false)}
-      >
+             {/* ====================================================================
+  🚀 BLOQUE 4 TRANSFORMADO: MENU FLOTANTE + CAMARA QR INYECTADA (REGLA DE GABRIEL)
+  ==================================================================== */}
+  
+  {/* 1. EL MENU DE OPCIONES QUE ABRE LA ELIPSE */}
+  <Modal
+    animationType="fade"
+    transparent={true}
+    visible={modalFotoVisible}
+    onRequestClose={() => setModalFotoVisible(false)}
+  >
+    <TouchableOpacity 
+      style={styles.modalOverlayBackground} 
+      activeOpacity={1} 
+      onPress={() => setModalFotoVisible(false)} 
+    >
+      <View style={styles.profileModalBox} onStartShouldSetResponder={() => true}>
+        
+        <View style={{ backgroundColor: '#202c33', padding: 14, borderBottomWidth: 1, borderBottomColor: '#2a3942' }}>
+          <Text style={{ color: '#e9edef', fontSize: 16, fontWeight: '700' }}>Opciones del Sistema</Text>
+        </View>
+
+        {/* 🔗 AL TOCAR ESTA OPCION VERDE: Apaga el menu flotante y enciende la camara nativa de Expo */}
         <TouchableOpacity 
-          style={styles.modalOverlayBackground} 
-          activeOpacity={1} 
-          onPress={() => setModalFotoVisible(false)} 
+          style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 14, backgroundColor: '#111b21' }}
+          activeOpacity={0.7}
+          onPress={() => {
+            setModalFotoVisible(false); // Cerramos el menu de la elipse
+            setModalQRVisible(true);    // 🚀 LE METEMOS CORRIENTE A LA CAMARA WEB DE VINCULAR.JS
+          }}
         >
-          <View style={styles.profileModalBox} onStartShouldSetResponder={() => true}>
-            
-            <View style={{ backgroundColor: '#202c33', padding: 14, borderBottomWidth: 1, borderBottomColor: '#2a3942' }}>
-              <Text style={{ color: '#e9edef', fontSize: 16, fontWeight: '700' }}>Opciones del Sistema</Text>
-            </View>
-
-            {/* 🔗 AL TOCAR ESTA OPCION VERDE: Apaga el menu flotante y enciende la camara nativa de Expo */}
-            <TouchableOpacity 
-              style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 14, backgroundColor: '#111b21' }}
-              activeOpacity={0.7}
-              onPress={() => {
-                setModalFotoVisible(false); // Cerramos el menu de la elipse
-                setModalQRVisible(true);    // 🚀 LE METEMOS CORRIENTE A LA CAMARA WEB DE VINCULAR.JS
-              }}
-            >
-              <Ionicons name="qr-code-outline" size={22} color="#00a884" style={{ marginRight: 14 }} />
-              <Text style={{ color: '#e9edef', fontSize: 15, fontWeight: '600' }}>Vincular dispositivo (QR)</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity 
-              style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 14, backgroundColor: '#111b21', borderTopWidth: 1, borderTopColor: '#2a3942' }}
-              activeOpacity={0.7}
-              onPress={() => {
-                setModalFotoVisible(false);
-                onAbrirEmpresa(); 
-              }}
-            >
-              <Ionicons name="business-outline" size={22} color="#8696a0" style={{ marginRight: 14 }} />
-              <Text style={{ color: '#e9edef', fontSize: 15 }}>Perfil de la Empresa</Text>
-            </TouchableOpacity>
-
-          </View>
+          <Ionicons name="qr-code-outline" size={22} color="#00a884" style={{ marginRight: 14 }} />
+          <Text style={{ color: '#e9edef', fontSize: 15, fontWeight: '600' }}>Vincular dispositivo (QR)</Text>
         </TouchableOpacity>
-      </Modal>
 
-      {/* 2. 📸 EL ESCANER DE VINCULAR.JS ANCLADO COMO HIJO DIRECTO EN EL RENDER */}
-      <VincularDispositivoModal 
-        isOpen={modalQRVisible} 
-        onClose={() => setModalQRVisible(false)} 
-        onVinculacionExitosa={(data) => {
-          console.log("✅ [SOTO QR]: Sincronización exitosa con el mostrador de Apio:", data);
-        }}
-      />
+        <TouchableOpacity 
+          style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 14, backgroundColor: '#111b21', borderTopWidth: 1, borderTopColor: '#2a3942' }}
+          activeOpacity={0.7}
+          onPress={() => {
+            setModalFotoVisible(false);
+            onAbrirEmpresa(); 
+          }}
+        >
+          <Ionicons name="business-outline" size={22} color="#8696a0" style={{ marginRight: 14 }} />
+          <Text style={{ color: '#e9edef', fontSize: 15 }}>Perfil de la Empresa</Text>
+        </TouchableOpacity>
+
+      </View>
+    </TouchableOpacity>
+  </Modal>
+
+  {/* 2. 📸 EL ESCANER DE VINCULAR.JS ANCLADO COMO HIJO DIRECTO EN EL RENDER */}
+  <VincularDispositivoModal 
+    isOpen={modalQRVisible} 
+    onClose={() => setModalQRVisible(false)} 
+    onVinculacionExitosa={(data) => {
+      console.log("✅ [SOTO QR]: Sincronización exitosa con el mostrador de Apio:", data);
+    }}
+  />
 
     </SafeAreaView> 
   );
