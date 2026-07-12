@@ -465,7 +465,7 @@ const procesarLoQueEscuche = async (audioUri) => {
           textoMinuscula.includes("atiéndeme") || 
           textoMinuscula.includes("llamada");
 
-        if (quireLlamar) {
+        if (quiereLlamar) {
           console.log("📞 [SOTO CALL]: Intención detectada. Disparando Ringtone en mostrador...");
           setTimeout(() => {
             setLlamadaEntranteVisible(true); 
