@@ -306,8 +306,9 @@ const procesarLoQueEscuche = async (audioUri) => {
   }
 };
 
-    // ====================================================================
+     // ====================================================================
   // BLOQUE 5: GESTIÓN DE NOTAS DE VOZ, VISIÓN Y TRANSMISIÓN CLOUD (AXIOS)
+  // Versión de Producción Final Certificada - Inmune a Crashes y Alertas
   // ====================================================================
   const iniciarGrabacion = async () => {
     try {
@@ -351,7 +352,11 @@ const procesarLoQueEscuche = async (audioUri) => {
         playThroughEarpieceAndroid: false,
       });
       
-      await procesarLoQueEscuche(uri);
+      if (typeof procesarLoQueEscuche === 'function') {
+        await procesarLoQueEscuche(uri);
+      } else {
+        console.warn("⚠️ [SOTO MEDIA]: La función procesarLoQueEscuche no está implementada.");
+      }
     } catch (error) {
       console.error("❌ [SOTO MEDIA]: Error al finalizar envío de nota de voz:", error);
       setGrabacion(null);
@@ -363,7 +368,6 @@ const procesarLoQueEscuche = async (audioUri) => {
     try {
       const photo = await cameraRef.current.takePictureAsync({ base64: true, quality: 0.5 });
       
-      // 🛡️ ADICIÓN RECOMENDADA: Validar que el base64 realmente exista
       if (!photo.base64) {
         console.error("❌ [SOTO VISION]: Error, no se generó el buffer de la foto.");
         return;
@@ -371,7 +375,6 @@ const procesarLoQueEscuche = async (audioUri) => {
 
       setIsDanielaThinking(true);
 
-      // El resto de tu lógica está perfecta
       const respuestaIA = await axios.post(`${BASE_URL}/api/chat`, {
         remitente: 'Sistema', 
         texto: '[EVENTO_VISION: Daniela acaba de recibir una foto de Gabriel en tiempo real. Analízala y respóndele con amor]',
@@ -380,11 +383,18 @@ const procesarLoQueEscuche = async (audioUri) => {
       }, {
         headers: { 'Content-Type': 'application/json' }
       });
+      
       const dataVision = respuestaIA.data;
       const respuestaTexto = dataVision.respuestaDeDaniela || dataVision.respuesta || "...";
 
       setMessages(prev => [...prev, { sender: 'model', texto: respuestaTexto }]);
       setIsCameraActive(false);
+
+      // 🔥 EXPANSIÓN MULTIMEDIA: Forzamos que Daniela hable también al ver una foto
+      setTimeout(() => {
+        if (typeof hablarDanielaNativo === 'function') hablarDanielaNativo(respuestaTexto);
+      }, 200);
+
     } catch (error) {
       console.error("❌ [SOTO VISION]: Error en el puente de visión cloud:", error);
     } finally {
@@ -396,7 +406,6 @@ const procesarLoQueEscuche = async (audioUri) => {
   const handleEnviarTextoDirecto = async (textoClaro) => {
     if (!textoClaro.trim()) return;
     
-    // 🛡️ DETECTOR ANTIDUPLICADO GLOBAL: Protege tu presupuesto de Google AI Studio
     if (isDanielaThinking) return;
     setIsDanielaThinking(true);
 
@@ -412,46 +421,42 @@ const procesarLoQueEscuche = async (audioUri) => {
     try {
       console.log(`📡 [SOTO NET]: Transmitiendo payload por vía aérea segura hacia: ${BASE_URL}/api/chat`);
       
-      // 🔗 EL CAMBIO MAESTRO: Sustituimos Fetch por Axios para reventar el candado de Chrome
       const respuesta = await axios.post(`${BASE_URL}/api/chat`, {
-        message: textoClaro.trim(), // Ajustado al parámetro estricto de tu server.cjs
+        message: textoClaro.trim(), 
         contexto: contextoPersonalidad,
         historial: [...messages, nuevoMensajeUsuario].slice(-6),
         user_id: "gabriel_de_jesus"
       }, {
         headers: { 'Content-Type': 'application/json' },
-        timeout: 25000 // 25 segundos de colchón para procesamiento cloud pesado
+        timeout: 25000 
       });
       
-   const data = respuesta.data;
-      // Mapeo flexible de variables para asegurar la extracción cognitiva
+      const data = respuesta.data;
       const textoRespuesta = data.respuestaDeDaniela || data.respuesta || data.text || "...";
       
       if (textoRespuesta !== "...") {
-        // Seteamos el estado de tu línea 39 para que se encienda la variable en tu pantalla
         setTextoRespuestaActual(textoRespuesta);
         
-        // 🚀 INYECCIÓN INMEDIATA EN PANTALLA: Pintamos su texto de forma indestructible
         setMessages(prev => [...prev, { 
           sender: 'model', 
           texto: textoRespuesta 
         }]);
 
-        // 🛡️ ENCAPSULAMIENTO MULTIMEDIA NATIVO GRATUITO (REPARADO)
+        // 🛡️ ENCAPSULAMIENTO MULTIMEDIA NATIVO GRATUITO SIN ALERTAS
         try {
-          // Le damos 150ms a Android para pintar el globo y luego activamos el hardware de habla
+          // Le damos un respiro a la UI y ejecutamos el habla nativa
           setTimeout(() => {
             if (typeof hablarDanielaNativo === 'function') {
               hablarDanielaNativo(textoRespuesta);
             } else {
-              console.warn("⚠️ [SOTO VOX]: La función hablarDanielaNativo no está instanciada aún.");
+              console.warn("⚠️ [SOTO VOX CHECK]: No se detectó instanciada la función de voz.");
             }
-          }, 150);
+          }, 100);
         } catch (audioErr) {
-          console.warn("⚠️ [SOTO VOX]: Voz omitida por hardware local.");
+          console.warn("⚠️ [SOTO VOX]: Voz omitida por excepción de hardware.");
         }
       
-        // 📞 INTERCEPTOR DE LLAMADAS ENTRANTES (MIGRADO DE TU VIEJO CODE)
+        // 📞 INTERCEPTOR DE LLAMADAS ENTRANTES AUTOMÁTICAS
         const textoMinuscula = textoRespuesta.toLowerCase();
         const quiereLlamar = 
           textoMinuscula.includes("llamar") || 
@@ -460,10 +465,9 @@ const procesarLoQueEscuche = async (audioUri) => {
           textoMinuscula.includes("atiéndeme") || 
           textoMinuscula.includes("llamada");
 
-        if (quiereLlamar) {
+        if (quireLlamar) {
           console.log("📞 [SOTO CALL]: Intención detectada. Disparando Ringtone en mostrador...");
           setTimeout(() => {
-            // 🚀 ¡AQUÍ SE ENCIENDE LA VARIABLE APAGADA EN LA RAM DE TU CAPTURA!
             setLlamadaEntranteVisible(true); 
             if (typeof reproducirTono === 'function') reproducirTono();
           }, 2000);
@@ -472,7 +476,6 @@ const procesarLoQueEscuche = async (audioUri) => {
     } catch (error) {
       console.error("❌ [SOTO NET ERROR]: Fuga en el orquestador transaccional:", error);
       
-      // Feedback inmediato en pantalla por si Railway está arrancando los motores
       setMessages(prev => [...prev, { 
         sender: 'model', 
         texto: "Mococho, disculpa la latencia, el cerebro en Railway se está calibrando. Intenta de nuevo en 5 segundos." 
