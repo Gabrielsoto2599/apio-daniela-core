@@ -60,7 +60,7 @@ export default function App() {
     }
   }, []);
 
-           // ====================================================================
+          // ====================================================================
   // BLOQUE 2: MOTOR DE AUDIO (RINGTONE DINÁMICO INMUNE A CRASHES DE APK)
   // ====================================================================
   async function reproducirTono() {
@@ -72,7 +72,7 @@ export default function App() {
         try { await sonido.unloadAsync(); } catch(e) {}
       }
 
-      // 🚀 REPARACIÓN DE PRODUCCIÓN COMERCIAL: Invocamos el archivo con require en caliente
+      // 🚀 SOLUCIÓN TRANSACCIONAL: Invocamos el archivo con require en caliente directo de los assets
       const { sound } = await Audio.Sound.createAsync(
         require('./apio-app/assets/sounds/whatsapp_ringtone.mp3'),
         { isLooping: true, shouldPlay: false }
@@ -85,6 +85,28 @@ export default function App() {
       console.error('❌ [SOTO VOX ERROR]: Crítico en motor de audio (Ringtone):', error.message);
     }
   }
+
+  async function detenerTono() {
+    // 🛡️ PROTECCIÓN CRÍTICA DE CRASH: Si la referencia es nula o vacía, salimos de inmediato
+    if (!sonido) {
+      console.log('📱 [SOTO VOX]: Canal de Ringtone vacío. Salida segura.');
+      return;
+    }
+    try {
+      console.log('🛑 [SOTO VOX]: Analizando estado del tono en la RAM...');
+      const status = await sonido.getStatusAsync();
+      if (status && status.isLoaded) {
+        await sonido.stopAsync();
+        await sonido.unloadAsync();
+        console.log('✅ [SOTO VOX]: Memoria del Ringtone liberada con éxito.');
+      }
+    } catch (error) {
+      console.log('⚠️ [SOTO VOX]: Aviso en motor de audio:', error.message);
+    } finally {
+      setSonido(null);
+    }
+  }
+
 
   // ====================================================================
 // BLOQUE 3: EFECTOS DE VIDA (FLUJO PASIVO Y RECOLECTOR DE TIEMPOS)
@@ -401,7 +423,7 @@ const procesarLoQueEscuche = async (audioUri) => {
         timeout: 25000 // 25 segundos de colchón para procesamiento cloud pesado
       });
       
-      const data = respuesta.data;
+   const data = respuesta.data;
       // Mapeo flexible de variables para asegurar la extracción cognitiva
       const textoRespuesta = data.respuestaDeDaniela || data.respuesta || data.text || "...";
       
@@ -415,15 +437,19 @@ const procesarLoQueEscuche = async (audioUri) => {
           texto: textoRespuesta 
         }]);
 
-        // 🛡️ ENCAPSULAMIENTO DEFENSIVO AUDIO-RESISTENTE
-                // 🛡️ ENCAPSULAMIENTO MULTIMEDIA NATIVO GRATUITO
+        // 🛡️ ENCAPSULAMIENTO MULTIMEDIA NATIVO GRATUITO (REPARADO)
         try {
-          // Le pasamos el texto puro de la respuesta directamente al altavoz del teléfono
-          await reproducirVozDaniela(textoRespuesta);
+          // Le damos 150ms a Android para pintar el globo y luego activamos el hardware de habla
+          setTimeout(() => {
+            if (typeof hablarDanielaNativo === 'function') {
+              hablarDanielaNativo(textoRespuesta);
+            } else {
+              console.warn("⚠️ [SOTO VOX]: La función hablarDanielaNativo no está instanciada aún.");
+            }
+          }, 150);
         } catch (audioErr) {
           console.warn("⚠️ [SOTO VOX]: Voz omitida por hardware local.");
         }
-
       
         // 📞 INTERCEPTOR DE LLAMADAS ENTRANTES (MIGRADO DE TU VIEJO CODE)
         const textoMinuscula = textoRespuesta.toLowerCase();
