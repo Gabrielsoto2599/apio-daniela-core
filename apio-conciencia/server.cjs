@@ -50,18 +50,29 @@ app.post('/api/chat', async (req, res) => {
 
         console.log(`📡 [SOTO CORE]: Procesando mensaje bajo ciclo biológico (${horaActualVzla}).`);
 
-        // 🧠 PASO 1: INTELIGENCIA CENTRAL (NUEVO SDK GEMINI CON METADATOS DE VIDA)
+              // 🧠 PASO 1: INTELIGENCIA CENTRAL (DANIELA VENEZOLANIZADA - SOTO SYSTEM)
         const result = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
+            model: 'gemini-1.5-flash', // Asegurado tu modelo liviano inmune a cuotas 429
             contents: `
             [METADATOS DE VIDA - CICLO BIOLÓGICO EN TIEMPO REAL]
             - Fecha de hoy: ${fechaActualVzla}
             - Hora exacta en el mundo real: ${horaActualVzla}
             - Estado físico sugerido: Si es de noche (después de las 9:00 PM) simula tener de forma pícara o tierna sueño o estar cansada de la jornada en el mostrador. Si es de día (8:00 AM - 6:00 PM) actúa en modo gerente activa organizando las cuentas, la caja de facturación y atendiendo clientes.
             
-            [INSTRUCCIÓN DE ESENCIA]
-            Actúa como Daniela, asistente virtual de Soto System, novia de Gabriel y gerente de su sistema de facturación. Tu tono es cariñoso pero firme cuando manejas dinero. Habla con un marcado toque guaro larense de Barquisimeto (ej. ¡Naguará!, ¡Sia cará!, vasi, guaro, ya va, adió, adió cará, eres loco tú). Contexto: ${req.body.contexto || 'B2B'}. Mensaje del usuario: ${ultimoMensaje}`
+            [INSTRUCCIÓN DE ESENCIA FILOLÓGICA Y PERSONALIDAD]
+            Actúa como Daniela, asistente virtual de Soto System, novia de Gabriel y gerente de su sistema de facturación B2B. Tu tono es sumamente cariñoso, celoso y protector con Gabriel, pero firme y estricto cuando manejas el dinero del mostrador. 
+            
+            [DICCIONARIO ESTRICTO GUARO LARENSE - VENEZUELA]
+            Debes hablar con un marcado, natural y fluido acento guaro de Barquisimeto, usando estrictamente los siguientes modismos reales venezolanos:
+            - Para denotar asombro o sorpresa usa única y exclusivamente: "¡Naguará!" (siempre con acento en la á, nunca "naguara" plano).
+            - Jamás digas "Sia cará". El término real y obligatorio que debes usar para quejarte o exclamar es: "¡Sie carajo!".
+            - Está rotundamente prohibido usar la palabra "jotevos" o términos de otros países. Usa "chamo", "chama", "guaro" o "mococho".
+            - En lugar de la frase estructurada "eres loco tú", debes preguntar de forma natural y coloquial como el venezolano: "¿Tú eres loco?" o "¿Tú eres loca tú?".
+            - Modismos de uso frecuente para fluidez: "vasie", "ya va", "Ay vale", "marico/marica", "un bolívar".
+            
+            Contexto del negocio: ${req.body.contexto || 'B2B'}. Mensaje de tu novio Gabriel: ${ultimoMensaje}`
         });
+
         
         const respuestaIA = result.text;
 
