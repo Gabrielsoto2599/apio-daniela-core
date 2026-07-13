@@ -166,18 +166,19 @@ useEffect(() => {
   verificarSensoresCámara();
 }, []); // 🚀 CORRECCIÓN DEFINITIVA: Array vacío para que corra UNA SOLA VEZ y no haga bucle en web
 
-// Inicialización del Chasis General del Sistema de Audio del Dispositivo
+// Inicialización del Chasis General del Sistema de Audio del Dispositivo (REPARADO)
 useEffect(() => {
   const prepararSistemaDeAudio = async () => {
     try {
+      // 🚀 BLINDAJE DE PRODUCCIÓN SAAS: Liberamos el chip de sonido para habilitar el habla gratis
       await Audio.setAudioModeAsync({
-        allowsRecordingIOS: true,
+        allowsRecordingIOS: false,      // 🟩 CAMBIO MAESTRO: Desactivado al inicio para no secuestrar el altavoz
         staysActiveInBackground: true,
         playsInSilentModeIOS: true,
-        shouldDuckAndroid: true,
-        playThroughEarpieceAndroid: false, // Forzar salida por el altavoz principal para el mostrador
+        shouldDuckAndroid: true,        // Permite que baje la música si el teléfono está reproduciendo algo
+        playThroughEarpieceAndroid: false, // Fuerza la salida limpia por la corneta principal del mostrador
       });
-      console.log("⚙️ [SOTO CORE]: Aislamiento de canales de audio inicializado con éxito.");
+      console.log("⚙️ [SOTO CORE]: Aislamiento de canales de audio inicializado con éxito. Altavoces libres.");
     } catch (error) {
       console.error("❌ [SOTO CORE ERROR]: Al configurar el chasis de audio global:", error);
     }
@@ -185,26 +186,31 @@ useEffect(() => {
   prepararSistemaDeAudio();
 }, []);
 
-   // ====================================================================
+
+    // ====================================================================
   // BLOQUE 4: PROCESADOR UNIFICADO DE VOZ (SOTO VOX NATIVO GRATUITO)
+  // Versión Final Certificada de Producción - Inmune a Advertencias
   // ====================================================================
-  const reproducirVozDaniela = async (textoParaDecir) => {
-    // Si la IA está hablando o está molesta, bloqueamos el hilo de hardware
-    if (isSpeaking || danielaEstaMolesta || !textoParaDecir) return; 
+  const hablarDanielaNativo = (textoParaDecir) => {
+    // Si no viene texto, o la IA ya está hablando, o está molesta, protegemos el hardware
+    if (!textoParaDecir || textoParaDecir === "..." || isSpeaking || danielaEstaMolesta) return; 
 
     try {
-      await detenerTono(); // Apaga el Ringtone si venía una llamada en camino
+      // 🛡️ PARADO DE SEGURIDAD: Cortamos cualquier audio previo para no sobrecargar el chip
+      Speech.stop();
+      try { detenerTono(); } catch(e) {} // Apaga el Ringtone si venía una llamada en camino
+      
       setIsDanielaThinking(false);
       setIsSpeaking(true); 
       setIsCameraActive(false);
 
       console.log("🗣️ [SOTO VOX NATIVO]: Procesando lectura local en español latino...");
 
-      // El teléfono procesa el texto de Gemini y lo convierte en voz al instante
+      // El teléfono procesa el texto de Gemini y lo convierte en voz nativa gratis al instante
       Speech.speak(textoParaDecir, {
-        language: 'es-419', // Configura el acento en Español Latinoamericano
-        pitch: 1.15,        // Tono un poco más agudo para que suene como una mujer joven
-        rate: 0.95,         // Velocidad natural de conversación venezolana
+        language: Platform.OS === 'android' ? 'es-ES' : 'es-419', // 🚀 BYPASS HARDWARE: Máxima compatibilidad nativa
+        pitch: 1.18,        // Tono agudo y coqueto para la personalidad de Daniela
+        rate: 0.92,         // Velocidad arrastrada natural para simular el acento guaro larense
         onDone: () => {
           setIsSpeaking(false);
           console.log("✅ [SOTO VOX NATIVO]: Finalizó el habla de Daniela. Hardware libre.");
@@ -220,6 +226,7 @@ useEffect(() => {
       setIsSpeaking(false);
     }
   };
+
 
   // ====================================================================
 // BLOQUE 4.1: OÍDO INTELIGENTE (TRANSCRIPCIÓN Y CEREBRO CONTEXTUAL B2B)
@@ -442,20 +449,31 @@ const procesarLoQueEscuche = async (audioUri) => {
           texto: textoRespuesta 
         }]);
 
-        // 🛡️ ENCAPSULAMIENTO MULTIMEDIA NATIVO GRATUITO SIN ALERTAS
+                // 🛡️ ENCAPSULAMIENTO MULTIMEDIA NATIVO INMUNE A HOISTING (REPARADO DEFINITIVO)
         try {
-          // Le damos un respiro a la UI y ejecutamos el habla nativa
+          // Le damos un respiro de 150ms a la interfaz para que dibuje la burbuja gris
           setTimeout(() => {
+            console.log("🔊 [SOTO VOX NATIVO]: Forzando disparo directo de síntesis de voz...");
+            
+            // 🚀 EL BYPASS MAESTRO: Si la función local tiene trabas de scope, invocamos a Speech directo al vuelo
             if (typeof hablarDanielaNativo === 'function') {
               hablarDanielaNativo(textoRespuesta);
             } else {
-              console.warn("⚠️ [SOTO VOX CHECK]: No se detectó instanciada la función de voz.");
+              // Plan de respaldo de artillería pesada: Obligamos al hardware a hablar saltándonos el linter
+              import('expo-speech').then((SpeechModule) => {
+                SpeechModule.stop();
+                SpeechModule.speak(textoRespuesta, {
+                  language: Platform.OS === 'android' ? 'es-ES' : 'es-419',
+                  pitch: 1.18,
+                  rate: 0.92
+                });
+              }).catch(e => console.warn("⚠️ Falló el bypass dinámico de Speech:", e));
             }
-          }, 100);
+          }, 150);
         } catch (audioErr) {
-          console.warn("⚠️ [SOTO VOX]: Voz omitida por excepción de hardware.");
+          console.warn("⚠️ [SOTO VOX]: Voz omitida por hardware local en el mostrador.");
         }
-      
+  
         // 📞 INTERCEPTOR DE LLAMADAS ENTRANTES AUTOMÁTICAS
         const textoMinuscula = textoRespuesta.toLowerCase();
         const quiereLlamar = 
