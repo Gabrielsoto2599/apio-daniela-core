@@ -4,7 +4,7 @@
 // ====================================================================
 
 // 🚀 CAMBIO MAESTRO DE INFRAESTRUCTURA CLOUD COMPLETADO
-export const BASE_URL = 'https://apio-daniela-core-production.up.railway.app';
+export const BASE_URL = 'https://web-production-dcec7.up.railway.app';
 
 console.log(`📡 [SOTO NET]: Interfaz móvil enrutada hacia la nube: ${BASE_URL}`);
 

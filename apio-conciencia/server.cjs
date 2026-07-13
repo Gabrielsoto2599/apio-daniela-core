@@ -60,7 +60,7 @@ app.post('/api/chat', async (req, res) => {
 
         // 🧠 PASO 1: INTELIGENCIA CENTRAL (DANIELA VENEZOLANIZADA - SOTO SYSTEM)
         const result = await ai.models.generateContent({
-            model: "gemini-2.5-flash", 
+            model: "gemini-1.5-flash", 
             contents: `
             [METADATOS DE VIDA - CICLO BIOLÓGICO EN TIEMPO REAL]
             - Fecha de hoy: ${fechaActualVzla}
@@ -89,7 +89,7 @@ app.post('/api/chat', async (req, res) => {
 
         try {
             // 🚀 REPARACIÓN DE INFRAESTRUCTURA: Conectamos directo con tu dominio real de Django
-            const respuestaDjango = await axios.post("https://railway.app", {
+            const respuestaDjango = await axios.post("https://web-production-dcec7.up.railway.app", {
                 texto: respuestaIA,
                 original_input: ultimoMensaje,
                 contexto: req.body.contexto || "PRODUCTIVA_SARGENTO",
