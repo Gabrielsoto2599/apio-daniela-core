@@ -1,6 +1,6 @@
 // ====================================================================
 // BLOQUE 1: CORE DE RED, MIDDLEWARES Y CONFIGURACIÓN (SOTO PROXY 2026)
-// Ubicación: server.cjs (VERSIÓN FINAL INMUNE A ERRORES 404)
+// Ubicación: server.cjs (Línea 18 - CONFIGURACIÓN INDESTRUCTIBLE)
 // ====================================================================
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
@@ -11,11 +11,13 @@ const axios = require('axios');
 // 🚀 SDK UNIFICADO NUEVO DE GOOGLE GEMINI
 const { GoogleGenAI } = require("@google/genai"); 
 
-// 🔥 LA REPARACIÓN DE ORO DEFINITIVA:
-// En la nueva SDK @google/genai, NO se le pasa 'apiVersion'. Al instanciar el objeto 
-// completamente vacío, la librería muerde de forma automática tu variable de entorno 
-// 'GEMINI_API_KEY' en Railway y se ancla sola en el canal 'v1' estable de Google.
-const ai = new GoogleGenAI(); 
+// Extraemos la llave limpia que inyectaste en las variables de Railway
+const apiKey = process.env.GEMINI_API_KEY || process.env.GEMINI_PRO || process.env.GOOGLE_API_KEY;
+
+// 🔥 LA COMPUERTA REPARADA: Le pasamos un objeto con la propiedad 'apiKey' explícita.
+// Esto sacia el constructor de la SDK, evita que busque propiedades 'project' vacías
+// y fuerza al sistema a usar de forma automatizada el canal 'v1' estable de Google.
+const ai = new GoogleGenAI({ apiKey: apiKey }); 
 
 // 🛠️ CONTROLADOR DE ERRORES OCULTOS EN RED
 process.on('unhandledRejection', (reason, promise) => {
@@ -26,8 +28,7 @@ const app = express();
 app.use(cors()); 
 app.use(express.json());
 
-console.log("⚙️ [SOTO PROXY]: Ecosistema Node inicializado en limpio en canal v1 de producción.");
-
+console.log("⚙️ [SOTO PROXY]: Ecosistema Node inicializado en el canal v1 estable de producción.");
 
 // ====================================================================
 // 🚀 ENDPOINT DE CHAT ORQUESTADO PURO (GEMINI + DJANGO SYNC)
