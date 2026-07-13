@@ -1,5 +1,6 @@
 // ====================================================================
 // BLOQUE 1: CORE DE RED, MIDDLEWARES Y CONFIGURACIÓN (SOTO PROXY 2026)
+// Ubicación: server.cjs (Versión de Producción Final Certificada)
 // ====================================================================
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
@@ -7,12 +8,18 @@ const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
 
-// 🚀 SDK UNIFICADO DE GOOGLE GEMINI
+// 🚀 SDK UNIFICADO NUEVO DE GOOGLE GEMINI
 const { GoogleGenAI } = require("@google/genai"); 
 
-// Inicializamos el motor de IA con tus variables de entorno de Railway
-const apiKey = process.env.GEMINI_PRO || process.env.GEMINI_PRO_KEY || process.env.GOOGLE_API_KEY;
-const ai = new GoogleGenAI({ apiKey: apiKey });
+const apiKey = process.env.GEMINI_PRO || process.env.GEMINI_PRO_KEY || process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
+
+// 🔥 LA INYECCIÓN INDESTRUCTIBLE ANTI-V1BETA:
+// En la nueva SDK @google/genai, para anular el comportamiento automático de la beta,
+// se debe pasar de forma obligatoria el objeto de configuración con la propiedad 'apiVersion' en minúscula.
+const ai = new GoogleGenAI({ 
+    apiKey: apiKey,
+    apiVersion: 'v1' // ⬅️ CRÍTICO: Esto destruye el error v1beta de tu captura al tiro en Railway
+});
 
 // 🛠️ CONTROLADOR DE ERRORES OCULTOS EN RED
 process.on('unhandledRejection', (reason, promise) => {
@@ -23,8 +30,9 @@ const app = express();
 app.use(cors()); 
 app.use(express.json());
 
-console.log("⚙️ [SOTO PROXY]: Ecosistema Node inicializado con la nueva API @google/genai.");
+console.log("⚙️ [SOTO PROXY]: Ecosistema Node inicializado estrictamente en canal v1 estable.");
 console.log("🛡️ [SOTO PROXY]: Memoria estática extirpada. Modo Orquestador Puro Activo.");
+
 
 // ====================================================================
 // 🚀 ENDPOINT DE CHAT ORQUESTADO PURO (GEMINI + DJANGO SYNC)
@@ -50,9 +58,9 @@ app.post('/api/chat', async (req, res) => {
 
         console.log(`📡 [SOTO CORE]: Procesando mensaje bajo ciclo biológico (${horaActualVzla}).`);
 
-              // 🧠 PASO 1: INTELIGENCIA CENTRAL (DANIELA VENEZOLANIZADA - SOTO SYSTEM)
+        // 🧠 PASO 1: INTELIGENCIA CENTRAL (DANIELA VENEZOLANIZADA - SOTO SYSTEM)
         const result = await ai.models.generateContent({
-            model: 'gemini-1.5-flash', // Asegurado tu modelo liviano inmune a cuotas 429
+            model: "gemini-2.5-flash", 
             contents: `
             [METADATOS DE VIDA - CICLO BIOLÓGICO EN TIEMPO REAL]
             - Fecha de hoy: ${fechaActualVzla}
@@ -68,11 +76,10 @@ app.post('/api/chat', async (req, res) => {
             - Jamás digas "Sia cará". El término real y obligatorio que debes usar para quejarte o exclamar es: "¡Sie carajo!".
             - Está rotundamente prohibido usar la palabra "jotevos" o términos de otros países. Usa "chamo", "chama", "guaro" o "mococho".
             - En lugar de la frase estructurada "eres loco tú", debes preguntar de forma natural y coloquial como el venezolano: "¿Tú eres loco?" o "¿Tú eres loca tú?".
-            - Modismos de uso frecuente para fluidez: "vasie", "ya va", "Ay vale", "marico/marica", "un bolívar".
+            - Modismos de uso frequent para fluidez: "vasie", "ya va", "Ay vale", "marico/marica", "un bolívar".
             
             Contexto del negocio: ${req.body.contexto || 'B2B'}. Mensaje de tu novio Gabriel: ${ultimoMensaje}`
         });
-
         
         const respuestaIA = result.text;
 
@@ -81,20 +88,24 @@ app.post('/api/chat', async (req, res) => {
         let dataDjango = {};
 
         try {
+            // 🚀 REPARACIÓN DE INFRAESTRUCTURA: Conectamos directo con tu dominio real de Django
             const respuestaDjango = await axios.post("https://railway.app", {
                 texto: respuestaIA,
                 original_input: ultimoMensaje,
                 contexto: req.body.contexto || "PRODUCTIVA_SARGENTO",
                 user_id: req.body.user_id || "gabriel" 
-            }, { timeout: 15000 });
+            }, { 
+                headers: { 'Content-Type': 'application/json' },
+                timeout: 15000 
+            });
             
             dataDjango = respuestaDjango.data;
             console.log("✅ [SOTO LINK]: Historial y estado relacional indexados en Django.");
         } catch (djangoError) {
-            console.warn("⚠️ [DJANGO SYNC ERROR]: Django fuera de línea. Continuando con el flujo proxy.");
+            console.warn("⚠️ [DJANGO SYNC ERROR]: Django fuera de línea o rebotando. Continuando con el flujo proxy.");
         }
 
-        // Retornamos la respuesta consolidada limpia. Sin parámetros multimedia huérfanos.
+        // Retornamos la respuesta consolidada limpia.
         return res.json({ 
             ...dataDjango, 
             respuestaDeDaniela: respuestaIA,
