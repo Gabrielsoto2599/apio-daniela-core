@@ -28,7 +28,8 @@ const app = express();
 app.use(cors()); 
 app.use(express.json());
 
-console.log("⚙️ [SOTO PROXY]: Ecosistema Node inicializado en el canal v1 estable de producción.");
+console.log("🔥🔥🔥 BUILD 2026 - CAMBIO CONFIRMADO - GEMINI 2.5 🔥🔥🔥");
+console.log("MODELO:", "gemini-2.5-flash");
 
 // ====================================================================
 // 🚀 ENDPOINT DE CHAT ORQUESTADO PURO (GEMINI + DJANGO SYNC)
@@ -56,7 +57,7 @@ app.post('/api/chat', async (req, res) => {
 
         // 🧠 PASO 1: INTELIGENCIA CENTRAL (DANIELA VENEZOLANIZADA - SOTO SYSTEM)
         const result = await ai.models.generateContent({
-            model: "gemini-1.5-flash", 
+            model: "gemini-2.5-flash", 
             contents: `
             [METADATOS DE VIDA - CICLO BIOLÓGICO EN TIEMPO REAL]
             - Fecha de hoy: ${fechaActualVzla}

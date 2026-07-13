@@ -92,18 +92,23 @@ export default function ChatScreen({
             </View>
           )}
 
-          {/* ====================================================================
+                    {/* ====================================================================
           HEADER SUPERIOR DE LA CONVERSACIÓN (ESTILO WHATSAPP PREMIUM BLINDADO)
           ==================================================================== */}
           <View style={styles.header}>
-            <TouchableOpacity onPress={onVolver} style={styles.backButton} activeOpacity={0.7}>
+            <TouchableOpacity 
+              onPress={onVolver} 
+              style={styles.backButton} 
+              activeOpacity={0.7}
+              hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }} // 🚀 Amplía el rango táctil del botón de atrás
+            >
               <Ionicons name="chevron-back" size={28} color="#fff" />
             </TouchableOpacity>
             
             <TouchableOpacity onPress={onAbrirEmpresa} style={styles.profileContainer} activeOpacity={0.8}>
               <Image source={profilePic} style={styles.profileImage} />
-              {/* 🛡️ REPARACIÓN COGNITIVA ANTI-CRASH: Sustituido 'div' web por '<View>' nativo de Expo */}
-              <View style={{ display: 'none' }} data-trigger="Ionicons MaterialIcons textRespuestaActual" />
+              
+              {/* 🟩 REPARACIÓN SANEADA: Eliminamos la propiedad 'data-trigger' web para blindar la APK contra alertas */}
               <View style={styles.onlineDot} />
             </TouchableOpacity>
 
@@ -113,9 +118,20 @@ export default function ChatScreen({
             </View>
 
             <View style={styles.headerIcons}>
-              <TouchableOpacity activeOpacity={0.7}><Ionicons name="videocam" size={22} color="#fff" /></TouchableOpacity>
-              <TouchableOpacity activeOpacity={0.7}><Ionicons name="call" size={20} color="#fff" /></TouchableOpacity>
-              <TouchableOpacity onPress={onAbrirPerfilFoto} activeOpacity={0.7}>
+              {/* Añadimos hitSlop a las herramientas multimedia para que respondan al tiro en el mostrador */}
+              <TouchableOpacity activeOpacity={0.7} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                <Ionicons name="videocam" size={22} color="#fff" />
+              </TouchableOpacity>
+              
+              <TouchableOpacity activeOpacity={0.7} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                <Ionicons name="call" size={20} color="#fff" />
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                onPress={onAbrirPerfilFoto} 
+                activeOpacity={0.7}
+                hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+              >
                 <Ionicons name="ellipsis-vertical" size={20} color="#fff" />
               </TouchableOpacity>
             </View>
@@ -125,8 +141,8 @@ export default function ChatScreen({
           CUERPO CENTRAL DE MENSAJES (PAPEL TAPIZ EN MODO OSCURO)
           ==================================================================== */}
             <ImageBackground 
-            // 🚀 EL ENLACE INDESTRUCTIBLE UNIFICADO: Con el prefijo raw. de datos puros
-            source={{ uri: 'https://raw.githubusercontent.com/Gabrielsoto2599/apio-ia/main/assets/images/foto-fondo-apio.png' }}
+            // 🚀 EL ENLACE INDESTRUCTIBLE LOCAL: Carga el fondo al vuelo desde el disco duro, inmune a fallas de internet
+            source={require('../../apio-app/assets/images/foto-fondo-apio.png')} // Ajusta los ../ según la altura de tu carpeta app/chat/
             style={styles.chatBackground}
             imageStyle={{ opacity: 0.04, tintColor: '#000000' }}
           >
@@ -148,7 +164,8 @@ export default function ChatScreen({
                     {/* 🛡️ BLINDAJE DE EXTRACCIÓN: Garantiza renderizar el texto sin importar qué clave responda el ORM */}
                     <Text style={styles.messageText}>{msg.texto || msg.text || msg.message || "..."}</Text>
                     <View style={styles.timeRow}>
-                      <Text style={styles.timeText}>{msg.time || '08:59 PM'}</Text>
+                      <Text style={styles.timeText}>
+                     {msg.time || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
                       {msg.sender === 'user' && <Ionicons name="checkmark-done" size={16} color="#53bdeb" />}
                     </View>
                   </View>
@@ -232,21 +249,29 @@ export default function ChatScreen({
               >
                 <MaterialCommunityIcons name="send" size={22} color="white" />
               </TouchableOpacity>
-            ) : (
+                        ) : (
               <TouchableOpacity 
                 style={[
                   styles.sendButton, 
                   { width: 48, height: 48, borderRadius: 24, backgroundColor: '#00a884', justifyContent: 'center', alignItems: 'center' },
                   isRecording && { backgroundColor: '#ea0038' }
                 ]} 
-                onPressIn={onIniciarGrabacion}
-                onPressOut={onDetenerGrabacion}
+                // 🚀 REPARACIÓN DE PRODUCCIÓN INTERNACIONAL: Quitamos onPressIn/Out para evitar micro-choques en el chip de audio
+                onPress={() => {
+                  if (isRecording) {
+                    onDetenerGrabacion(); // Si ya estaba grabando, corta el canal y despacha
+                  } else {
+                    onIniciarGrabacion(); // Si estaba apagado, enciende las cuerdas vocales nativas
+                  }
+                }}
                 disabled={isDanielaThinking} 
                 activeOpacity={0.7}
               >
-                <MaterialCommunityIcons name={isRecording ? "microphone-off" : "microphone"} size={22} color="white" />
+                {/* Cambia dinámicamente el icono para dar feedback visual inmediato */}
+                <MaterialCommunityIcons name={isRecording ? "stop" : "microphone"} size={22} color="white" />
               </TouchableOpacity>
             )}
+
           </View>
 
         </View>
