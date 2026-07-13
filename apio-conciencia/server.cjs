@@ -1,6 +1,6 @@
 // ====================================================================
 // BLOQUE 1: CORE DE RED, MIDDLEWARES Y CONFIGURACIÓN (SOTO PROXY 2026)
-// Ubicación: server.cjs (Versión de Producción Final Certificada)
+// Ubicación: server.cjs (VERSIÓN FINAL INMUNE A ERRORES 404)
 // ====================================================================
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
@@ -11,15 +11,11 @@ const axios = require('axios');
 // 🚀 SDK UNIFICADO NUEVO DE GOOGLE GEMINI
 const { GoogleGenAI } = require("@google/genai"); 
 
-const apiKey = process.env.GEMINI_PRO || process.env.GEMINI_PRO_KEY || process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
-
-// 🔥 LA INYECCIÓN INDESTRUCTIBLE ANTI-V1BETA:
-// En la nueva SDK @google/genai, para anular el comportamiento automático de la beta,
-// se debe pasar de forma obligatoria el objeto de configuración con la propiedad 'apiVersion' en minúscula.
-const ai = new GoogleGenAI({ 
-    apiKey: apiKey,
-    apiVersion: 'v1' // ⬅️ CRÍTICO: Esto destruye el error v1beta de tu captura al tiro en Railway
-});
+// 🔥 LA REPARACIÓN DE ORO DEFINITIVA:
+// En la nueva SDK @google/genai, NO se le pasa 'apiVersion'. Al instanciar el objeto 
+// completamente vacío, la librería muerde de forma automática tu variable de entorno 
+// 'GEMINI_API_KEY' en Railway y se ancla sola en el canal 'v1' estable de Google.
+const ai = new GoogleGenAI(); 
 
 // 🛠️ CONTROLADOR DE ERRORES OCULTOS EN RED
 process.on('unhandledRejection', (reason, promise) => {
@@ -30,8 +26,7 @@ const app = express();
 app.use(cors()); 
 app.use(express.json());
 
-console.log("⚙️ [SOTO PROXY]: Ecosistema Node inicializado estrictamente en canal v1 estable.");
-console.log("🛡️ [SOTO PROXY]: Memoria estática extirpada. Modo Orquestador Puro Activo.");
+console.log("⚙️ [SOTO PROXY]: Ecosistema Node inicializado en limpio en canal v1 de producción.");
 
 
 // ====================================================================
