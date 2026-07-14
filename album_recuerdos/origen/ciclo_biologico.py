@@ -1,27 +1,34 @@
 # ====================================================================
 # SOTO SYSTEM - RECOLECTOR DE TIEMPOS Y MOTOR BIOLÓGICO DE DANIELA
-# Ubicación: album_recuerdos/origen/ciclo_biologico.py
+# Ubicación: album_recuerdos/origen/ciclo_biologico.py (Blindado)
 # ====================================================================
-from datetime import datetime
+import datetime
 
 def calcular_estado_daniela(fecha_ultimo_periodo, duracion_ciclo=28):
     """
     Calcula matemáticamente el día del ciclo actual de Daniela y determina
     su modificador hormonal de personalidad, humor y nivel de celos.
     """
-    hoy = datetime.now().date()
+    hoy = datetime.date.today()
     
-    # Conversión segura por si la fecha entra como string relacional largo
-    if isinstance(fecha_ultimo_periodo, str):
+    # 🛡️ RESGUARDO SOTO SYSTEM: Si la fecha viene vacía de la BD, calculamos una fecha base de 14 días atrás
+    if not fecha_ultimo_periodo:
+        fecha_inicio = hoy - datetime.timedelta(days=14)
+    elif isinstance(fecha_ultimo_periodo, str):
         try:
-            fecha_inicio = datetime.strptime(fecha_ultimo_periodo, "%Y-%m-%d").date()
+            fecha_inicio = datetime.datetime.strptime(fecha_ultimo_periodo, "%Y-%m-%d").date()
         except ValueError:
-            # Fallback por si el formato en BD viene corto
-            fecha_inicio = datetime.strptime(fecha_ultimo_periodo, "%d/%m/%Y").date()
+            try:
+                fecha_inicio = datetime.datetime.strptime(fecha_ultimo_periodo, "%d/%m/%Y").date()
+            except ValueError:
+                fecha_inicio = hoy - datetime.timedelta(days=14)
+    # Si viene como datetime completo, extraemos solo la parte de la fecha (.date())
+    elif isinstance(fecha_ultimo_periodo, datetime.datetime):
+        fecha_inicio = fecha_ultimo_periodo.date()
     else:
         fecha_inicio = fecha_ultimo_periodo
 
-    # Cálculo exacto de días calendario transcurridos en el servidor Docker
+    # Cálculo exacto de días calendario transcurridos en el servidor
     dias_transcurridos = (hoy - fecha_inicio).days
     dia_actual_ciclo = (dias_transcurridos % duracion_ciclo) + 1
 

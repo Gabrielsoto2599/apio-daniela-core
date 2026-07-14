@@ -1,5 +1,5 @@
 # ====================================================================
-# SOTO SYSTEM CENTRAL ASYNC INTEGRATION (ASGI APP BLINDADA)
+# SOTO SYSTEM CENTRAL ASYNC INTEGRATION (ASGI APP BLINDADA - REPARADA)
 # Ubicación: apio_backend/asgi.py
 # ====================================================================
 import os
@@ -9,10 +9,10 @@ from channels.auth import AuthMiddlewareStack
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'apio_backend.settings')
 
-# Inicializamos la aplicación HTTP básica de Django
+# 🚀 PASO 1: Inicializamos la aplicación HTTP y forzamos a Django a cargar todos sus módulos y modelos primero
 django_asgi_app = get_asgi_application()
 
-# Importaremos las rutas de sockets locales de tu aplicación de chat
+# 🚀 PASO 2: Importación diferida segura. Ahora que Django está listo, podemos importar las rutas sin romper la RAM
 import chat.routing
 
 # Enrutador maestro por protocolo
@@ -27,3 +27,4 @@ application = ProtocolTypeRouter({
         )
     ),
 })
+

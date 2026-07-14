@@ -1,17 +1,21 @@
 // ====================================================================
-// VINCULAR.JS - CALIBRACIÓN DE ESCÁNER DE RED (SOTO SYSTEM 2026)
-// Ubicación: app/home/vincular.js
+// VINCULAR.JS - CALIBRACIÓN DE ESCÁNER DE RED MULTIUSUARIO (SOTO SYSTEM 2026)
+// Ubicación: app/home/vincular.js (Versión Blindada de Producción)
 // ====================================================================
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { StyleSheet, View, Modal, TouchableOpacity, Text } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Ionicons } from '@expo/vector-icons';
 
-export default function VincularDispositivoModal({ isOpen, onClose, onVinculacionExitosa }) {
+export default function VincularDispositivoModal({ isOpen, onClose, onVinculacionExitosa, usuarioActual }) {
   const [permission, requestPermission] = useCameraPermissions();
+  
+  // 🛡️ CERROJO DE HARDWARE: Impide botes de memoria o dobles disparos en milisegundos
+  const escaneoBloqueadoRef = useRef(false);
 
   useEffect(() => {
     if (isOpen) {
+      escaneoBloqueadoRef.current = false; // Liberamos el gatillo al abrir el modal
       (async () => {
         try {
           await requestPermission();
@@ -24,11 +28,38 @@ export default function VincularDispositivoModal({ isOpen, onClose, onVinculacio
 
   // 🚀 CONEXIÓN QUÍMICA ASÍNCRONA: Muerde la URL de Railway emitida por la computadora
   const handleBarCodeScanned = ({ data }) => {
+    // Si el cerrojo está activo, ignoramos lecturas repetidas para proteger la red
+    if (escaneoBloqueadoRef.current) return;
+    
     console.log("📡 [SOTO QR]: Captura de datos transaccionales en mostrador:", data);
     
-    // Filtro de validación: Certifica que los bits traigan el ecosistema de Railway
-    if (data && data.includes('railway.app')) {
-      onVinculacionExitosa(data); // Dispara la prop maestra hacia App.js para mutar el backend
+    // 🛡️ Filtro de Validación Soto System: Asegura tu ID único de producción de Daniela
+    if (data && data.includes('web-production-dcec7.up.railway.app')) {
+      escaneoBloqueadoRef.current = true; // Echamos el pestillo de inmediato en la RAM
+
+      // Sanitizamos el nombre del operador actual de la sección 'Mi Cuenta' para evitar espacios raros
+      const operadorSaaS = usuarioActual ? encodeURIComponent(usuarioActual.trim()) : "Cajero_Anonimo";
+      
+      // Aseguramos que la URL conserve la barra de cierre obligatoria antes del parámetro
+      // Esto evita que Django arroje un error de redirección 301 en la antena asíncrona
+      let urlLimpia = data.trim();
+      if (!urlLimpia.includes('?') && !urlLimpia.endsWith('/')) {
+        urlLimpia += '/';
+      } else if (urlLimpia.includes('?')) {
+        const partes = urlLimpia.split('?');
+        if (!partes[0].endsWith('/')) {
+          partes[0] += '/';
+        }
+        urlLimpia = partes.join('?');
+      }
+
+      // Re-estructuramos la URL final inyectándole dinámicamente el usuario activo de la bodega
+      const concatenador = urlLimpia.includes('?') ? '&' : '?';
+      const urlConOperadorDinamico = `${urlLimpia}${concatenador}user_id=${operadorSaaS}`;
+      
+      console.log(`✅ [SOTO QR MATCH]: Enlazando sesión multiusuario para el operador: [${usuarioActual || 'Anónimo'}]`);
+      
+      onVinculacionExitosa(urlConOperadorDinamico); // Envía la URL amarrada con sesión y usuario a App.js
       onClose(); // Apaga la cámara nativa en la RAM de inmediato para liberar sensores
     } else {
       console.warn("⚠️ [SOTO QR]: Código QR inválido o ajeno al ecosistema de Apio SaaS.");
@@ -57,6 +88,11 @@ export default function VincularDispositivoModal({ isOpen, onClose, onVinculacio
           <Text style={styles.scannerHelperText}>Apunte al QR de la Computadora</Text>
         </View>
 
+        {/* Indicador inferior flotante del operador actual que escanea */}
+        <View style={styles.operadorBadge}>
+          <Text style={styles.operadorText}>📱 Operador: {usuarioActual || "No Identificado"}</Text>
+        </View>
+
         <View style={styles.overlay}>
           <TouchableOpacity style={styles.closeButton} onPress={onClose} activeOpacity={0.7}>
             <Ionicons name="close" size={30} color="#fff" />
@@ -81,5 +117,9 @@ const styles = StyleSheet.create({
   scannerCornerTopRight: { position: 'absolute', top: 0, right: 0, width: 24, height: 24, borderColor: '#00a884', borderRightWidth: 4, borderTopWidth: 4 },
   scannerCornerBottomLeft: { position: 'absolute', bottom: 0, left: 0, width: 24, height: 24, borderColor: '#00a884', borderLeftWidth: 4, borderBottomWidth: 4 },
   scannerCornerBottomRight: { position: 'absolute', bottom: 0, right: 0, width: 24, height: 24, borderColor: '#00a884', borderRightWidth: 4, borderBottomWidth: 4 },
-  scannerHelperText: { color: '#e9edef', position: 'absolute', bottom: -40, fontSize: 13, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5, textAlign: 'center', width: 300 }
+  scannerHelperText: { color: '#e9edef', position: 'absolute', bottom: -40, fontSize: 13, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5, textAlign: 'center', width: 300 },
+  
+  // Etiqueta de seguridad del operario en mostrador
+  operadorBadge: { position: 'absolute', bottom: 60, backgroundColor: 'rgba(18, 27, 34, 0.85)', paddingVertical: 8, paddingHorizontal: 16, borderRadius: 20, borderWidth: 1, borderColor: '#334155' },
+  operadorText: { color: '#22c55e', fontSize: 12, fontWeight: '700', fontFamily: 'System' }
 });

@@ -4,14 +4,14 @@
     "slug": "apio-ia-v2",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./apio-app/assets/images/icon.png",
+    "icon": "./assets/images/icon.png",
     "scheme": "apioapp",
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
         "NSMicrophoneUsageDescription": "Necesitamos acceso al micrófono para que hables con Daniela.",
-        "NSCameraUsageDescription": "Daniela necesita usar la cámara frontal para verte físicamente, chamo."
+        "NSCameraUsageDescription": "Daniela necesita usar la cámara para escanear el código QR de facturación y verte en tiempo real, chamo."
       }
     },
     "android": {
@@ -25,20 +25,20 @@
       ],
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./apio-app/assets/images/android-icon-foreground.png",
-        "backgroundImage": "./apio-app/assets/images/android-icon-background.png",
-        "monochromeImage": "./apio-app/assets/images/android-icon-monochrome.png"
+        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "backgroundImage": "./assets/images/android-icon-background.png",
+        "monochromeImage": "./assets/images/android-icon-monochrome.png"
       }
     },
     "web": {
-  "bundler": "metro",
-  "output": "static"
-},
+      "bundler": "metro",
+      "output": "static"
+    },
     "plugins": [
       [
         "expo-splash-screen",
         {
-          "image": "./apio-app/assets/images/splash-icon.png",
+          "image": "./assets/images/splash-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
@@ -47,13 +47,13 @@
       [
         "expo-av",
         {
-          "microphonePermission": "Daniela necesita escucharte para poder responderte, chamo."
+          "microphonePermission": "Daniela necesita escucharte para poder responderte, chamo y procesar tus audios."
         }
       ],
       [
         "expo-camera",
         {
-          "cameraPermission": "Daniela necesita usar la cámara para verte físicamente en tiempo real."
+          "cameraPermission": "Daniela necesita usar la cámara para enlazar el asistente al sistema de escritorio mediante el código QR."
         }
       ],
       "expo-router"

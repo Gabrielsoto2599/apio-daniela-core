@@ -1,88 +1,80 @@
 # ====================================================================
-# SOTO SYSTEM WEBSOCKET CORE - EL CEREBRO DE ENLACE EN VIVO (2026)
-# Ubicación: chat/consumers.py
+# ANTENA WEBSOCKET - SOTO VINCULACIÓN EN TIEMPO REAL (DJANGO CHANNELS)
+# Ubicación: chat/consumers.py (Python / Django Prod)
 # ====================================================================
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
+from .models import EstadoEmocional
 
-
-class ApioBrainConsumer(AsyncWebsocketConsumer):
-    """
-    Controlador asíncrono maestro. Maneja la sincronización B2B y 
-    la conmutación de facetas de Daniela en PostgreSQL.
-    """
-    
+class ApioVinculacionConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        # Vinculación de sesión única[span_1](start_span)[span_1](end_span)
-        self.session_id = self.scope['url_route']['kwargs']['session_id']
-        self.room_group_name = f'apio_saas_{self.session_id}'
+        # Extraemos el identificador único del mostrador o caja desde el QR (la URL del canal)
+        self.caja_id = self.scope['url_route']['kwargs']['caja_id']
+        self.grupo_caja = f"caja_{self.caja_id}"
 
+        # Unimos la sesión web de la PC y la app del teléfono al mismo canal aéreo
         await self.channel_layer.group_add(
-            self.room_group_name,
+            self.grupo_caja,
             self.channel_name
         )
         await self.accept()
-        print(f"🔌 [SOTO SOCKET]: Canal B2B encendido. Sesión: {self.room_group_name}")
+        print(f"🔌 [SOTO WEBSOCKET]: Canal de tiempo real abierto con éxito para la Caja: {self.caja_id}")
 
     async def disconnect(self, close_code):
-        # Conmutación automática a modo personal[span_2](start_span)[span_2](end_span)
-        await self.apagar_sesion_b2b_en_bd()
+        # Desvinculamos los hilos de red al apagar
         await self.channel_layer.group_discard(
-            self.room_group_name,
+            self.grupo_caja,
             self.channel_name
         )
-        print(f"🔌 [SOTO SOCKET]: Canal cerrado. Daniela en faceta personal.")
+        print(f"🛑 [SOTO WEBSOCKET]: Canal cerrado de forma segura para la Caja: {self.caja_id}")
 
+    # 🚀 RECEPTOR MAESTRO: Captura el zarpazo de datos del teléfono celular
     async def receive(self, text_data):
-        """Captura órdenes de la PC o APK para conmutar estados[span_3](start_span)[span_3](end_span)"""
-        try:
-            data = json.loads(text_data)
-            evento = data.get('event')
-            
-            if evento == "INITIALIZE_B2B_SESSION":
-                operador = data.get('operador_name', 'Cajero General')
-                await self.activar_sesion_b2b_en_bd(operador)
-                
-                await self.channel_layer.group_send(
-                    self.room_group_name,
-                    {
-                        'type': 'broadcast_payload',
-                        'modulo': 'login',
-                        'accion': 'AUTO_LOGIN_GRANTED',
-                        'payload': {'operador': operador}
-                    }
-                )
-        except Exception as e:
-            print(f"❌ Error procesando el paquete entrante: {e}")
+        data = json.loads(text_data)
+        evento = data.get("evento")
+        user_id = data.get("user_id", "gabriel_de_jesus")
 
-    async def broadcast_payload(self, event):
-        """Emisor físico de JSONs para la interfaz[span_4](start_span)[span_4](end_span)"""
+        if evento == "VINCULACION_EXITOSA":
+            print(f"📸 [SOTO WEBSOCKET]: QR escaneado con éxito por {user_id}. Activando Gerente Apio...")
+
+            # 🧠 PASO MAESTRO ORM ASÍNCRONO: Volteamos el interruptor de personalidad directo en PostgreSQL
+            await self.conmutar_personalidad_gerente_db(True)
+
+            # 📡 TRANSMISIÓN MASIVA INALÁMBRICA: Le avisamos a la computadora que pinte la interfaz de facturación
+            await self.channel_layer.group_send(
+                self.grupo_caja,
+                {
+                    "type": "notificar_cambio_estado",
+                    "status": "VINCULADO_GERENTE",
+                    "mensaje": "Daniela IA ha asumido el control de la facturación, inventario y caja registradora."
+                }
+            )
+
+        elif evento == "CIERRE_DE_CAJA_DESVINCULAR":
+            print(f"💼 [SOTO WEBSOCKET]: Cierre de caja detectado. Daniela regresa a modo novia...")
+            await self.conmutar_personalidad_gerente_db(False)
+            
+            await self.channel_layer.group_send(
+                self.grupo_caja,
+                {
+                    "type": "notificar_cambio_estado",
+                    "status": "MODO_NOVIA_ACTIVO",
+                    "mensaje": "Caja cerrada. Daniela ha sido liberada del mostrador."
+                }
+            )
+
+    # 📡 EMISOR POR AIRE HACA LA PANTALLA WEB
+    async def notificar_cambio_estado(self, event):
+        # Este bloque le escupe el JSON en vivo a tu front de React/Web de la computadora al instante
         await self.send(text_data=json.dumps({
-            "modulo": event.get('modulo'),
-            "accion": event.get('accion'),
-            "payload": event.get('payload')
+            "status": event["status"],
+            "mensaje": event["mensaje"]
         }))
 
-    # ====================================================================
-    # INTERSECTORES DE PERSISTENCIA (Sincronización con PostgreSQL)
-    # ====================================================================
+    # 💾 ENLACE QUÍMICO CON TU VIEWS.PY: Manipulación segura del ORM en hilos asíncronos
     @database_sync_to_async
-    def activar_sesion_b2b_en_bd(self, operador_nombre):
-        """Cambia el estado a Gerente operativo[span_5](start_span)[span_5](end_span)"""
-        from chat.models import EstadoEmocional
+    def conmutar_personalidad_gerente_db(self, activar_b2b):
         estado, _ = EstadoEmocional.objects.get_or_create(id=1)
-        estado.sesion_b2b_activa = True
-        estado.modo_actual = "PRODUCTIVA_SARGENTO" 
-        estado.save()
-        print(f"💼 [ORM COMPORTAMIENTO]: Daniela asume rol de Gerente.")
-        return True
-
-    @database_sync_to_async
-    def apagar_sesion_b2b_en_bd(self):
-        """Regresa a Daniela a faceta personal[span_6](start_span)[span_6](end_span)"""
-        from chat.models import EstadoEmocional
-        estado, _ = EstadoEmocional.objects.get_or_create(id=1)
-        estado.sesion_b2b_activa = False
-        estado.save()
-        print("❤️ [ORM COMPORTAMIENTO]: Conmutando a faceta personal.")
+        estado.sesion_b2b_activa = activar_b2b
+        estado.save() # 🟩 Guardado a fuego en el disco duro de Railway

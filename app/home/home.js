@@ -158,63 +158,60 @@ export default function Home({ messages, onCambiarVista, onAbrirPerfil, onAbrirE
         </TouchableOpacity>
       )}
 
-             {/* ====================================================================
-  🚀 BLOQUE 4 TRANSFORMADO: MENU FLOTANTE + CAMARA QR INYECTADA (REGLA DE GABRIEL)
-  ==================================================================== */}
-  
-  {/* 1. EL MENU DE OPCIONES QUE ABRE LA ELIPSE */}
-  <Modal
-    animationType="fade"
-    transparent={true}
-    visible={modalFotoVisible}
-    onRequestClose={() => setModalFotoVisible(false)}
-  >
-    <TouchableOpacity 
-      style={styles.modalOverlayBackground} 
-      activeOpacity={1} 
-      onPress={() => setModalFotoVisible(false)} 
-    >
-      <View style={styles.profileModalBox} onStartShouldSetResponder={() => true}>
-        
-        <View style={{ backgroundColor: '#202c33', padding: 14, borderBottomWidth: 1, borderBottomColor: '#2a3942' }}>
-          <Text style={{ color: '#e9edef', fontSize: 16, fontWeight: '700' }}>Opciones del Sistema</Text>
-        </View>
-
-        {/* 🔗 AL TOCAR ESTA OPCION VERDE: Apaga el menu flotante y enciende la camara nativa de Expo */}
-        <TouchableOpacity 
-          style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 14, backgroundColor: '#111b21' }}
-          activeOpacity={0.7}
-          onPress={() => {
-            setModalFotoVisible(false); // Cerramos el menu de la elipse
-            setModalQRVisible(true);    // 🚀 LE METEMOS CORRIENTE A LA CAMARA WEB DE VINCULAR.JS
-          }}
-        >
-          <Ionicons name="qr-code-outline" size={22} color="#00a884" style={{ marginRight: 14 }} />
-          <Text style={{ color: '#e9edef', fontSize: 15, fontWeight: '600' }}>Vincular dispositivo (QR)</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-          style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 14, backgroundColor: '#111b21', borderTopWidth: 1, borderTopColor: '#2a3942' }}
-          activeOpacity={0.7}
-          onPress={() => {
-            setModalFotoVisible(false);
-            onAbrirEmpresa(); 
-          }}
-        >
-          <Ionicons name="business-outline" size={22} color="#8696a0" style={{ marginRight: 14 }} />
-          <Text style={{ color: '#e9edef', fontSize: 15 }}>Perfil de la Empresa</Text>
-        </TouchableOpacity>
-
-      </View>
-    </TouchableOpacity>
-  </Modal>
+               {/* ====================================================================
+    🚀 BLOQUE 4 TRANSFORMADO: MULTIUSER QR SCANNER (SOTO SYSTEM 2026)
+    Ubicación: app/home/Home.js (Punto de Inyección Maestro)
+    ==================================================================== */}
 
   {/* 2. 📸 EL ESCANER DE VINCULAR.JS ANCLADO COMO HIJO DIRECTO EN EL RENDER */}
   <VincularDispositivoModal 
     isOpen={modalQRVisible} 
     onClose={() => setModalQRVisible(false)} 
-    onVinculacionExitosa={(data) => {
-      console.log("✅ [SOTO QR]: Sincronización exitosa con el mostrador de Apio:", data);
+    
+    // 🚀 PASO 1: Inyectamos el usuario real logueado en la App del teléfono
+    // Reemplaza 'usuarioLogueado' por la variable exacta que almacena el nombre en tu componente (ej: "Gabriel", "Maria_Cajera")
+    usuarioActual={usuarioLogueado || "Operador_Master"} 
+
+    // 🚀 PASO 2: GATILLO DE CONTROL OPERATIVO REAL (Handshake asíncrono con Django)
+    onVinculacionExitosa={(urlEscaneada) => {
+      console.log("✅ [SOTO QR]: Sincronización exitosa detectada. Abriendo canales...");
+
+      try {
+        // La urlEscaneada ya viene procesada desde vincular.js con la estructura:
+        // https://railway.app
+        
+        // Convertimos el protocolo HTTPS de la URL a WSS de WebSocket exigido por Daphne
+        const urlWebSocket = urlEscaneada.replace('https://', 'wss://').replace('http://', 'ws://');
+        
+        // Abrimos la antena de red desde el teléfono celular hacia Railway
+        const wsMovil = new WebSocket(urlWebSocket);
+        
+        wsMovil.onopen = () => {
+          // Extraemos el operario sanitizado para armar el payload estructurado
+          const nombreOperador = usuarioLogueado || "Operador_Master";
+
+          const payload = {
+            evento: "VINCULACION_EXITOSA",
+            user_id: nombreOperador
+          };
+          
+          // Escupimos los datos binarios por el aire hacia Django Channels
+          wsMovil.send(JSON.stringify(payload));
+          console.log(`📡 [SOTO LINK SUCCESS]: Señal operativa transmitida a Django para [${nombreOperador}]`);
+          
+          // Cerramos el hilo del socket del teléfono tras 1.5 segundos para no dejar conexiones muertas
+          setTimeout(() => {
+            wsMovil.close();
+          }, 1500);
+        };
+
+        wsMovil.onerror = (error) => {
+          console.error("❌ [SOTO MOBILE NET ERROR]: Falló la inyección al WebSocket:", error);
+        };
+
+      } catch (netError) {
+        console.error("❌ [SOTO CRITICAL NET CRASH]:", netError.message);
+      }
     }}
   />
 
