@@ -80,14 +80,19 @@ export default function App() {
     recuperarSesionOperador();
   }, []);
 
-  // 💾 PROCESADOR DE REGISTRO A FUEGO
-  // Salva el nombre del operario en el almacenamiento interno para que no se borre al apagar el celular
+    // 💾 PROCESADOR DE REGISTRO A FUEGO (REPARADO MULTIUSER)
   const salvarNombreOperador = async (nombre) => {
     try {
       const nombreLimpio = nombre.trim();
+      
+      // 1. Guardamos físicamente en el chip del teléfono / navegador
       await AsyncStorage.setItem('@soto_user_session', nombreLimpio);
-      setUsuarioOperador(nombreLimpio);
-      console.log(`✅ [SOTO PERSIST SUCCESS]: Nuevo operario registrado de forma indestructible: ${nombreLimpio}`);
+      
+      // 🚀 EL REMIENDATOR DE RAM: Forzamos la actualización inmediata del estado global
+      // Esto hace que toda la app se entere en el mismo milisegundo que el usuario mutó
+      setUsuarioOperador(nombreLimpio); 
+      
+      console.log(`✅ [SOTO PERSIST SUCCESS]: Operario sincronizado en RAM y Disco: ${nombreLimpio}`);
     } catch (err) {
       console.error("❌ [SOTO PERSIST CRASH]: Error escribiendo el bloque de identidad:", err);
     }
