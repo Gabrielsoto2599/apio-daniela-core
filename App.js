@@ -447,99 +447,101 @@ const procesarLoQueEscuche = async (audioUri) => {
     }
   };
 
-  // 🚀 LA COMPUERTA REFACTORIZADA CON UNIÓN QUÍMICA DE RED (AXIOS)
-  const handleEnviarTextoDirecto = async (textoClaro) => {
-    if (!textoClaro.trim()) return;
-    
-    if (isDanielaThinking) return;
-    setIsDanielaThinking(true);
-
-    const nuevoMensajeUsuario = { 
-      sender: 'user', 
-      texto: textoClaro.trim(),
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    };
-    
-    setMessages(prev => [...prev, nuevoMensajeUsuario]);
-    const contextoPersonalidad = vistaActual === 'bussnes' ? 'GERENTE_APIO' : 'NOVIA_POSESIVA';
-
-    try {
-      console.log(`📡 [SOTO NET]: Transmitiendo payload por vía aérea segura hacia: ${BASE_URL}/api/chat`);
-      
-      const respuesta = await axios.post(`${BASE_URL}/api/chat`, {
-        message: textoClaro.trim(), 
-        contexto: contextoPersonalidad,
-        historial: [...messages, nuevoMensajeUsuario].slice(-6),
-        user_id: "gabriel_de_jesus"
-      }, {
-        headers: { 'Content-Type': 'application/json' },
-        timeout: 25000 
-      });
-      
-      const data = respuesta.data;
-      const textoRespuesta = data.respuestaDeDaniela || data.respuesta || data.text || "...";
-      
-      if (textoRespuesta !== "...") {
-        setTextoRespuestaActual(textoRespuesta);
-        
-        setMessages(prev => [...prev, { 
-          sender: 'model', 
-          texto: textoRespuesta 
-        }]);
-
-                // 🛡️ ENCAPSULAMIENTO MULTIMEDIA NATIVO INMUNE A HOISTING (REPARADO DEFINITIVO)
-        try {
-          // Le damos un respiro de 150ms a la interfaz para que dibuje la burbuja gris
-          setTimeout(() => {
-            console.log("🔊 [SOTO VOX NATIVO]: Forzando disparo directo de síntesis de voz...");
-            
-            // 🚀 EL BYPASS MAESTRO: Si la función local tiene trabas de scope, invocamos a Speech directo al vuelo
-            if (typeof hablarDanielaNativo === 'function') {
-              hablarDanielaNativo(textoRespuesta);
-            } else {
-              // Plan de respaldo de artillería pesada: Obligamos al hardware a hablar saltándonos el linter
-              import('expo-speech').then((SpeechModule) => {
-                SpeechModule.stop();
-                SpeechModule.speak(textoRespuesta, {
-                  language: Platform.OS === 'android' ? 'es-ES' : 'es-419',
-                  pitch: 1.18,
-                  rate: 0.92
-                });
-              }).catch(e => console.warn("⚠️ Falló el bypass dinámico de Speech:", e));
-            }
-          }, 150);
-        } catch (audioErr) {
-          console.warn("⚠️ [SOTO VOX]: Voz omitida por hardware local en el mostrador.");
-        }
+  // ====================================================================
+// 🚀 LA COMPUERTA REFACTORIZADA CON UNIÓN QUÍMICA DE RED MULTIUSER (AXIOS)
+// Ubicación: App.js (Método de Transmisión de Alta Velocidad)
+// ====================================================================
+// 🚀 REPARACIÓN SOTO SYSTEM: Recibe 'remitenteVivo' enviado desde el componente chat.js
+const handleEnviarTextoDirecto = async (textoClaro, remitenteVivo) => {
+  if (!textoClaro.trim()) return;
   
-        // 📞 INTERCEPTOR DE LLAMADAS ENTRANTES AUTOMÁTICAS
-        const textoMinuscula = textoRespuesta.toLowerCase();
-        const quiereLlamar = 
-          textoMinuscula.includes("llamar") || 
-          textoMinuscula.includes("llamo") || 
-          textoMinuscula.includes("atiende") || 
-          textoMinuscula.includes("atiéndeme") || 
-          textoMinuscula.includes("llamada");
+  if (isDanielaThinking) return;
+  setIsDanielaThinking(true);
 
-        if (quiereLlamar) {
-          console.log("📞 [SOTO CALL]: Intención detectada. Disparando Ringtone en mostrador...");
-          setTimeout(() => {
-            setLlamadaEntranteVisible(true); 
-            if (typeof reproducirTono === 'function') reproducirTono();
-          }, 2000);
-        }
-      }
-    } catch (error) {
-      console.error("❌ [SOTO NET ERROR]: Fuga en el orquestador transaccional:", error);
+  const nuevoMensajeUsuario = { 
+    sender: 'user', 
+    texto: textoClaro.trim(),
+    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  };
+  
+  setMessages(prev => [...prev, nuevoMensajeUsuario]);
+  const contextoPersonalidad = vistaActual === 'bussnes' ? 'GERENTE_APIO' : 'NOVIA_POSESIVA';
+
+  try {
+    console.log(`📡 [SOTO NET]: Transmitiendo payload por vía aérea segura hacia: ${BASE_URL}/api/chat`);
+    
+    // 🧠 LOGICA DE ACCESO SEGURO: 
+    // Prioriza el remitente en vivo del chat; si viene vacío, usa el usuarioOperador de la RAM de la App
+    const operadorRealSaas = remitenteVivo || usuarioOperador || "Gabriel Soto";
+    console.log(`👤 [SOTO NET]: Mensaje firmado en el mostrador por el usuario real: [${operadorRealSaas}]`);
+
+    const respuesta = await axios.post(`${BASE_URL}/api/chat`, {
+      message: textoClaro.trim(), 
+      contexto: contextoPersonalidad,
+      historial: [...messages, nuevoMensajeUsuario].slice(-6),
+      
+      // 🚀 EL REMIENDATOR DEFINITIVO: Ya no se manda "gabriel_de_jesus" a fuego.
+      user_id: operadorRealSaas
+    }, {
+      headers: { 'Content-Type': 'application/json' },
+      timeout: 25000 
+    });
+    
+    const data = respuesta.data;
+    const textoRespuesta = data.respuestaDeDaniela || data.respuesta || data.text || "...";
+    
+    if (textoRespuesta !== "...") {
+      setTextoRespuestaActual(textoRespuesta);
       
       setMessages(prev => [...prev, { 
         sender: 'model', 
-        texto: "Mococho, disculpa la latencia, el cerebro en Railway se está calibrando. Intenta de nuevo en 5 segundos." 
+        texto: textoRespuesta 
       }]);
-    } finally {
-      setIsDanielaThinking(false);
+
+      // Encapsulamiento de audio nativo intacto para resguardo de hardware
+      try {
+        setTimeout(() => {
+          console.log("🔊 [SOTO VOX NATIVO]: Forzando disparo directo de síntesis de voz...");
+          if (typeof hablarDanielaNativo === 'function') {
+            hablarDanielaNativo(textoRespuesta);
+          } else {
+            import('expo-speech').then((SpeechModule) => {
+              SpeechModule.stop();
+              SpeechModule.speak(textoRespuesta, {
+                language: Platform.OS === 'android' ? 'es-ES' : 'es-419',
+                pitch: 1.18,
+                rate: 0.92
+              });
+            }).catch(e => console.warn("⚠️ Falló el bypass dinámico de Speech:", e));
+          }
+        }, 150);
+      } catch (audioErr) {
+        console.warn("⚠️ [SOTO VOX]: Voz omitida por hardware local en el mostrador.");
+      }
+
+      // Interceptor de llamadas entrantes intacto
+      const textoMinuscula = textoRespuesta.toLowerCase();
+      const quiereLlamar = 
+        textoMinuscula.includes("llamar") || 
+        textoMinuscula.includes("llamo") || 
+        textoMinuscula.includes("atiende") || 
+        textoMinuscula.includes("atiéndeme") || 
+        textoMinuscula.includes("llamada");
+
+      if (quiereLlamar) {
+        console.log("📞 [SOTO CALL]: Intención detectada. Disparando Ringtone en mostrador...");
+        setTimeout(() => {
+          setLlamadaEntranteVisible(true); 
+          if (typeof reproducirTono === 'function') reproducirTono();
+        }, 2000);
+      }
     }
-  };
+  } catch (err) {
+    console.error("❌ Falló el envío del pipeline cognitivo:", err.message);
+  } finally {
+    setIsDanielaThinking(false);
+  }
+};
 
         // ====================================================================
   // BLOQUE 6: ENRUTADOR Y ORQUESTADOR DE RENDERIZADO CONDICIONAL FINAL (REPARADO)

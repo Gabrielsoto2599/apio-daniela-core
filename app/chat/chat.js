@@ -1,5 +1,5 @@
 // ====================================================================
-// CHAT.JS - CABECERA, LÓGICA Y ORQUESTADOR VISUAL (SOTO SYSTEM 2026)
+// CHAT.JS - CABECERA, LÓGICA Y ORQUESTADOR VISUAL MULTIUSER (SOTO SYSTEM)
 // Ubicación: app/chat/chat.js (Bloque de Producción Unificado)
 // ====================================================================
 import { useState, useRef, useEffect } from 'react';
@@ -9,7 +9,9 @@ import {
   ImageBackground, SafeAreaView, StatusBar
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { CameraView } from 'expo-camera'; 
+import { CameraView } from 'expo-camera';
+import * as DocumentPicker from 'expo-document-picker';
+import * as FileSystem from 'expo-file-system'; 
 
 const profilePic = require('../../apio-app/assets/images/foto-perfil-apio.png');
 
@@ -25,7 +27,10 @@ export default function ChatScreen({
   setIsCameraActive,
   onCapturar,
   
-  // 🚀 INYECCIÓN MAESTRA MULTIMEDIA: Las llaves de control remoto para el micrófono
+  // 🚀 ADICIÓN DE INGENIERÍA MULTIUSER: Captura el operador dinámico de la sesión
+  usuarioLogueado,
+
+  // Las llaves de control remoto para el micrófono
   onIniciarGrabacion,
   onDetenerGrabacion,
   isRecording
@@ -44,20 +49,69 @@ export default function ChatScreen({
     }
   }, [messages, isDanielaThinking]);
 
-  // 🚀 MOTOR DE ENVÍO BLINDADO: Unidireccional para evitar duplicados en el mostrador
+    // 🚀 MOTOR DE ENVÍO BLINDADO: Unidireccional para evitar duplicados en el mostrador
   const enviarMensajeUsuario = () => {
     if (!message.trim() || isDanielaThinking) return;
 
     const textoParaEnviar = message.trim();
     setMessage(''); // Limpieza inmediata del input en pantalla para mejor UX
 
-    // Notificamos al padre, el padre (App.js) es quien ejecuta Axios hacia Railway
+    // 📡 TRANSMISIÓN DE DOBLE CANAL REPARADA: 
+    // Ahora le escupe al padre (App.js) tanto el texto como el nombre del operario logueado (Ej: Rosmary)
     if (typeof onEnviarMensajeTexto === 'function') {
-      onEnviarMensajeTexto(textoParaEnviar);
+      onEnviarMensajeTexto(textoParaEnviar, usuarioLogueado || "Gabriel Soto");
     }
   };
 
-    return (
+  // ====================================================================
+  // 🚀 FUNCIÓN HACER FUNCIONAL EL CLIP (ABRIR GALERÍA NATIVA + BASE64)
+  // ====================================================================
+  const handleSeleccionarArchivoGaleria = async () => {
+    try {
+      console.log("📂 [SOTO STORAGE]: Abriendo galería nativa del teléfono...");
+      
+      const resultado = await DocumentPicker.getDocumentAsync({
+        type: ['image/jpeg', 'image/png'], 
+        copyToCacheDirectory: true
+      });
+
+      if (resultado.canceled || !resultado.assets || resultado.assets.length === 0) {
+        console.log("📱 [SOTO STORAGE]: Selección cancelada por el operario.");
+        return;
+      }
+
+      const archivoAtrapado = resultado.assets[0]; // Muerde el primer asset indexado
+      console.log(`✅ [SOTO STORAGE MATCH]: Foto capturada: ${archivoAtrapado.name}`);
+
+      const stringBase64 = await FileSystem.readAsStringAsync(archivoAtrapado.uri, {
+        encoding: FileSystem.EncodingType.Base64
+      });
+
+      if (typeof onEnviarMensajeTexto === 'function') {
+        onEnviarMensajeTexto(
+          `[SOTO VISION]: Analiza esta imagen. Es una foto tuya (Daniela). Reconócete usando tu biografía larense y reacciona de forma humana con tu acento guaro de Barquisimeto.`, 
+          usuarioLogueado || "Gabriel Soto", 
+          stringBase64 
+        );
+        
+        // Inyectamos de forma segura la burbuja en el hilo reactivo local
+        if (messages && Array.isArray(messages)) {
+          messages.push({
+            sender: 'user',
+            texto: `📸 Foto adjuntada: ${archivoAtrapado.name}`,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          });
+        }
+      }
+
+    } catch (err) {
+      console.error("❌ [SOTO STORAGE CRASH]: Error abriendo los archivos de la galería:", err.message);
+    }
+  };
+  // ====================================================================
+
+
+  return (
     <SafeAreaView style={[
       styles.safeAreaBlindada,
       { 
@@ -66,6 +120,7 @@ export default function ChatScreen({
         paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 
       }
     ]}>
+
       <StatusBar barStyle="light-content" backgroundColor="#202c33" translucent={true} />
       
       {/* 🛡️ EL ESCUDO PROTECTOR SUPREMO: Evita que el teclado rompa los botones de Android */}
@@ -181,7 +236,7 @@ export default function ChatScreen({
             </ScrollView>
           </ImageBackground>
 
-          {/* ====================================================================
+                    {/* ====================================================================
           BARRA INFERIOR CONTROL REMOTO (INPUT Y DETECTOR MULTIMEDIA WHATSAPP REAL)
           ==================================================================== */}
           <View style={[
@@ -191,7 +246,7 @@ export default function ChatScreen({
               alignItems: 'center', 
               paddingHorizontal: 8, 
               paddingTop: 6,
-              // 🚀 AISLAMIENTO INFERIOR: Colchón de seguridad para que no choque con la barra de gestos de Android
+              // 🚀 AISLAMIENTO INFERIOR: Colchón de seguridad intacto contra botones táctiles
               paddingBottom: Platform.OS === 'ios' ? 22 : 12, 
               backgroundColor: 'transparent' 
             }
@@ -227,10 +282,17 @@ export default function ChatScreen({
                 editable={!isDanielaThinking}
               />
 
-              {/* 📎 ICONO DE ADJUNTAR ARCHIVOS (CLIP) */}
-              <TouchableOpacity style={{ padding: 4, marginRight: 6 }} disabled={isDanielaThinking} activeOpacity={0.7}>
+              {/* 📎 ICONO DE ADJUNTAR ARCHIVOS (CLIP - FUNCIONAL) */}
+              <TouchableOpacity 
+                style={{ padding: 4, marginRight: 6 }} 
+                disabled={isDanielaThinking} 
+                activeOpacity={0.7}
+                // 🚀 AQUÍ SE CONECTA LA MAGIA: Al tocar el clip, ejecuta la función de arriba
+                onPress={handleSeleccionarArchivoGaleria}
+              >
                 <MaterialCommunityIcons name="paperclip" size={22} color="#8696a0" style={{ transform: [{ rotate: '315deg' }] }} />
               </TouchableOpacity>
+
 
               {/* 📸 ICONO DE CÁMARA INYECTADA */}
               <TouchableOpacity style={{ padding: 4 }} onPress={() => setIsCameraActive(true)} disabled={isDanielaThinking} activeOpacity={0.7}>
@@ -249,25 +311,23 @@ export default function ChatScreen({
               >
                 <MaterialCommunityIcons name="send" size={22} color="white" />
               </TouchableOpacity>
-                        ) : (
+            ) : (
               <TouchableOpacity 
                 style={[
                   styles.sendButton, 
                   { width: 48, height: 48, borderRadius: 24, backgroundColor: '#00a884', justifyContent: 'center', alignItems: 'center' },
                   isRecording && { backgroundColor: '#ea0038' }
                 ]} 
-                // 🚀 REPARACIÓN DE PRODUCCIÓN INTERNACIONAL: Quitamos onPressIn/Out para evitar micro-choques en el chip de audio
                 onPress={() => {
                   if (isRecording) {
-                    onDetenerGrabacion(); // Si ya estaba grabando, corta el canal y despacha
+                    onDetenerGrabacion(); 
                   } else {
-                    onIniciarGrabacion(); // Si estaba apagado, enciende las cuerdas vocales nativas
+                    onIniciarGrabacion(); 
                   }
                 }}
                 disabled={isDanielaThinking} 
                 activeOpacity={0.7}
               >
-                {/* Cambia dinámicamente el icono para dar feedback visual inmediato */}
                 <MaterialCommunityIcons name={isRecording ? "stop" : "microphone"} size={22} color="white" />
               </TouchableOpacity>
             )}
@@ -278,7 +338,7 @@ export default function ChatScreen({
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
-} // ⬅️ LLAVE FINAL DE CIERRE DE TU COMPONENTE CHAT
+} // ⬅nt LLAVE FINAL DE CIERRE DE TU COMPONENTE CHAT COGNITIVO
 
 // ==========================================================
 // 🎨 HOJA DE ESTILOS UNIFICADA CON ESPACIADO DEFENSIVO
