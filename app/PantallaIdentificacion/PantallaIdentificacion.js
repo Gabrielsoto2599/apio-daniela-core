@@ -6,7 +6,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
 
 // 🚀 IMPORTACIÓN DE ASSETS SANEADA: Ruta relativa exacta desde tu subcarpeta
-import profilePic from '../../assets/images/foto-perfil-apio.png';
+const profilePic = require('../../apio-app/assets/images/foto-perfil-apio.png');
 
 export default function PantallaIdentificacion({ onGuardarNombre }) {
   const [inputNombre, setInputNombre] = useState('');
