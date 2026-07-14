@@ -16,23 +16,23 @@ export default function PantallaIdentificacion({ onGuardarNombre }) {
     onGuardarNombre(inputNombre.trim());
   };
 
-  return (
+    return (
     <View style={styles.loginContainer}>
       
       {/* 📸 AVATAR FLOTANTE GIGANTE MULTIPLATAFORMA (PC + MÓVIL) */}
       <View style={styles.avatarWrapper}>
         <Image 
-          // 🚀 SOLUCIÓN INDESTRUCTIBLE: Cargamos la imagen por red para que sea 100% compatible con tu localhost web
-          source={{ uri: 'https://liara.run' }} // Fallback de red o usa una URL directa de tus imágenes en Railway
+          // 🚀 ¡ENCENDIDO!: Le inyectamos la variable local legítima para que use tu .png real
+          source={profilePic} 
           style={styles.avatarLoginImage} 
         />
         {/* Indicador de estado neón */}
         <View style={styles.avatarStatusDot} />
       </View>
 
-
       <Text style={styles.loginTitle}>Ecosistema Soto System 2026</Text>
       <Text style={styles.loginSub}>Identifícate para que Daniela IA reconozca tu identidad o rol de caja</Text>
+
       
       <TextInput
         style={styles.input}
