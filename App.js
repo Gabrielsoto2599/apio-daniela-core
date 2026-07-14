@@ -9,6 +9,7 @@ import { Camera, useCameraPermissions } from 'expo-camera';
 import axios from 'axios';
 import { Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import * as Speech from 'expo-speech';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // 🚀 RUTA RELATIVA UNIVERSAL SANEADA: Muerde tus assets en limpio
 import { BASE_URL } from './src/config/apiConfig';
@@ -20,6 +21,7 @@ import ChatScreen from './app/chat/chat.js';
 import Bussnes from './app/bussnes/bussnes.js';
 import Llamadas from './app/llamadas/llamadas.js';
 import Novedades from './app/novedades/novedades.js';
+import PantallaIdentificacion from './app/components/PantallaIdentificacion.js';
 
 export default function App() {
   // ====================================================================
@@ -52,6 +54,43 @@ export default function App() {
 
   // Configuración de inicialización de permisos de hardware
   const [permission, requestPermission] = useCameraPermissions();
+
+  // 🚀 ADICIÓN DE INGENIERÍA MULTIUSER (SOTO SYSTEM 2026)
+  // Estados para retener y validar al operario dinámico en la RAM
+  const [usuarioOperador, setUsuarioOperador] = useState(null);
+  const [inicializandoSesion, setInicializandoSesion] = useState(true);
+
+  // 📥 RECOLECTOR DE SESIÓN PERSISTENTE NATIVA
+  // Ejecuta una lectura ultra veloz al disco duro del teléfono al encender el chasis
+  useEffect(() => {
+    const recuperarSesionOperador = async () => {
+      try {
+        const nombreGuardado = await AsyncStorage.getItem('@soto_user_session');
+        if (nombreGuardado) {
+          setUsuarioOperador(nombreGuardado);
+          console.log(`💻 [SOTO CACHE]: Sesión recuperada de la RAM física para: [${nombreGuardado}]`);
+        }
+      } catch (err) {
+        console.warn("⚠️ [SOTO MEMORY ERROR]: Falló la lectura de la sesión en disco:", err);
+      } finally {
+        setInicializandoSesion(false);
+      }
+    };
+    recuperarSesionOperador();
+  }, []);
+
+  // 💾 PROCESADOR DE REGISTRO A FUEGO
+  // Salva el nombre del operario en el almacenamiento interno para que no se borre al apagar el celular
+  const salvarNombreOperador = async (nombre) => {
+    try {
+      const nombreLimpio = nombre.trim();
+      await AsyncStorage.setItem('@soto_user_session', nombreLimpio);
+      setUsuarioOperador(nombreLimpio);
+      console.log(`✅ [SOTO PERSIST SUCCESS]: Nuevo operario registrado de forma indestructible: ${nombreLimpio}`);
+    } catch (err) {
+      console.error("❌ [SOTO PERSIST CRASH]: Error escribiendo el bloque de identidad:", err);
+    }
+  };
 
   // 🚀 DETECTOR MAESTRO DE CONSUMO: Fuerza la lectura en RAM para encender 'profilePic' en azul
   useEffect(() => {
@@ -106,7 +145,6 @@ export default function App() {
       setSonido(null);
     }
   }
-
 
   // ====================================================================
 // BLOQUE 3: EFECTOS DE VIDA (FLUJO PASIVO Y RECOLECTOR DE TIEMPOS)
@@ -503,23 +541,37 @@ const procesarLoQueEscuche = async (audioUri) => {
     }
   };
 
-       // ====================================================================
-  // BLOQUE 6: ENRUTADOR Y ORQUESTADOR DE RENDERIZADO CONDICIONAL FINAL
+        // ====================================================================
+  // BLOQUE 6: ENRUTADOR Y ORQUESTADOR DE RENDERIZADO CONDICIONAL FINAL (REPARADO)
+  // Ubicación: App.js (Cierre Maestro del Chasis con Filtro Multiusuario)
   // ====================================================================
+  
+  // ⏳ COLCHÓN DE CARGA RECONVERGENTE: Mantiene la pantalla limpia mientras lee la RAM
+  if (inicializandoSesion) {
+    return <View style={{ flex: 1, backgroundColor: '#0c111d' }} />;
+  }
+
+  // 🔒 LA COMPUERTA MULTIUSUARIO: Si el disco duro está vacío, detiene el chasis y pide identificación
+  if (!usuarioOperador) {
+    return <PantallaIdentificacion onGuardarNombre={salvarNombreOperador} />;
+  }
+
+  // 🚀 INTERFAZ LIBERADA: Si el usuario existe, enciende todo tu ecosistema original intacto
   return (
     <View style={styles.container}>
       
       {/* 6.1 NAVEGACIÓN MODULAR DE PANTALLAS SAAS APIO */}
       {vistaActual === 'home' && (
         <Home 
-          messages={messages} // 🚀 CONEXIÓN CRÍTICA: Se inyecta el hilo de memoria al Home para romper la pantalla blanca
+          messages={messages} 
+          usuarioLogueado={usuarioOperador} // 🚀 GATILLO MULTI-BODEGA: Le inyectamos el operador al Home para vincular.js
           onCambiarVista={(pantalla) => setVistaActual(pantalla)}
           onAbrirPerfil={() => setIsProfileModalOpen(true)}
           onAbrirEmpresa={() => setIsBusinessModalOpen(true)}
         />
       )}
 
-           {vistaActual === 'chat' && (
+      {vistaActual === 'chat' && (
         <ChatScreen 
           messages={messages}
           setMessages={setMessages}
@@ -533,8 +585,6 @@ const procesarLoQueEscuche = async (audioUri) => {
           isRecording={!!grabacion}
           onEnviarMensajeTexto={handleEnviarTextoDirecto} 
           onVolver={() => setVistaActual('home')}
-          
-          // 🚀 EL CABLE QUE FALTA: Clava esta línea aquí para que el linter la lea
           textoRespuesta={textoRespuestaActual} 
         />
       )}
@@ -554,11 +604,11 @@ const procesarLoQueEscuche = async (audioUri) => {
         />
       )}
 
-            {/* 6.2 CAPA DE INTERRUPCIÓN FLOTANTE: MODAL DE LLAMADA ENTRANTE */}
+      {/* 6.2 CAPA DE INTERRUPCIÓN FLOTANTE: MODAL DE LLAMADA ENTRANTE */}
       <Modal visible={llamadaEntranteVisible || enLlamada} transparent={true} animationType="fade">
         <View style={styles.modalOverlayCall}>
           
-          {/* 📸 DESPIERTA LA CÁMARA NATIVA: Etiqueta invisible de control para encender 'Camera' arriba */}
+          {/* 📸 DESPIERTA LA CÁMARA NATIVA: Etiqueta invisible de control */}
           {isCameraActive && (
             <View style={{ width: 1, height: 1, opacity: 0 }}>
               <Camera ref={cameraRef} />
@@ -592,7 +642,7 @@ const procesarLoQueEscuche = async (audioUri) => {
           ) : (
             <View style={styles.callActionsRow}>
               
-              {/* 🟢 BOTÓN ACEPTAR LLAMADA (Mantiene tus MaterialCommunityIcons) */}
+              {/* 🟢 BOTÓN ACEPTAR LLAMADA */}
               <TouchableOpacity 
                 style={[styles.btnActionCall, { backgroundColor: '#25D366' }]}
                 onPress={async () => {
@@ -606,7 +656,7 @@ const procesarLoQueEscuche = async (audioUri) => {
                     const response = await axios.post(`${BASE_URL}/api/chat`, { 
                       contexto: contextoPersonalidad,
                       message: "SISTEMA: Gabriel contestó tu llamada. Inicia la conversación.",
-                      user_id: 'gabriel_de_jesus'
+                      user_id: usuarioOperador // 🚀 ALINEACIÓN DE RED: Le pasa el usuario logueado dinámico de la RAM a la llamada
                     }, {
                       headers: { 'Content-Type': 'application/json' },
                       timeout: 20000
@@ -629,7 +679,7 @@ const procesarLoQueEscuche = async (audioUri) => {
                 <MaterialCommunityIcons name="phone" size={32} color="white" />
               </TouchableOpacity>
 
-              {/* 🚀 DESPIERTA IONICONS Y MATERIALICONS: Los inyectamos como decoración del modal */}
+              {/* 🚀 DESPIERTA IONICONS Y MATERIALICONS */}
               <View style={{ position: 'absolute', top: 20, flexDirection: 'row', gap: 20, opacity: 0.1 }}>
                 <Ionicons name="call-outline" size={20} color="#8696a0" />
                 <MaterialIcons name="security" size={20} color="#8696a0" />
