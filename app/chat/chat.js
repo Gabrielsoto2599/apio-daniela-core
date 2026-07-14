@@ -26,8 +26,6 @@ export default function ChatScreen({
   isCameraActive,
   setIsCameraActive,
   onCapturar,
-  
-  // 🚀 ADICIÓN DE INGENIERÍA MULTIUSER: Captura el operador dinámico de la sesión
   usuarioLogueado,
 
   // Las llaves de control remoto para el micrófono

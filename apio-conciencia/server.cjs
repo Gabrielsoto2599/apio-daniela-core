@@ -166,7 +166,7 @@ app.post('/api/chat', async (req, res) => {
             const respuestaDjango = await axios.post(`http://web-production-dcec7.up.railway.app`, {
                 message: ultimoMensaje,
                 contexto: req.body.contexto || "NOVIA_POSESIVA",
-                user_id: req.body.user_id || "Gabriel Soto" 
+                
             }, { 
                 headers: { 'Content-Type': 'application/json' },
                 timeout: 15000 
