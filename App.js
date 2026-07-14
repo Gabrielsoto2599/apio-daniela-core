@@ -60,18 +60,19 @@ export default function App() {
   const [usuarioOperador, setUsuarioOperador] = useState(null);
   const [inicializandoSesion, setInicializandoSesion] = useState(true);
 
-  // 📥 RECOLECTOR DE SESIÓN PERSISTENTE NATIVA
-  // Ejecuta una lectura ultra veloz al disco duro del teléfono al encender el chasis
+    // 🚀 PARCHE DE PURGA SOTO SYSTEM: Fuerza el borrado del nombre viejo en tu teléfono
   useEffect(() => {
     const recuperarSesionOperador = async () => {
       try {
+        // REVIENTA ESTA LÍNEA DE ABAJO UNA SOLA VEZ PARA BORRAR TU CACHÉ:
+        await AsyncStorage.removeItem('@soto_user_session'); 
+        
         const nombreGuardado = await AsyncStorage.getItem('@soto_user_session');
         if (nombreGuardado) {
           setUsuarioOperador(nombreGuardado);
-          console.log(`💻 [SOTO CACHE]: Sesión recuperada de la RAM física para: [${nombreGuardado}]`);
         }
       } catch (err) {
-        console.warn("⚠️ [SOTO MEMORY ERROR]: Falló la lectura de la sesión en disco:", err);
+        console.warn("⚠️ Error purgando memoria:", err);
       } finally {
         setInicializandoSesion(false);
       }
