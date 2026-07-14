@@ -21,7 +21,7 @@ import ChatScreen from './app/chat/chat.js';
 import Bussnes from './app/bussnes/bussnes.js';
 import Llamadas from './app/llamadas/llamadas.js';
 import Novedades from './app/novedades/novedades.js';
-import PantallaIdentificacion from './app/components/PantallaIdentificacion.js';
+import PantallaIdentificacion from './app/PantallaIdentificacion/PantallaIdentificacion.js';
 
 export default function App() {
   // ====================================================================
