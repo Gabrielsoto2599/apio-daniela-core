@@ -217,7 +217,7 @@ wss.on('connection', (ws, req) => {
                     // Transmitimos la señal a la pantalla web de la computadora de inmediato
                     socketPC.send(JSON.stringify({ 
                         status: "VINCULADO_GERENTE",
-                        mensaje: `Daniela IA ha asumido el control operativo para el usuario ${datos.user_id || 'Gabriel'}.`
+                        mensaje: `Daniela IA ha asumido el control operativo para el usuario ${datos.user_id || ''}.`
                     }));
                     console.log(`✅ [SOTO LINK]: Emparejamiento QR asíncrono exitoso para la sesión: ${cajaId}`);
                 }
