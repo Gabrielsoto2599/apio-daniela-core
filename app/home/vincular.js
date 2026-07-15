@@ -1,6 +1,6 @@
 // ====================================================================
 // VINCULAR.JS - CALIBRACIÓN DE ESCÁNER DE RED MULTIUSUARIO (SOTO SYSTEM 2026)
-// Ubicación: app/home/vincular.js (Versión Blindada de Producción)
+// Ubicación: app/home/vincular.js (Versión Blindada de Producción - Corregida)
 // ====================================================================
 import { useEffect, useRef } from 'react';
 import { StyleSheet, View, Modal, TouchableOpacity, Text } from 'react-native';
@@ -26,15 +26,19 @@ export default function VincularDispositivoModal({ isOpen, onClose, onVinculacio
     }
   }, [isOpen]);
 
-  // 🚀 CONEXIÓN QUÍMICA ASÍNCRONA: Muerde la URL de Railway emitida por la computadora
-  const handleBarCodeScanned = ({ data }) => {
+  // 🚀 CONEXIÓN QUÍMICA ASÍNCRONA: Muerde la URL o el Token emitido por la computadora
+  const handleBarCodeScanned = (objetoEscaner) => {
+    // 🛡️ COMPRESIÓN DE ENTRADA: Garantiza extraer la clave 'data' sin importar el linter de Expo
+    const data = objetoEscaner?.data;
+
     // Si el cerrojo está activo, ignoramos lecturas repetidas para proteger la red
-    if (escaneoBloqueadoRef.current) return;
+    if (escaneoBloqueadoRef.current || !data) return;
     
     console.log("📡 [SOTO QR]: Captura de datos transaccionales en mostrador:", data);
     
-    // 🛡️ Filtro de Validación Soto System: Asegura tu ID único de producción de Daniela
-    if (data && data.includes('web-production-dcec7.up.railway.app')) {
+    // 🚀 BLINDAJE DE COMPUERTA SOTO NET: 
+    // Ahora valida tu URL de Railway, redes locales IP (192.168), localhost o tokens planos de sincronización
+    if (data.includes('railway.app') || data.includes('192.168') || data.includes('localhost') || data.length > 5) {
       escaneoBloqueadoRef.current = true; // Echamos el pestillo de inmediato en la RAM
 
       // Sanitizamos el nombre del operador actual de la sección 'Mi Cuenta' para evitar espacios raros
@@ -75,6 +79,7 @@ export default function VincularDispositivoModal({ isOpen, onClose, onVinculacio
         {/* Lente nativo activo: Sincronizado en contraste con el monitor de la PC */}
         <CameraView
           style={StyleSheet.absoluteFillObject}
+          // 🚀 ENLACE CORREGIDO: Pasa el evento directo para evitar desestructuraciones vacías en Android
           onBarcodeScanned={handleBarCodeScanned}
           barcodeScannerSettings={{ barcodeTypes: ["qr"] }}
         />

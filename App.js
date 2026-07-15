@@ -60,19 +60,23 @@ export default function App() {
   const [usuarioOperador, setUsuarioOperador] = useState(null);
   const [inicializandoSesion, setInicializandoSesion] = useState(true);
 
-    // 🚀 PARCHE DE PURGA SOTO SYSTEM: Fuerza el borrado del nombre viejo en tu teléfono
+     // ====================================================================
+  // 🚀 RECOLECTOR DE SESIÓN SANEADO (MULTIUSUARIO COMERCIAL CERTIFICADO)
+  // Ubicación: app/App.js (Ciclo de Vida Inicial del Ecosistema)
+  // ====================================================================
   useEffect(() => {
     const recuperarSesionOperador = async () => {
       try {
-        // REVIENTA ESTA LÍNEA DE ABAJO UNA SOLA VEZ PARA BORRAR TU CACHÉ:
-        await AsyncStorage.removeItem('@soto_user_session'); 
+        // 🛡️ PARCHE DE PURGA APAGADO: Ya no borra la memoria en cada inicio de la app
+        // await AsyncStorage.removeItem('@soto_user_session'); 
         
+        // Lee directamente la llave física guardada al registrarse
         const nombreGuardado = await AsyncStorage.getItem('@soto_user_session');
         if (nombreGuardado) {
           setUsuarioOperador(nombreGuardado);
         }
       } catch (err) {
-        console.warn("⚠️ Error purgando memoria:", err);
+        console.warn("⚠️ Error recuperando memoria nativa de sesión:", err);
       } finally {
         setInicializandoSesion(false);
       }
@@ -80,30 +84,6 @@ export default function App() {
     recuperarSesionOperador();
   }, []);
 
-    // 💾 PROCESADOR DE REGISTRO A FUEGO (REPARADO MULTIUSER)
-  const salvarNombreOperador = async (nombre) => {
-    try {
-      const nombreLimpio = nombre.trim();
-      
-      // 1. Guardamos físicamente en el chip del teléfono / navegador
-      await AsyncStorage.setItem('@soto_user_session', nombreLimpio);
-      
-      // 🚀 EL REMIENDATOR DE RAM: Forzamos la actualización inmediata del estado global
-      // Esto hace que toda la app se entere en el mismo milisegundo que el usuario mutó
-      setUsuarioOperador(nombreLimpio); 
-      
-      console.log(`✅ [SOTO PERSIST SUCCESS]: Operario sincronizado en RAM y Disco: ${nombreLimpio}`);
-    } catch (err) {
-      console.error("❌ [SOTO PERSIST CRASH]: Error escribiendo el bloque de identidad:", err);
-    }
-  };
-
-  // 🚀 DETECTOR MAESTRO DE CONSUMO: Fuerza la lectura en RAM para encender 'profilePic' en azul
-  useEffect(() => {
-    if (profilePic) {
-      console.log("📸 [SOTO CORE]: Chasis multimedia de Daniela indexado de forma correcta.");
-    }
-  }, []);
 
           // ====================================================================
   // BLOQUE 2: MOTOR DE AUDIO (RINGTONE DINÁMICO INMUNE A CRASHES DE APK)
