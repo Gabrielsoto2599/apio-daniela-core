@@ -5,7 +5,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { View, Platform, StyleSheet, Modal, TouchableOpacity, Text } from 'react-native'; 
 import { Audio } from 'expo-av';
-import { Camera, useCameraPermissions } from 'expo-camera';
+import { CameraView, useCameraPermissions } from 'expo-camera';
 import axios from 'axios';
 import { Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import * as Speech from 'expo-speech';
