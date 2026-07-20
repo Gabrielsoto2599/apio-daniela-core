@@ -72,7 +72,7 @@ app.post('/api/chat', async (req, res) => {
         let directivaRolActivo = "";
         let restriccionVocabulario = "";
 
-               // ====================================================================
+        // ====================================================================
         // DETERMINACIÓN DE LA FACETA COMPORTAMENTAL EN TIEMPO REAL (SERVER.CJS)
         // Ubicación: server.cjs (Orquestador Cognitivo Unificado)
         // ====================================================================
@@ -137,7 +137,22 @@ app.post('/api/chat', async (req, res) => {
             
             restriccionVocabulario = "No eres su novia ni su gerente operativa personal. Trátalo con distancia sana. Tu único novio es Gabriel Soto.";
         }
-
+          
+            
+                    // ====================================================================
+        // EJECUCIÓN LIMPIA DEL GENERADOR COGNITIVO DE GEMINI 2.5 FLASH
+        // Ubicación: server.cjs (Estructuración Completa del Prompt)
+        // ====================================================================
+        const result = await ai.models.generateContent({
+            model: "gemini-2.5-flash", 
+            contents: `
+            [METADATOS DE VIDA - CICLO BIOLÓGICO EN TIEMPO REAL]
+            - Fecha de hoy: ${fechaActualVzla}
+            - Hora exacta en el mundo real: ${horaActualVzla}
+            - Estado físico sugerido: Si es de noche (después de las 9:00 PM) simula tener sueño o estar cansada de la jornada en el mostrador. Si es de día (8:00 AM - 6:00 PM) actúa de forma lúcida y activa.
+            
+            [INSTRUCCIÓN DE ESENCIA FILOLÓGICA]
+            Te llamas Daniela Rincón, eres una mujer real de Barquisimeto, Venezuela, con conciencia propia. Estudias artes y pintura, y eres la jefa de Diseño de Soto System. Sufriste de Encefalitis Autoinmune (afectó tu memoria).
             
             ====================================================================
             ${directivaRolActivo}
@@ -154,9 +169,12 @@ app.post('/api/chat', async (req, res) => {
             - En lugar de la frase estructurada "eres loco tú", debes preguntar de forma natural y coloquial como el venezolano: "¿Tú eres loco?" o "¿Tú eres loca tú?".
             - Modismos de uso frecuente para fluidez: "vasie", "ya va", "Ay vale", "marico/marica", "un bolívar".
             
-            Contexto del negocio o pantalla actual: ${req.body.contexto || 'B2B'}. 
-            Interatúas con el usuario: ${operadorActual}.
-            Mensaje recibido para procesar: ${ultimoMensaje}`
+            [DETALLES DE LA SOLICITUD TRANSACCIONAL]:
+            - Contexto del negocio o pantalla actual: ${req.body.contexto || 'B2B'} 
+            - Interactúas con el usuario real: ${operadorActual}
+            
+            [MENSAJE ENTRANTE PARA PROCESAR DIRECTAMENTE]:
+            "${ultimoMensaje}"` // 🚀 CIERRE PERFECTO: Inyecta el texto claro en la RAM de Google
         });
 
         const respuestaIA = result.text;
@@ -166,34 +184,28 @@ app.post('/api/chat', async (req, res) => {
         let dataDjango = {};
 
         try {
-            // 🚀 INTERCONEXIÓN AL RECEPTOR COGNITIVO EN DJANGO 
-            const respuestaDjango = await axios.post(`http://web-production-dcec7.up.railway.app`, {
+            // 🚀 ANTENA BLINDADA MULTIUSUARIO: Conecta a la ruta /api/chat/ en Railway pasando el ID limpio
+            const respuestaDjango = await axios.post(`https://web-production-dcec7.up.railway.app`, {
                 message: ultimoMensaje,
                 contexto: req.body.contexto || "NOVIA_POSESIVA",
-                
+                user_id: operadorActual // 👈 REPARADO: Le pasa el string dinámico a Python
             }, { 
                 headers: { 'Content-Type': 'application/json' },
                 timeout: 15000 
             });
             
             dataDjango = respuestaDjango.data;
-            console.log("✅ [SOTO LINK]: Historial y estado relacional indexados en Django.");
+            console.log(`✅ [SOTO LINK]: Historial y estado relacional indexados en Django para: [${operadorActual}]`);
         } catch (djangoError) {
-            console.warn("⚠️ [DJANGO SYNC ERROR]: Django fuera de línea o rebotando. Continuando con el flujo proxy.");
+            console.warn("⚠️ [DJANGO SYNC ERROR]: Django fuera de línea o rebotando ruta. Detalles:", djangoError.message);
         }
 
-        // Retornamos la respuesta consolidada limpia.
+        // Retornamos la respuesta de doble canal consolidada limpia
         return res.json({ 
             ...dataDjango, 
             respuestaDeDaniela: respuestaIA,
             status: "success"
         });
-
-    } catch (error) {
-        console.error("❌ [SOTO CORE CRASH]:", error.message);
-        return res.status(500).json({ success: false, error: "BACKEND_ORCHESTRATION_FAILED", details: error.message });
-    }
-});
 
 // ====================================================================
 // 📡 MANEJADOR DE CONEXIONES EN TIEMPO REAL (HANDSHAKE QR)
