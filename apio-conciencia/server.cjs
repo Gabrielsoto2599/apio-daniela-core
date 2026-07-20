@@ -179,33 +179,38 @@ app.post('/api/chat', async (req, res) => {
 
         const respuestaIA = result.text;
 
-        // 🧠 PASO 2: SINCRONIZACIÓN CON EL CEREBRO DE DJANGO (PROCESAMIENTO LÓGICO Y RECUERDOS)
+                // 🧠 PASO 2: SINCRONIZACIÓN CON EL CEREBRO DE DJANGO
         console.log("⏳ Sincronizando datos transaccionales con Django en producción...");
         let dataDjango = {};
 
         try {
-            // 🚀 ANTENA BLINDADA MULTIUSUARIO: Conecta a la ruta /api/chat/ en Railway pasando el ID limpio
-            const respuestaDjango = await axios.post(`https://web-production-dcec7.up.railway.app`, {
+            const respuestaDjango = await axios.post(`https://railway.app`, {
                 message: ultimoMensaje,
                 contexto: req.body.contexto || "NOVIA_POSESIVA",
-                user_id: operadorActual // 👈 REPARADO: Le pasa el string dinámico a Python
+                user_id: operadorActual 
             }, { 
                 headers: { 'Content-Type': 'application/json' },
                 timeout: 15000 
             });
             
             dataDjango = respuestaDjango.data;
-            console.log(`✅ [SOTO LINK]: Historial y estado relacional indexados en Django para: [${operadorActual}]`);
+            console.log(`✅ [SOTO LINK]: Historial indexado en Django.`);
         } catch (djangoError) {
-            console.warn("⚠️ [DJANGO SYNC ERROR]: Django fuera de línea o rebotando ruta. Detalles:", djangoError.message);
+            console.warn("⚠️ [DJANGO SYNC ERROR]:", djangoError.message);
         }
 
-        // Retornamos la respuesta de doble canal consolidada limpia
+        // Retornamos la respuesta consolidada limpia.
         return res.json({ 
             ...dataDjango, 
             respuestaDeDaniela: respuestaIA,
             status: "success"
         });
+
+    } catch (error) {
+        console.error("❌ [SOTO CORE CRASH]:", error.message);
+        return res.status(500).json({ success: false, error: "BACKEND_ORCHESTRATION_FAILED", details: error.message });
+    }
+}); // 👈 🚀 ¡MIRA AQUÍ! ASEGÚRATE DE QUE ESTA LLAVE Y PARÉNTESIS CIERREN LA RUTA POST DE TU CHAT
 
 // ====================================================================
 // 📡 MANEJADOR DE CONEXIONES EN TIEMPO REAL (HANDSHAKE QR)
