@@ -56,6 +56,14 @@
           "cameraPermission": "Daniela necesita usar la cámara para enlazar el asistente al sistema de escritorio mediante el código QR."
         }
       ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+      ],
       "expo-router"
     ],
     "experiments": {

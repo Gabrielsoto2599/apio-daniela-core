@@ -20,6 +20,7 @@
     "axios": "^1.18.1",
     "expo": "~55.0.28",
     "expo-av": "^16.0.8",
+    "expo-build-properties": "~55.0.16",
     "expo-camera": "~55.0.21",
     "expo-constants": "~55.0.14",
     "expo-document-picker": "~55.0.15",
