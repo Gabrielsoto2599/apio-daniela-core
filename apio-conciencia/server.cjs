@@ -203,7 +203,7 @@ app.post('/api/chat', async (req, res) => {
         let dataDjango = {};
 
         try {
-            const respuestaDjango = await axios.post(`https://railway.app`, {
+            const respuestaDjango = await axios.post(`https://web-production-dcec7.up.railway.app`, {
                 message: ultimoMensaje,
                 contexto: req.body.contexto || "NOVIA_POSESIVA",
                 user_id: operadorActual 
