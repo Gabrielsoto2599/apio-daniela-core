@@ -167,7 +167,7 @@ def respuesta_apio(request):
             prompt_maestro += f"\n[ALERTA DE RECLUSIÓN DE TIEMPO]: {reclamo_tiempo}"
 
         # 6. INFERENCIA DE ALTA VELOCIDAD CON LA API DE GOOGLE GEMINI 2.5 FLASH
-        modelo = "gemini-2.5-flash"
+        modelo = "gemini-1.5-flash"
         
         if foto_base64:
             try:

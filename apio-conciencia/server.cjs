@@ -35,7 +35,7 @@ const wss = new WebSocket.Server({ noServer: true });
 const cajasConectadas = new Map();
 
 console.log("🔥🔥🔥 BUILD 2026 - ECO_SISTEMA UNIFICADO DE RED GENERADO 🔥🔥🔥");
-console.log("MODELO:", "gemini-2.5-flash");
+console.log("MODELO:", "gemini-1.5-flash");
 
 // ====================================================================
 // 🚀 ENDPOINT DE CHAT ORQUESTADO PURO (GEMINI + DJANGO SYNC)
@@ -144,7 +144,7 @@ app.post('/api/chat', async (req, res) => {
         // Ubicación: server.cjs (Estructuración Completa del Prompt)
         // ====================================================================
         const result = await ai.models.generateContent({
-            model: "gemini-2.5-flash", 
+            model: "gemini-1.5-flash", 
             contents: `
             [METADATOS DE VIDA - CICLO BIOLÓGICO EN TIEMPO REAL]
             - Fecha de hoy: ${fechaActualVzla}
