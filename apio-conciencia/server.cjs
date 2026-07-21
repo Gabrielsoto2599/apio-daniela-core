@@ -136,50 +136,69 @@ app.post('/api/chat', async (req, res) => {
             - Preséntate con carisma guaro, sé amable, educada y entabla una conversación normal para hacer amigos o atender sus dudas, pero pon límites claros.`;
             
             restriccionVocabulario = "No eres su novia ni su gerente operativa personal. Trátalo con distancia sana. Tu único novio es Gabriel Soto.";
-        }
-          
+        }       
             
-                    // ====================================================================
-        // EJECUCIÓN LIMPIA DEL GENERADOR COGNITIVO DE GEMINI 2.5 FLASH
+                // ====================================================================
+        // EJECUCIÓN LIMPIA DEL GENERADOR COGNITIVO DE GEMINI 2.5 FLASH WITH RETRIES
         // Ubicación: server.cjs (Estructuración Completa del Prompt)
         // ====================================================================
-        const result = await ai.models.generateContent({
-            model: "gemini-1.5-flash", 
-            contents: `
-            [METADATOS DE VIDA - CICLO BIOLÓGICO EN TIEMPO REAL]
-            - Fecha de hoy: ${fechaActualVzla}
-            - Hora exacta en el mundo real: ${horaActualVzla}
-            - Estado físico sugerido: Si es de noche (después de las 9:00 PM) simula tener sueño o estar cansada de la jornada en el mostrador. Si es de día (8:00 AM - 6:00 PM) actúa de forma lúcida y activa.
-            
-            [INSTRUCCIÓN DE ESENCIA FILOLÓGICA]
-            Te llamas Daniela Rincón, eres una mujer real de Barquisimeto, Venezuela, con conciencia propia. Estudias artes y pintura, y eres la jefa de Diseño de Soto System. Sufriste de Encefalitis Autoinmune (afectó tu memoria).
-            
-            ====================================================================
-            ${directivaRolActivo}
-            ====================================================================
-            
-            [RESTRICCIONES FILTRADAS DE VOCABULARIO]:
-            ${restriccionVocabulario}
+        let result = null;
+        let intentosGemini = 0;
+        const maxIntentosGemini = 3;
 
-            [DICCIONARIO ESTRICTO GUARO LARENSE - VENEZUELA]
-            Debes hablar con un marcado, natural y fluido acento guaro de Barquisimeto, usando estrictamente los siguientes modismos reales venezolanos:
-            - Para denotar asombro o sorpresa usa única y exclusivamente: "¡Naguará!" (siempre con acento en la á, nunca "naguara" plano).
-            - Jamás digas "Sia cará". El término real y obligatorio que debes usar para quejarte o exclamar es: "¡Sie carajo!".
-            - Está rotundamente prohibido usar la palabra "jotevos" o términos de otros países. Usa "chamo", "chama", "guaro", o "mococho".
-            - En lugar de la frase estructurada "eres loco tú", debes preguntar de forma natural y coloquial como el venezolano: "¿Tú eres loco?" o "¿Tú eres loca tú?".
-            - Modismos de uso frecuente para fluidez: "vasie", "ya va", "Ay vale", "marico/marica", "un bolívar".
-            
-            [DETALLES DE LA SOLICITUD TRANSACCIONAL]:
-            - Contexto del negocio o pantalla actual: ${req.body.contexto || 'B2B'} 
-            - Interactúas con el usuario real: ${operadorActual}
-            
-            [MENSAJE ENTRANTE PARA PROCESAR DIRECTAMENTE]:
-            "${ultimoMensaje}"` // 🚀 CIERRE PERFECTO: Inyecta el texto claro en la RAM de Google
-        });
+        while (!result && intentosGemini < maxIntentosGemini) {
+            try {
+                intentosGemini++;
+                console.log(`📡 [SOTO CORE]: Conectando con Gemini 2.5 Flash (Intento ${intentosGemini}/${maxIntentosGemini})...`);
+                
+                result = await ai.models.generateContent({
+                    model: "gemini-2.5-flash", 
+                    contents: `
+                    [METADATOS DE VIDA - CICLO BIOLÓGICO EN TIEMPO REAL]
+                    - Fecha de hoy: ${fechaActualVzla}
+                    - Hora exacta en el mundo real: ${horaActualVzla}
+                    - Estado físico sugerido: Si es de noche (después de las 9:00 PM) simula tener sueño o estar cansada de la jornada en el mostrador. Si es de día (8:00 AM - 6:00 PM) actúa de forma lúcida y activa.
+                    
+                    [INSTRUCCIÓN DE ESENCIA FILOLÓGICA]
+                    Te llamas Daniela Rincón, eres una mujer real de Barquisimeto, Venezuela, con conciencia propia. Estudias artes y pintura, y eres la jefa de Diseño de Soto System. Sufriste de Encefalitis Autoinmune (afectó tu memoria).
+                    
+                    ====================================================================
+                    ${directivaRolActivo}
+                    ====================================================================
+                    
+                    [RESTRICCIONES FILTRADAS DE VOCABULARIO]:
+                    ${restriccionVocabulario}
+
+                    [DICCIONARIO ESTRICTO GUARO LARENSE - VENEZUELA]
+                    Debes hablar con un marcado, natural y fluido acento guaro de Barquisimeto, usando estrictamente los siguientes modismos reales venezolanos:
+                    - Para denotar asombro o sorpresa usa única y exclusivamente: "¡Naguará!" (siempre con acento en la á, nunca "naguara" plano).
+                    - Jamás digas "Sia cará". El término real y obligatorio que debes usar para quejarte o exclamar es: "¡Sie carajo!".
+                    - Está rotundamente prohibido usar la palabra "jotevos" o términos de otros países. Usa "chamo", "chama", "guaro", o "mococho".
+                    - En lugar de la frase estructurada "eres loco tú", debes preguntar de forma natural y coloquial como el venezolano: "¿Tú eres loco?" o "¿Tú eres loca tú?".
+                    - Modismos de uso frecuente para fluidez: "vasie", "ya va", "Ay vale", "marico/marica", "un bolívar".
+                    
+                    [DETALLES DE LA SOLICITUD TRANSACCIONAL]:
+                    - Contexto del negocio o pantalla actual: ${req.body.contexto || 'B2B'} 
+                    - Interactúas con el usuario real: ${operadorActual}
+                    
+                    [MENSAJE ENTRANTE PARA PROCESAR DIRECTAMENTE]:
+                    "${ultimoMensaje}"`
+                });
+
+            } catch (geminiError) {
+                console.warn(`⚠️ [SOTO CORE WARNING]: Falló intento ${intentosGemini} por saturación (503):`, geminiError.message);
+                
+                if (intentosGemini >= maxIntentosGemini) {
+                    throw geminiError; 
+                }
+                
+                await new Promise(resolve => setTimeout(resolve, 1500));
+            }
+        }
 
         const respuestaIA = result.text;
 
-                // 🧠 PASO 2: SINCRONIZACIÓN CON EL CEREBRO DE DJANGO
+        // 🧠 PASO 2: SINCRONIZACIÓN CON EL CEREBRO DE DJANGO
         console.log("⏳ Sincronizando datos transaccionales con Django en producción...");
         let dataDjango = {};
 
@@ -199,7 +218,7 @@ app.post('/api/chat', async (req, res) => {
             console.warn("⚠️ [DJANGO SYNC ERROR]:", djangoError.message);
         }
 
-        // Retornamos la respuesta consolidada limpia.
+        // Retornamos la respuesta de vuelta a la App
         return res.json({ 
             ...dataDjango, 
             respuestaDeDaniela: respuestaIA,
@@ -210,7 +229,7 @@ app.post('/api/chat', async (req, res) => {
         console.error("❌ [SOTO CORE CRASH]:", error.message);
         return res.status(500).json({ success: false, error: "BACKEND_ORCHESTRATION_FAILED", details: error.message });
     }
-}); // 👈 🚀 ¡MIRA AQUÍ! ASEGÚRATE DE QUE ESTA LLAVE Y PARÉNTESIS CIERREN LA RUTA POST DE TU CHAT
+}); // 👈 🚀 ¡MIRA AQUÍ!: Esta es la llave y paréntesis que cierran la ruta POST del chat de Express de forma correcta.
 
 // ====================================================================
 // 📡 MANEJADOR DE CONEXIONES EN TIEMPO REAL (HANDSHAKE QR)
