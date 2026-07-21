@@ -60,23 +60,25 @@ export default function App() {
   const [usuarioOperador, setUsuarioOperador] = useState(null);
   const [inicializandoSesion, setInicializandoSesion] = useState(true);
 
-     // ====================================================================
+      // ====================================================================
   // 🚀 RECOLECTOR DE SESIÓN SANEADO (MULTIUSUARIO COMERCIAL CERTIFICADO)
   // Ubicación: app/App.js (Ciclo de Vida Inicial del Ecosistema)
   // ====================================================================
   useEffect(() => {
     const recuperarSesionOperador = async () => {
       try {
-        // 🛡️ PARCHE DE PURGA APAGADO: Ya no borra la memoria en cada inicio de la app
-        // await AsyncStorage.removeItem('@soto_user_session'); 
-        
         // Lee directamente la llave física guardada al registrarse
         const nombreGuardado = await AsyncStorage.getItem('@soto_user_session');
+        
         if (nombreGuardado) {
           setUsuarioOperador(nombreGuardado);
+        } else {
+          console.log("[SOTO SYSTEM] Memoria vacía. Cargando Pantalla de Identificación.");
+          setUsuarioOperador(null); // Aseguramos que quede nulo para activar la barrera
         }
       } catch (err) {
         console.warn("⚠️ Error recuperando memoria nativa de sesión:", err);
+        setUsuarioOperador(null);
       } finally {
         setInicializandoSesion(false);
       }
@@ -533,7 +535,17 @@ const handleEnviarTextoDirecto = async (textoClaro, remitenteVivo) => {
   // BLOQUE 6: ENRUTADOR Y ORQUESTADOR DE RENDERIZADO CONDICIONAL FINAL (REPARADO)
   // Ubicación: App.js (Cierre Maestro del Chasis con Filtro Multiusuario)
   // ====================================================================
-  
+    // 💾 FUNCIÓN DE GUARDADO NATIVO MULTIUSUARIO (SOTO SYSTEM 2026)
+  const salvarNombreOperador = async (nuevoNombre) => {
+    try {
+      console.log("[SOTO SYSTEM] Guardando nuevo operador en disco duro:", nuevoNombre);
+      await AsyncStorage.setItem('@soto_user_session', nuevoNombre);
+      setUsuarioOperador(nuevoNombre); // 🚀 Esto rompe la compuerta y abre el Home de inmediato
+    } catch (err) {
+      console.error("⚠️ Error crítico al escribir el operador en AsyncStorage:", err);
+    }
+  };
+
   // ⏳ COLCHÓN DE CARGA RECONVERGENTE: Mantiene la pantalla limpia mientras lee la RAM
   if (inicializandoSesion) {
     return <View style={{ flex: 1, backgroundColor: '#0c111d' }} />;
