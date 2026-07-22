@@ -26,9 +26,12 @@ export default function ChatScreen({
   onCapturar,
   usuarioLogueado,
   onEnviarMensajeTexto,
-  
-  // 🚀 ¡INYECCIÓN CRÍTICA DE REPARACIÓN!: Encendemos el pase del botón de atrás
-  onVolver
+  onVolver, // 🚀 Ya inyectado en el paso anterior
+
+  // 🚀 ¡INYECCIÓN CRÍTICA DE REPARACIÓN DE HOY!:
+  // Encendemos los pases remotos de los modales y el perfil del header
+  onAbrirEmpresa,
+  onAbrirPerfilFoto
 }) { // 👈 Cierre perfecto del objeto de argumentos
 
 
