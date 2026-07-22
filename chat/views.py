@@ -38,7 +38,11 @@ def respuesta_apio(request):
     try:
         # Carga limpia de los bytes en la memoria RAM del contenedor Docker
         data = json.loads(request.body) if request.body else {}
-        mensaje_usuario = str(data.get("message", "")).strip()
+        
+        # 🛡️ RECOLECTOR TOLERANTE MULTIPLATAFORMA (SOTO SYSTEM 2026)
+        # Resuelve "message" de la web o "texto" nativo de la App
+        mensaje_usuario = str(data.get("message", data.get("texto", ""))).strip()
+        
         contexto_pantalla = data.get("contexto", "NOVIA_POSESIVA")
         foto_base64 = data.get("fotoBase64")
         
