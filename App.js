@@ -439,7 +439,6 @@ const procesarLoQueEscuche = async (audioUri) => {
 // 🚀 LA COMPUERTA REFACTORIZADA CON UNIÓN QUÍMICA DE RED MULTIUSER (AXIOS)
 // Ubicación: App.js (Método de Transmisión de Alta Velocidad)
 // ====================================================================
-// 🚀 REPARACIÓN SOTO SYSTEM: Recibe 'remitenteVivo' enviado desde el componente chat.js
 const handleEnviarTextoDirecto = async (textoClaro, remitenteVivo) => {
   if (!textoClaro.trim()) return;
   
@@ -458,9 +457,9 @@ const handleEnviarTextoDirecto = async (textoClaro, remitenteVivo) => {
   try {
     console.log(`📡 [SOTO NET]: Transmitiendo payload por vía aérea segura hacia: ${BASE_URL}/api/chat`);
     
-    // 🧠 LOGICA DE ACCESO SEGURO: 
-    // Prioriza el remitente en vivo del chat; si viene vacío, usa el usuarioOperador de la RAM de la App
-    const operadorRealSaas = remitenteVivo || usuarioOperador || "Gabriel Soto";
+    // 🧠 LOGICA DE ACCESO SEGURO SANEADA (SOTO SYSTEM 2026)
+    // Prioriza el remitente en vivo; si viene vacío usa el estado, y si no, viaja como Invitado Anónimo
+    const operadorRealSaas = remitenteVivo || usuarioOperador || "Invitado Anonimo";
     console.log(`👤 [SOTO NET]: Mensaje firmado en el mostrador por el usuario real: [${operadorRealSaas}]`);
 
     const respuesta = await axios.post(`${BASE_URL}/api/chat`, {
@@ -468,7 +467,7 @@ const handleEnviarTextoDirecto = async (textoClaro, remitenteVivo) => {
       contexto: contextoPersonalidad,
       historial: [...messages, nuevoMensajeUsuario].slice(-6),
       
-      // 🚀 EL REMIENDATOR DEFINITIVO: Ya no se manda "gabriel_de_jesus" a fuego.
+      // 🚀 EL REMIENDATOR DEFINITIVO: Firma de red 100% limpia y dinámica para multiusuario
       user_id: operadorRealSaas
     }, {
       headers: { 'Content-Type': 'application/json' },
@@ -531,11 +530,11 @@ const handleEnviarTextoDirecto = async (textoClaro, remitenteVivo) => {
   }
 };
 
-        // ====================================================================
+     // ====================================================================
   // BLOQUE 6: ENRUTADOR Y ORQUESTADOR DE RENDERIZADO CONDICIONAL FINAL (REPARADO)
   // Ubicación: App.js (Cierre Maestro del Chasis con Filtro Multiusuario)
   // ====================================================================
-    // 💾 FUNCIÓN DE GUARDADO NATIVO MULTIUSUARIO (SOTO SYSTEM 2026)
+  // 💾 FUNCIÓN DE GUARDADO NATIVO MULTIUSUARIO (SOTO SYSTEM 2026)
   const salvarNombreOperador = async (nuevoNombre) => {
     try {
       console.log("[SOTO SYSTEM] Guardando nuevo operador en disco duro:", nuevoNombre);
@@ -564,7 +563,8 @@ const handleEnviarTextoDirecto = async (textoClaro, remitenteVivo) => {
       {vistaActual === 'home' && (
         <Home 
           messages={messages} 
-          usuarioLogueado={usuarioOperador} // 🚀 GATILLO MULTI-BODEGA: Le inyectamos el operador al Home para vincular.js
+          usuarioLogueado={usuarioOperador} 
+          fotoPerfil={profilePic} // 🚀 ¡INYECCIÓN CRÍTICA!: Encendemos el avatar en tu Home
           onCambiarVista={(pantalla) => setVistaActual(pantalla)}
           onAbrirPerfil={() => setIsProfileModalOpen(true)}
           onAbrirEmpresa={() => setIsBusinessModalOpen(true)}
@@ -641,6 +641,7 @@ const handleEnviarTextoDirecto = async (textoClaro, remitenteVivo) => {
             </>
           ) : (
             <View style={styles.callActionsRow}>
+
               
               {/* 🟢 BOTÓN ACEPTAR LLAMADA */}
               <TouchableOpacity 

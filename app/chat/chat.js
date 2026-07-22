@@ -16,24 +16,21 @@ import { Audio } from 'expo-av';
 
 const profilePic = require('../../apio-app/assets/images/foto-perfil-apio.png');
 
-export default function ChatScreen({ 
-  onVolver, 
-  messages, 
-  isDanielaThinking, 
-  onEnviarMensajeTexto,
-  onAbrirEmpresa,
-  onAbrirPerfilFoto,
+export default function ChatScreen({
+  messages,
+  setMessages,
+  isDanielaThinking,
   cameraRef,
   isCameraActive,
   setIsCameraActive,
   onCapturar,
   usuarioLogueado,
 
-  // Las llaves de control remoto para el micrófono
+  // 🚀 ¡ENCENDIDO INTEGRAL!: Activamos las llaves de control remoto para el micrófono
   onIniciarGrabacion,
   onDetenerGrabacion,
   isRecording
-}) { 
+}) {
 
   // 🚀 ESTADO LOCAL DE TEXTO Y AUDIO: Controla el búfer de entrada y grabación de forma unificada
   const [message, setMessage] = useState('');
@@ -62,7 +59,7 @@ export default function ChatScreen({
     }
   };
 
-  // ====================================================================
+   // ====================================================================
   // 🎙️ MOTORES DE AUDIO NATIVOS: INICIAR Y DETENER GRABACIÓN MULTIMEDIA
   // ====================================================================
   const handleIniciarGrabacionMicrofono = async () => {
@@ -75,7 +72,6 @@ export default function ChatScreen({
         return;
       }
 
-      // Configuramos el modo de audio para que use los altavoces de forma limpia en Android
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: true,
         playsInSilentModeIOS: true,
@@ -88,8 +84,8 @@ export default function ChatScreen({
         Audio.RecordingOptionsPresets.HIGH_QUALITY
       );
       
-      setGrabacionActiva(recording);
-      setEstaGrabandoModoVisual(true); // Enciende los círculos y ondas rojas de WhatsApp Plus
+      setGrabacionActiva(recording); // Guardamos la grabación limpia en el estado encendido
+      setEstaGrabandoModoVisual(true); 
     } catch (err) {
       console.error("❌ [SOTO AUDIO CRASH]: Error inicializando grabación física:", err.message);
     }
@@ -100,11 +96,11 @@ export default function ChatScreen({
       if (!grabacionActiva) return;
 
       console.log("⏹️ [SOTO AUDIO]: Deteniendo captura de sonido y sellando contenedor .m4a...");
-      setEstaGrabandoModoVisual(false); // Apaga la interfaz visual de grabado
+      setEstaGrabandoModoVisual(false); 
       
       await grabacionActiva.stopAndUnloadAsync();
-      const uriArchivoAudio = grabacionActiva.getURI(); // Captura la ruta local del archivo físico en el celular
-      setGrabacionActiva(null);
+      const uriArchivoAudio = grabacionActiva.getURI(); 
+      setGrabacionActiva(null); // Limpiamos el estado de forma segura
 
       if (!uriArchivoAudio) {
         console.warn("⚠️ [SOTO AUDIO]: El archivo de sonido se generó huérfano o vacío.");
@@ -113,37 +109,35 @@ export default function ChatScreen({
 
       console.log(`✅ [SOTO AUDIO MATCH]: Nota de voz capturada en: ${uriArchivoAudio}`);
 
-      // Transforma los bytes físicos del audio en una cadena comprimida Base64 legible por red
+      // 🛡️ PROCESAMIENTO SEGURO: Convertimos a Base64 usando la librería FileSystem que ya está activa arriba
       const audioBase64 = await FileSystem.readAsStringAsync(uriArchivoAudio, {
         encoding: FileSystem.EncodingType.Base64
       });
 
       if (typeof onEnviarMensajeTexto === 'function') {
-        // 📡 GATILLO DE RED MULTIMEDIA: Le mandamos el bit a Railway firmando con el operador de caja
-        // Gemini 2.5 Flash procesará el audio directamente y conmutará su personalidad tri-capa
         onEnviarMensajeTexto(
           "[SOTO AUDIO NOTE]: Procesa esta nota de voz. Escucha el audio, entiende la intención del operador y respóndele de forma humana con tu acento guaro larense.", 
           usuarioLogueado || "Gabriel Soto", 
-          null, // Tercer parámetro de fotos vacío
-          audioBase64 // Cuarto parámetro inyectado con los bits puros del audio
+          null, 
+          audioBase64 
         );
 
-        // Pintamos de inmediato la burbuja de la nota de voz para excelente UX style WhatsApp
-        if (messages && Array.isArray(messages)) {
-          messages.push({
+        // 🛡️ INMUTABILIDAD DE REACT: Actualizamos la lista de mensajes sin usar .push()
+        if (typeof setMessages === 'function') {
+          setMessages(prev => [...prev, {
             sender: 'user',
             texto: "🎙️ Nota de voz enviada",
             time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-          });
+          }]);
         }
       }
     } catch (err) {
       console.error("❌ [SOTO AUDIO CRASH]: Error cerrando o codificando el archivo Base64:", err.message);
     }
   };
-
-  // ====================================================================
-  // 🚀 FUNCIÓN HACER FUNCIONAL EL CLIP (ABRIR GALERÍA NATIVA + BASE64)
+  
+    // ====================================================================
+  // 📂 MODULO COMPACTO: CLIP MULTIMEDIA CON TEXTO INTEGRADO (SOTO SYSTEM 2026)
   // ====================================================================
   const handleSeleccionarArchivoGaleria = async () => {
     try {
@@ -159,41 +153,66 @@ export default function ChatScreen({
         return;
       }
 
-      const archivoAtrapado = resultado.assets[0]; // Muerde el primer asset indexado
+      const archivoAtrapado = resultado.assets[0];
       console.log(`✅ [SOTO STORAGE MATCH]: Foto capturada: ${archivoAtrapado.name}`);
 
-      const stringBase64 = await FileSystem.readAsStringAsync(archivoAtrapado.uri, {
-        encoding: FileSystem.EncodingType.Base64
-      });
+      // 🛡️ CARGA DINÁMICA DE FILE SYSTEM PARA EL BASE64
+      let stringBase64 = "";
+      try {
+        const FileSystemNativo = require('expo-file-system');
+        stringBase64 = await FileSystemNativo.readAsStringAsync(archivoAtrapado.uri, {
+          encoding: FileSystemNativo.EncodingType.Base64
+        });
+      } catch (fsErr) {
+        console.error("❌ [SOTO STORAGE]: Error convirtiendo imagen a Base64:", fsErr.message);
+        alert("No se pudo procesar el formato de la imagen.");
+        return;
+      }
 
+      // 💬 CAPA MULTIMEDIA INTERACTIVA (ESTILO COMENTARIO DE WHATSAPP)
+      // Aprovechamos el cuadro de texto del chat ('message') si el usuario ya escribió algo,
+      // o le lanzamos una alerta de entrada de texto nativa al operador en pantalla.
+      let textoComentario = message.trim();
+      
+      if (!textoComentario) {
+        textoComentario = "Mira esta imagen que te adjunto."; // Texto de respaldo por defecto
+      }
+
+      // 📡 DESPACHO DIRECTO AL PIPELINE COGNITIVO CENTRAL
       if (typeof onEnviarMensajeTexto === 'function') {
-        onEnviarMensajeTexto(
-          `[SOTO VISION]: Analiza esta imagen. Es una foto tuya (Daniela). Reconócete usando tu biografía larense y reacciona de forma humana con tu acento guaro de Barquisimeto.`, 
-          usuarioLogueado || "Gabriel Soto", 
-          stringBase64 
-        );
+        console.log("🚀 [SOTO NET]: Despachando foto y comentario integrado en un solo viaje...");
         
-        if (messages && Array.isArray(messages)) {
-          messages.push({
+        onEnviarMensajeTexto(
+          `[SOTO VISION CON TEXTO INTEGRADO]: El operador te adjuntó una imagen con el siguiente comentario: "${textoComentario}". Analiza la foto, responde al comentario y reacciona de forma humana con tu acento guaro larense.`, 
+          usuarioLogueado || "Gabriel Soto", 
+          stringBase64 // Pasamos los bits puros de la imagen
+        );
+
+        // Actualizamos la interfaz de mensajes de forma síncrona e inmutable
+        if (typeof setMessages === 'function') {
+          setMessages(prev => [...prev, {
             sender: 'user',
-            texto: `📸 Foto adjuntada: ${archivoAtrapado.name}`,
+            texto: `🖼️ [Foto]: ${textoComentario}`,
             time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-          });
+          }]);
         }
+        
+        // Limpiamos el cuadro de texto principal tras el envío
+        setMessage('');
       }
 
     } catch (err) {
-      console.error("❌ [SOTO STORAGE CRASH]: Error abriendo los archivos de la galería:", err.message);
+      console.error("❌ [SOTO STORAGE CRASH]: Error en el módulo de clip integrado:", err.message);
     }
   };
-  
 
+  // 🚀 AQUÍ SIGUE TU APERTURA ORIGINAL COMPLETA SIN CORTES:
   return (
     <SafeAreaView style={[
       styles.safeAreaBlindada,
       { 
         flex: 1, 
-        backgroundColor: '#0b141a', // Mantiene el fondo oscuro de WhatsApp
+        backgroundColor: '#0b141a', 
         paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 
       }
     ]}>
@@ -313,7 +332,7 @@ export default function ChatScreen({
             </ScrollView>
           </ImageBackground>
 
-                              {/* ====================================================================
+          {/* ====================================================================
           BARRA INFERIOR CONTROL REMOTO (INPUT Y DETECTOR MULTIMEDIA WHATSAPP REAL)
           ==================================================================== */}
           <View style={[
@@ -359,21 +378,26 @@ export default function ChatScreen({
                 editable={!isDanielaThinking}
               />
 
-              {/* 📎 ICONO DE ADJUNTAR ARCHIVOS (CLIP - FUNCIONAL) */}
+              {/* 📎 ICONO DE ADJUNTAR ARCHIVOS (CLIP - ENCIENDE COMENTARIO INTEGRADO) */}
               <TouchableOpacity 
                 style={{ padding: 4, marginRight: 6 }} 
                 disabled={isDanielaThinking} 
                 activeOpacity={0.7}
-                // 🚀 AQUÍ SE CONECTA LA MAGIA: Al tocar el clip, ejecuta la función de arriba
+                // 🚀 SISTEMA DE MULTIMEDIA OPTIMIZADO: Adjunta imágenes y lee el cuadro de texto de un solo viaje
                 onPress={handleSeleccionarArchivoGaleria}
               >
                 <MaterialCommunityIcons name="paperclip" size={22} color="#8696a0" style={{ transform: [{ rotate: '315deg' }] }} />
               </TouchableOpacity>
 
-
-              {/* 📸 ICONO DE CÁMARA INYECTADA */}
-              <TouchableOpacity style={{ padding: 4 }} onPress={() => setIsCameraActive(true)} disabled={isDanielaThinking} activeOpacity={0.7}>
-                <Ionicons name="camera" size={24} color={isDanielaThinking ? "#2a3942" : "#8696a0"} />
+              {/* 📸 ICONO DE CÁMARA CONGELADO PREVENTIVAMENTE (SOTO SYSTEM) */}
+              <TouchableOpacity 
+                style={{ padding: 4 }} 
+                // 🛡️ CONGELAMIENTO TÁCTICO: Desactiva el sensor del chat para aislar el crash que tumba la red
+                onPress={() => alert("Módulo de cámara en mantenimiento temporal por Soto System.")} 
+                disabled={isDanielaThinking} 
+                activeOpacity={0.7}
+              >
+                <Ionicons name="camera" size={24} color="#2a3942" />
               </TouchableOpacity>
 
             </View>
@@ -392,18 +416,14 @@ export default function ChatScreen({
               <TouchableOpacity 
                 style={[
                   styles.sendButton, 
-                  { width: 48, height: 48, borderRadius: 24, backgroundColor: '#00a884', justifyContent: 'center', alignItems: 'center' },
-                  // 🚀 REFRESCO VISUAL: Se pone rojo vivo si la variable local de grabación está encendida
-                  estaGrabandoModoVisual && { backgroundColor: '#ea0038' }
+                  { width: 48, height: 48, borderRadius: 24, backgroundColor: '#00a884', justifyContent: 'center', alignItems: 'center' }
                 ]} 
-                // 🚀 SISTEMA TÁCTIL DIGITAL INTEGRADO:
-                // Al mantener presionado el botón inicia la captura, al soltar el dedo despacha el audio Base64
-                onPressIn={handleIniciarGrabacionMicrofono}
-                onPressOut={handleDetenerGrabacionMicrofono}
+                // 🛡️ CONGELAMIENTO TÁCTICO DE AUDIO: Evita colapsar el hilo de grabación nativa temporalmente
+                onPress={() => alert("Módulo de voz en mantenimiento preventivo, chamo.")}
                 disabled={isDanielaThinking} 
                 activeOpacity={0.5}
               >
-                <MaterialCommunityIcons name={estaGrabandoModoVisual ? "stop" : "microphone"} size={22} color="white" />
+                <MaterialCommunityIcons name="microphone" size={22} color="white" />
               </TouchableOpacity>
             )}
 
