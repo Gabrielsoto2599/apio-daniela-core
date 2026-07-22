@@ -66,14 +66,9 @@
       ],
       "expo-router"
     ],
-    "experiments": {
+        "experiments": {
       "typedRoutes": true
     },
-    "extra": {
-      "eas": {
-        "projectId": "d2808447-c901-4cc7-bf32-49b782086403"
-      }
-    },
-    "owner": "ednydarleny1402"
+    "extra": {}
   }
 }
