@@ -25,17 +25,16 @@ export default function ChatScreen({
   setIsCameraActive,
   onCapturar,
   usuarioLogueado,
+  onEnviarMensajeTexto,
+  
+  // 🚀 ¡INYECCIÓN CRÍTICA DE REPARACIÓN!: Encendemos el pase del botón de atrás
+  onVolver
+}) { // 👈 Cierre perfecto del objeto de argumentos
 
-  // 🚀 ¡ENCENDIDO INTEGRAL!: Activamos las llaves de control remoto para el micrófono
-  onIniciarGrabacion,
-  onDetenerGrabacion,
-  isRecording
-}) {
 
   // 🚀 ESTADO LOCAL DE TEXTO Y AUDIO: Controla el búfer de entrada y grabación de forma unificada
   const [message, setMessage] = useState('');
   const [grabacionActiva, setGrabacionActiva] = useState(null);
-  const [estaGrabandoModoVisual, setEstaGrabandoModoVisual] = useState(false);
   const scrollViewRef = useRef(null);
 
   // Auto-scroll automatizado con tolerancia de carga asíncrona
