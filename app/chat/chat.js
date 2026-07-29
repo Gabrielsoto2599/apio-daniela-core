@@ -36,9 +36,9 @@ export default function ChatScreen({
   onAbrirPerfilFoto
 }) { // 👈 Cierre perfecto del objeto de argumentos
 
-
-  // 🚀 ESTADO LOCAL DE TEXTO Y AUDIO: Controla el búfer de entrada y grabación de forma unificada
+    // 🚀 ESTADO LOCAL DE TEXTO Y AUDIO: Controla el búfer de entrada y grabación de forma unificada
   const [message, setMessage] = useState('');
+  const [estaGrabandoModoVisual, setEstaGrabandoModoVisual] = useState(false); // 🚀 LA PIEZA FALTANTE SNEADA
   const scrollViewRef = useRef(null);
 
   // Auto-scroll automatizado con tolerancia de carga asíncrona

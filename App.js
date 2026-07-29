@@ -599,9 +599,7 @@ const handleEnviarTextoDirecto = async (textoClaro, remitenteVivo) => {
   return (
     <View style={styles.container}>
       
-      // ====================================================================
-      // 6.1 NAVEGACIÓN MODULAR DE PANTALLAS SAAS APIO
-      // ====================================================================
+      {/*  6.1 NAVEGACIÓN MODULAR DE PANTALLAS SAAS APIO */}
       {vistaActual === 'home' && (
         <Home 
           messages={messages} 
