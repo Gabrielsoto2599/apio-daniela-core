@@ -26,7 +26,7 @@ export default function VincularDispositivoModal({ isOpen, onClose, onVinculacio
     }
   }, [isOpen]);
 
-  // 🚀 CONEXIÓN QUÍMICA ASÍNCRONA: Muerde la URL o el Token emitido por la computadora
+  // 🚀 CONEXIÓN QUÍMICA ASÍNCRONA: Muerde la URL oficial emitida por tu backend de Django
   const handleBarCodeScanned = (objetoEscaner) => {
     // 🛡️ COMPRESIÓN DE ENTRADA: Garantiza extraer la clave 'data' sin importar el linter de Expo
     const data = objetoEscaner?.data;
@@ -36,22 +36,20 @@ export default function VincularDispositivoModal({ isOpen, onClose, onVinculacio
     
     console.log("📡 [SOTO QR]: Captura de datos transaccionales en mostrador:", data);
     
-    // 🚀 BLINDAJE DE COMPUERTA SOTO NET: 
-    // Ahora valida tu URL de Railway, redes locales IP (192.168), localhost o tokens planos de sincronización
-    if (data.includes('railway.app') || data.includes('192.168') || data.includes('localhost') || data.length > 5) {
-      escaneoBloqueadoRef.current = true; // Echamos el pestillo de inmediato en la RAM
+    // 🚀 BLINDAJE DE COMPUERTA SOTO NET DE PRODUCCIÓN: Filtro rígido Cloud de Railway
+    if (data.includes('web-production-dcec7.up.railway.app')) {
+      escaneoBloqueadoRef.current = true; // Echamos el pestillo de inmediato en la RAM para congelar el lente
 
       // Sanitizamos el nombre del operador actual de la sección 'Mi Cuenta' para evitar espacios raros
       const operadorSaaS = usuarioActual ? encodeURIComponent(usuarioActual.trim()) : "Cajero_Anonimo";
       
       // Aseguramos que la URL conserve la barra de cierre obligatoria antes del parámetro
-      // Esto evita que Django arroje un error de redirección 301 en la antena asíncrona
       let urlLimpia = data.trim();
       if (!urlLimpia.includes('?') && !urlLimpia.endsWith('/')) {
         urlLimpia += '/';
       } else if (urlLimpia.includes('?')) {
         const partes = urlLimpia.split('?');
-        if (!partes[0].endsWith('/')) {
+        if (partes[0] && !partes[0].endsWith('/')) {
           partes[0] += '/';
         }
         urlLimpia = partes.join('?');
@@ -63,15 +61,17 @@ export default function VincularDispositivoModal({ isOpen, onClose, onVinculacio
       
       console.log(`✅ [SOTO QR MATCH]: Enlazando sesión multiusuario para el operador: [${usuarioActual || 'Anónimo'}]`);
       
-      onVinculacionExitosa(urlConOperadorDinamico); // Envía la URL amarrada con sesión y usuario a App.js
+      onVinculacionExitosa(urlConOperadorDinamico); // Envía la URL amarrada a App.js
       onClose(); // Apaga la cámara nativa en la RAM de inmediato para liberar sensores
     } else {
-      console.warn("⚠️ [SOTO QR]: Código QR inválido o ajeno al ecosistema de Apio SaaS.");
+      console.warn("⚠️ [SOTO QR SECURITY]: Código QR bloqueado. Intento de conexión ajeno a tu Railway.");
     }
   };
 
+  // 🛡️ CONTROL DE ACCESO FISCAL: Si no hay permisos aprobados en Android, frenamos el render de forma segura
   if (!permission || !permission.granted) return null;
 
+  // 🚀 CONTEXTO RENDERIZADO EXCLUSIVO (AQUÍ REGRESA LA VIDA A LA INTERFAZ)
   return (
     <Modal visible={isOpen} animationType="slide" onRequestClose={onClose}>
       <View style={styles.container}>
@@ -79,12 +79,11 @@ export default function VincularDispositivoModal({ isOpen, onClose, onVinculacio
         {/* Lente nativo activo: Sincronizado en contraste con el monitor de la PC */}
         <CameraView
           style={StyleSheet.absoluteFillObject}
-          // 🚀 ENLACE CORREGIDO: Pasa el evento directo para evitar desestructuraciones vacías en Android
           onBarcodeScanned={handleBarCodeScanned}
           barcodeScannerSettings={{ barcodeTypes: ["qr"] }}
         />
         
-        {/* Guía visual en el aire para que el usuario centre el QR de tu Vite */}
+        {/* Guía visual en el aire para que el usuario centre el QR de tu Vite sin láseres invasivos */}
         <View style={styles.scannerTargetBox}>
           <View style={styles.scannerCornerTopLeft} />
           <View style={styles.scannerCornerTopRight} />
@@ -128,3 +127,4 @@ const styles = StyleSheet.create({
   operadorBadge: { position: 'absolute', bottom: 60, backgroundColor: 'rgba(18, 27, 34, 0.85)', paddingVertical: 8, paddingHorizontal: 16, borderRadius: 20, borderWidth: 1, borderColor: '#334155' },
   operadorText: { color: '#22c55e', fontSize: 12, fontWeight: '700', fontFamily: 'System' }
 });
+

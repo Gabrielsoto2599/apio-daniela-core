@@ -11,8 +11,10 @@ import {
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { CameraView } from 'expo-camera';
 import * as DocumentPicker from 'expo-document-picker';
-import * as FileSystem from 'expo-file-system'; 
 import { Audio } from 'expo-av';
+
+// 🚀 INYECCIÓN MAESTRA NATIVA: Acoplamos el motor Speech-to-Text para Daniela IA
+import Voice from '@react-native-voice/voice';
 
 const profilePic = require('../../apio-app/assets/images/foto-perfil-apio.png');
 
@@ -37,7 +39,6 @@ export default function ChatScreen({
 
   // 🚀 ESTADO LOCAL DE TEXTO Y AUDIO: Controla el búfer de entrada y grabación de forma unificada
   const [message, setMessage] = useState('');
-  const [grabacionActiva, setGrabacionActiva] = useState(null);
   const scrollViewRef = useRef(null);
 
   // Auto-scroll automatizado con tolerancia de carga asíncrona
@@ -61,8 +62,8 @@ export default function ChatScreen({
     }
   };
 
-   // ====================================================================
-  // 🎙️ MOTORES DE AUDIO NATIVOS: INICIAR Y DETENER GRABACIÓN MULTIMEDIA
+       // ====================================================================
+  // 🎙️ MOTORES DE AUDIO RECALIBRADOS: CONVERSIÓN DE VOZ A TEXTO EN VIVO
   // ====================================================================
   const handleIniciarGrabacionMicrofono = async () => {
     try {
@@ -74,70 +75,56 @@ export default function ChatScreen({
         return;
       }
 
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: true,
-        playsInSilentModeIOS: true,
-        staysActiveInBackground: false,
-        shouldRouteThroughEarpieceAndroid: false,
-      });
+      // Limpiamos el input para la nueva orden por voz
+      setMessage(''); 
+      setEstaGrabandoModoVisual(true);
 
-      console.log("🔴 [SOTO AUDIO]: Encendiendo búfer de audio y capturando ondas...");
-      const { recording } = await Audio.Recording.createAsync(
-        Audio.RecordingOptionsPresets.HIGH_QUALITY
-      );
+      console.log("🔴 [SOTO SPEECH]: Encendiendo transcriptor nativo con acento de Venezuela...");
       
-      setGrabacionActiva(recording); // Guardamos la grabación limpia en el estado encendido
-      setEstaGrabandoModoVisual(true); 
+      // 🚀 DISPARO DE HARDWARE: Inicializamos el reconocimiento de voz en el hilo secundario
+      await Voice.start('es-VE');
+
+      // 🛡️ REPARACIÓN QUÍMICA DE BUFFER: Extraemos estrictamente el string de mayor precisión
+      Voice.onSpeechResults = (e) => {
+        if (e.value && e.value[0]) {
+          const textoReconocidoLimpio = e.value[0]; // Muerde el índice cero directamente
+          console.log(`🗣️ [SOTO SPEECH MATCH]: "${textoReconocidoLimpio}"`);
+          
+          // 🚀 SEGURO ABSOLUTO: Estampamos las palabras directo en tu caja de entrada
+          setMessage(textoReconocidoLimpio);
+        }
+      };
+
+      Voice.onSpeechError = (e) => {
+        console.error("❌ [SOTO SPEECH ERROR]:", e.error);
+        setEstaGrabandoModoVisual(false);
+      };
+
     } catch (err) {
-      console.error("❌ [SOTO AUDIO CRASH]: Error inicializando grabación física:", err.message);
+      console.error("❌ [SOTO AUDIO CRASH]: Error inicializando reconocimiento de voz:", err.message);
+      setEstaGrabandoModoVisual(false);
     }
   };
 
   const handleDetenerGrabacionMicrofono = async () => {
     try {
-      if (!grabacionActiva) return;
-
-      console.log("⏹️ [SOTO AUDIO]: Deteniendo captura de sonido y sellando contenedor .m4a...");
-      setEstaGrabandoModoVisual(false); 
+      console.log("⏹️ [SOTO SPEECH]: Sellando buffer de reconocimiento vocal y apagando micrófono...");
+      setEstaGrabandoModoVisual(false);
       
-      await grabacionActiva.stopAndUnloadAsync();
-      const uriArchivoAudio = grabacionActiva.getURI(); 
-      setGrabacionActiva(null); // Limpiamos el estado de forma segura
+      // Detenemos el motor de voz de forma síncrona
+      await Voice.stop();
+      
+      // Liberamos los listeners de la memoria RAM del teléfono para evitar fugas de hardware
+      await Voice.destroy();
+      
+      console.log("✅ [SOTO SPEECH SUCCESS]: Texto inyectado en el input. Listo para revisión del cajero.");
 
-      if (!uriArchivoAudio) {
-        console.warn("⚠️ [SOTO AUDIO]: El archivo de sonido se generó huérfano o vacío.");
-        return;
-      }
-
-      console.log(`✅ [SOTO AUDIO MATCH]: Nota de voz capturada en: ${uriArchivoAudio}`);
-
-      // 🛡️ PROCESAMIENTO SEGURO: Convertimos a Base64 usando la librería FileSystem que ya está activa arriba
-      const audioBase64 = await FileSystem.readAsStringAsync(uriArchivoAudio, {
-        encoding: FileSystem.EncodingType.Base64
-      });
-
-      if (typeof onEnviarMensajeTexto === 'function') {
-        onEnviarMensajeTexto(
-          "[SOTO AUDIO NOTE]: Procesa esta nota de voz. Escucha el audio, entiende la intención del operador y respóndele de forma humana con tu acento guaro larense.", 
-          usuarioLogueado || "Gabriel Soto", 
-          null, 
-          audioBase64 
-        );
-
-        // 🛡️ INMUTABILIDAD DE REACT: Actualizamos la lista de mensajes sin usar .push()
-        if (typeof setMessages === 'function') {
-          setMessages(prev => [...prev, {
-            sender: 'user',
-            texto: "🎙️ Nota de voz enviada",
-            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-          }]);
-        }
-      }
     } catch (err) {
-      console.error("❌ [SOTO AUDIO CRASH]: Error cerrando o codificando el archivo Base64:", err.message);
+      console.error("❌ [SOTO AUDIO CRASH]: Error deteniendo el motor de voz nativo:", err.message);
+      setEstaGrabandoModoVisual(false);
     }
   };
-  
+
     // ====================================================================
   // 📂 MODULO COMPACTO: CLIP MULTIMEDIA CON TEXTO INTEGRADO (SOTO SYSTEM 2026)
   // ====================================================================
@@ -404,7 +391,7 @@ export default function ChatScreen({
 
             </View>
             
-            {/* 🚀 CONMUTADOR INTELIGENTE DE BOTÓN ACCIÓN DIRECTA REPARADO */}
+            {/* 🚀 CONMUTADOR INTELIGENTE DE BOTÓN ACCIÓN DIRECTA REPARADO (SOTO SYSTEM 2026) */}
             {message.trim().length > 0 ? (
               <TouchableOpacity 
                 style={[styles.sendButton, { width: 48, height: 48, borderRadius: 24, backgroundColor: '#00a884', justifyContent: 'center', alignItems: 'center' }]} 
@@ -418,24 +405,41 @@ export default function ChatScreen({
               <TouchableOpacity 
                 style={[
                   styles.sendButton, 
-                  { width: 48, height: 48, borderRadius: 24, backgroundColor: '#00a884', justifyContent: 'center', alignItems: 'center' }
+                  { 
+                    width: 48, 
+                    height: 48, 
+                    borderRadius: 24, 
+                    backgroundColor: estaGrabandoModoVisual ? '#ef4444' : '#00a884', // Muta a rojo neón si dejas el dedo pegado grabando
+                    justifyContent: 'center', 
+                    alignItems: 'center' 
+                  }
                 ]} 
-                // 🛡️ CONGELAMIENTO TÁCTICO DE AUDIO: Evita colapsar el hilo de grabación nativa temporalmente
-                onPress={() => alert("Módulo de voz en mantenimiento preventivo, chamo.")}
+                // 🚀 DISPARO DE HARDWARE ASÍNCRONO: Dejas el dedo pegado al micrófono y hablas de corrido
+                onPressIn={handleIniciarGrabacionMicrofono}
+                
+                // 🛑 CIERRE DE BUFFER SEGURO: Sueltas el dedo, se apaga el micro y se inyecta el texto en el input
+                onPressOut={handleDetenerGrabacionMicrofono}
+                
                 disabled={isDanielaThinking} 
                 activeOpacity={0.5}
               >
-                <MaterialCommunityIcons name="microphone" size={22} color="white" />
+                <MaterialCommunityIcons 
+                  name={estaGrabandoModoVisual ? "microphone-off" : "microphone"} 
+                  size={22} 
+                  color="white" 
+                />
               </TouchableOpacity>
             )}
 
           </View>
+
 
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 } // ⬅️ LLAVE FINAL DE CIERRE DE TU COMPONENTE CHAT COGNITIVO SANEADO
+
 
 // ==========================================================
 // 🎨 HOJA DE ESTILOS UNIFICADA CON ESPACIADO DEFENSIVO

@@ -60,6 +60,46 @@ export default function App() {
   const [usuarioOperador, setUsuarioOperador] = useState(null);
   const [inicializandoSesion, setInicializandoSesion] = useState(true);
 
+    // ====================================================================
+  // 🔌 GATILLO DE VINCULACIÓN QR TELEMÉTRICA (SOTO SYSTEM 2026)
+  // Ubicación: App.js (Conexión asíncrona al morder el QR de la PC)
+  // ====================================================================
+  const handleAceptarSincronizacionQR = (urlEscaneada) => {
+    try {
+      console.log("🔗 [SOTO LINK]: Procesando URL capturada del mostrador:", urlEscaneada);
+      
+      // 1. Extraemos el ID de la sesión de la URL mutada (ej: ws://.../ws/chat/SESION_123)
+      // Cambiamos el protocolo HTTP/HTTPS a WS/WSS dinámicamente para la antena
+      const urlSocket = urlEscaneada.replace('http', 'ws').split('?')[0]; 
+      
+      console.log("📡 [SOTO NET]: Abriendo túnel WebSocket hacia:", urlSocket);
+      const socketConexion = new WebSocket(urlSocket);
+
+      socketConexion.onopen = () => {
+        console.log("🔌 [SOTO SOCKET]: Túnel de aire abierto con la PC. Despachando apretón de manos...");
+        
+        // 🚀 EL IMPACTO CRÍTICO: Mandamos el evento legítimo que server.cjs espera en la RAM
+        socketConexion.send(JSON.stringify({
+          evento: "VINCULACION_EXITOSA",
+          user_id: usuarioOperador || "Cajero_Anonimo"
+        }));
+      };
+
+      socketConexion.onmessage = (e) => {
+        const payloadRemoto = JSON.parse(e.data);
+        console.log("📥 [SOTO SOCKET]: Señal remota de la PC:", payloadRemoto);
+        // Aquí puedes meter lógicas para que Daniela IA hable si la PC pasa un producto
+      };
+
+      socketConexion.onerror = (err) => console.warn("⚠️ Error en el túnel del mostrador:", err.message);
+      socketConexion.onclose = () => console.log("🔌 Canal liberado con la PC.");
+
+    } catch (error) {
+      console.error("❌ [SOTO LINK CRASH]: Falló el enganche químico QR:", error.message);
+    }
+  };
+
+
       // ====================================================================
   // 🚀 RECOLECTOR DE SESIÓN SANEADO (MULTIUSUARIO COMERCIAL CERTIFICADO)
   // Ubicación: app/App.js (Ciclo de Vida Inicial del Ecosistema)
@@ -559,15 +599,20 @@ const handleEnviarTextoDirecto = async (textoClaro, remitenteVivo) => {
   return (
     <View style={styles.container}>
       
-      {/* 6.1 NAVEGACIÓN MODULAR DE PANTALLAS SAAS APIO */}
+      // ====================================================================
+      // 6.1 NAVEGACIÓN MODULAR DE PANTALLAS SAAS APIO
+      // ====================================================================
       {vistaActual === 'home' && (
         <Home 
           messages={messages} 
           usuarioLogueado={usuarioOperador} 
-          fotoPerfil={profilePic} // 🚀 ¡INYECCIÓN CRÍTICA!: Encendemos el avatar en tu Home
+          fotoPerfil={profilePic}
           onCambiarVista={(pantalla) => setVistaActual(pantalla)}
           onAbrirPerfil={() => setIsProfileModalOpen(true)}
           onAbrirEmpresa={() => setIsBusinessModalOpen(true)}
+          
+          // 🚀 EL ENLACE TELEMÉTRICO: Conectamos el chasis con el modal modular vincular.js
+          onVinculacionExitosa={handleAceptarSincronizacionQR} 
         />
       )}
 
