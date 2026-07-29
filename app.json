@@ -56,8 +56,6 @@
           "cameraPermission": "Daniela necesita usar la cámara para enlazar el asistente al sistema de escritorio mediante el código QR."
         }
       ],
-      // 🚀 INYECCIÓN MAESTRA ANTI-CRASH DE GRADLEY (SOTO SYSTEM 2026)
-      // Configura las cabeceras nativas de Java para habilitar el reconocimiento de voz en la APK
       [
         "@react-native-voice/voice",
         {
