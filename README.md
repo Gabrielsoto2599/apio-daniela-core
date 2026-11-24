@@ -1,3 +1,6 @@
+<img width="1439" height="747" alt="Daniela IA modificacion" src="https://github.com/user-attachments/assets/b4579c93-b9b1-48af-8861-1d80781b5816" />
+
+
 Daniela-IA 🧠
 Sistema Autónomo de Gestión de Memoria, Identidad y Soporte Inteligente.
 
