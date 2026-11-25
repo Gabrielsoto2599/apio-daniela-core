@@ -62,6 +62,42 @@ export default function ChatScreen({
     }
   };
 
+  // ====================================================================
+// 🎯 CONTROLADOR ÓPTICO NATIVO - ESCÁNER DE BARRAS POR WEBSOCKET (SOTO SYSTEM)
+// ====================================================================
+const [escanerActivo, setEscanerActivo] = useState(false);
+
+const abrirEscanerBarra = async () => {
+  // 1. Solicitar los permisos nativos de hardware al smartphone
+  const { status } = await Camera.requestCameraPermissionsAsync();
+  if (status !== 'granted') {
+    alert("🔒 Error: Soto System requiere permisos de cámara para procesar códigos de barra.");
+    return;
+  }
+  setEscanerActivo(true);
+};
+
+// 📡 El evento que se dispara en el microsegundo en que la cámara enfoca las líneas negras del producto
+const manejarCodigoEscaneado = ({ type, data }) => {
+  if (!escanerActivo) return;
+  setEscanerActivo(false); // Apaga el sensor inmediatamente para evitar lecturas duplicadas en bucle
+  
+  console.log(`🎯 [SOTO OPTIC]: Código detectado (${type}): ${data}`);
+
+  // 🚀 DISPARO ATÓMICO POR WEBSOCKET: Envía el código en vivo al backend híbrido en la nube
+  if (socket && socket.readyState === WebSocket.OPEN) {
+    const payloadEnvio = {
+      action: "escanEO_PRODUCTO_PASARELA",
+      codigo_barras: data,
+      timestamp: new Date().toISOString()
+    };
+    socket.send(JSON.stringify(payloadEnvio));
+    alert(`📝 Producto detectado: ${data}. Sincronizando con la pasarela de Apio...`);
+  } else {
+    alert("⚠️ Error de Red: La antena WebSocket de Daniela IA está desconectada en este instante.");
+  }
+};
+
        // ====================================================================
   // 🎙️ MOTORES DE AUDIO RECALIBRADOS: CONVERSIÓN DE VOZ A TEXTO EN VIVO
   // ====================================================================
@@ -216,12 +252,19 @@ export default function ChatScreen({
       >
         <View style={styles.container}>
           
-          {/* ====================================================================
-          📸 CAPA MULTIMEDIA ACTIVA: CÁMARA DE VISIÓN DE HARDWARE
+                    {/* ====================================================================
+          📸 CAPA MULTIMEDIA ACTIVA: CÁMARA DE VISIÓN DE HARDWARE (DESCONGELADA)
           ==================================================================== */}
           {isCameraActive && (
             <View style={styles.cameraContainer}>
-              <CameraView style={styles.camera} facing="front" ref={cameraRef}>
+              <CameraView 
+                style={styles.camera} 
+                facing="back" // 🛡️ AJUSTE CRUCIAL: Cambiado a cámara trasera para enfoque óptico de alta velocidad
+                ref={cameraRef}
+                // 🚀 EL BOTÓN DE ENCENDIDO ELECTRÓNICO:
+                // Activa el reconocimiento automático de líneas negras en el microsegundo de enfoque
+                onBarcodeScanned={manejarCodigoEscaneado}
+              >
                 <View style={styles.cameraControls}>
                   <TouchableOpacity style={styles.actionBtnCam} onPress={() => setIsCameraActive(false)}>
                     <Ionicons name="close-circle" size={40} color="white" />
@@ -378,16 +421,23 @@ export default function ChatScreen({
                 <MaterialCommunityIcons name="paperclip" size={22} color="#8696a0" style={{ transform: [{ rotate: '315deg' }] }} />
               </TouchableOpacity>
 
-              {/* 📸 ICONO DE CÁMARA CONGELADO PREVENTIVAMENTE (SOTO SYSTEM) */}
-              <TouchableOpacity 
-                style={{ padding: 4 }} 
-                // 🛡️ CONGELAMIENTO TÁCTICO: Desactiva el sensor del chat para aislar el crash que tumba la red
-                onPress={() => alert("Módulo de cámara en mantenimiento temporal por Soto System.")} 
-                disabled={isDanielaThinking} 
-                activeOpacity={0.7}
-              >
-                <Ionicons name="camera" size={24} color="#2a3942" />
-              </TouchableOpacity>
+              {/* 📸 ICONO DE CÁMARA DESCONGELADO E INTEGRADO AL ESCÁNER INDUSTRIAL (SOTO SYSTEM 2026) */}
+          <TouchableOpacity 
+           style={{ padding: 4 }} 
+          // ⚡ DISPARO INTEGRAL: Abre el visor de la cámara y activa el sensor de reconocimiento de código de barras
+           onPress={() => {
+           if (typeof abrirEscanerBarra === 'function') {
+           abrirEscanerBarra();
+           } else {
+           alert("Soto System: Inicializando controladores de la cámara...");
+            }
+           }} 
+           disabled={isDanielaThinking} 
+           activeOpacity={0.7}
+>
+          <Ionicons name="camera" size={24} color="#00a884" /> {/* Cambiado a verde WhatsApp para marcar estado activo */}
+          </TouchableOpacity>
+
 
             </View>
             
